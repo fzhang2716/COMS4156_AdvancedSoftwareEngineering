@@ -1,4 +1,5 @@
 #include "crow.h"
+#include "database.cpp"
 
 int main()
 {
@@ -9,12 +10,13 @@ int main()
      {
         // result of a function
         return "somthing"; });
+    
 
     CROW_ROUTE(app, "/json")
     ([]
      {
-    crow::json::wvalue x({{"message", "Hello, World!"}});
-    x["message2"] = "Hello, World.. Again!";
+    crow::json::wvalue x({{"message", GetTestTable()}});
+    // x["message2"] = "Hello, World.. Again!";
     return x; });
 
     app.port(3000).multithreaded().run();
