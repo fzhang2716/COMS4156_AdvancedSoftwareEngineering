@@ -10,10 +10,10 @@ LDLIBS = -lmysqlcppconn
  
 # ****************************************************
 # Targets needed to bring the executable up to date
-all: helloworld
+all: main
 
-helloworld: helloworld.cpp
-	$(CC) $(CFLAGS) -pthread -o helloworld helloworld.cpp $(LDLIBS)
+main: main.cpp
+	$(CC) $(CFLAGS) -pthread -o main main.cpp $(LDLIBS)
 
 clean:
-	$(RM) helloworld
+	$(RM) main

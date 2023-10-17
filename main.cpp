@@ -1,9 +1,22 @@
-// Sets up the server
-#include<iostream>
-#include "data_management.hpp"
-//#include "crow.h"
+#include "crow.h"
+#include "database.cpp"
 
-int main() {
-    DataManagementService datamanage;
-    return 0;
+int main()
+{
+    crow::SimpleApp app;
+
+    CROW_ROUTE(app, "/test")
+    ([]()
+     {
+        // result of a function
+        return "somthing"; });
+    
+
+    CROW_ROUTE(app, "/json")
+    ([]
+     {
+    crow::json::wvalue x({{"message", GetTestTable()}});
+    return x; });
+
+    app.port(3000).multithreaded().run();
 }
