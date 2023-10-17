@@ -1,14 +1,23 @@
-#include<iostream>
-#include<vector>
-#include<string>
-
-using namespace std;
+#include "crow.h"
+#include "database.cpp"
 
 int main()
 {
-    vector<string> list = {"Hello", "World", "4156", "Project"};
-    for (auto& each: list) {
-        cout << each << " ";
-    }
-    cout << endl;
+    crow::SimpleApp app;
+
+    CROW_ROUTE(app, "/test")
+    ([]()
+     {
+        // result of a function
+        return "somthing"; });
+    
+
+    CROW_ROUTE(app, "/json")
+    ([]
+     {
+    crow::json::wvalue x({{"message", GetTestTable()}});
+    // x["message2"] = "Hello, World.. Again!";
+    return x; });
+
+    app.port(3000).multithreaded().run();
 }
