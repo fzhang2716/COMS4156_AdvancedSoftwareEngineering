@@ -74,13 +74,19 @@ int main()
         }
         DBDisConnect(conn); });
 
-    CROW_ROUTE(app, "/addCompany")
-    .methods("POST"_method)
-    ([](const crow::request& req){
-        sql::Connection* conn = DBConnect();
-        std::string res = addCompany(req, conn);
 
-        return res;
+    /**
+     * Add a company's infomation
+     * Example request: http://localhost:3000/addCompany?company_id=8&email=email8&hash_pwd=12321&company_name=company8
+     */
+    CROW_ROUTE(app, "/addCompany")
+    .methods(crow::HTTPMethod::POST)
+    ([&](const crow::request &req, crow::response &res){
+        sql::Connection* conn = DBConnect();
+        addCompany(req, conn, res);
+
+        res.end();
+        DBDisConnect(conn);
     });
 
     app.port(3000).multithreaded().run();
