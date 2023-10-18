@@ -67,7 +67,7 @@ make
 ### Get user's company info
 
 #### Request
-`GET \company?company?companyname=usr&password=pwd` 
+`GET \company?username=usr&password=pwd` 
 
 ```
 curl -G -i -d "username=company1" -d "password=pwd" http://localhost:3000/company
