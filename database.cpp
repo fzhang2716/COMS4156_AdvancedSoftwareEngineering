@@ -14,13 +14,17 @@
 #include <cppconn/statement.h>
 #include <cppconn/prepared_statement.h>
 
+/**
+ * Connect to the database
+ * Return a pointer to the sql::Connection
+*/
 sql::Connection* DBConnect(){
-    // database connection
+    // Database connection
     sql::mysql::MySQL_Driver* driver;
     sql::Connection* conn;
 
     driver = sql::mysql::get_mysql_driver_instance();
-    // connect IP adress, username, password
+    // Connect IP adress, username, password
     conn = driver->connect("tcp://34.150.169.58", "admin", "debugteam"); 
 
     return conn;
@@ -30,47 +34,45 @@ void DBDisConnect(sql::Connection* conn){
     delete conn;
 }
 
+
 /**
- * If user is authorized, return its company_id
- * otherwise, return -1
+ * Query MySQL database to validate the credentials in the request parameters
+ * If the credentials are valid, return the corresponding company id; otherwise, return -1.
 */
 int isUserAuthenticated(const crow::request& req, crow::response& res, sql::Connection* conn) {
     // Extract username and password from the request.
     std::string username = req.url_params.get("username");
     std::string password = req.url_params.get("password");
 
-
-    // Query your MySQL database to validate the credentials.
-    // If the credentials are valid, return true; otherwise, return false.
-
-    // Example of a query to check user credentials:
+    // Try query the databse
     try{
         sql::Statement* stmt = conn->createStatement();
         sql::ResultSet* result = stmt->executeQuery("SELECT * FROM service.company_table WHERE company_name = '" + username + "' AND hash_pwd = '" + password + "'");
 
         if (result->next()) {
             int companyId = result->getInt("company_id");
-            std::cout << "Authorized company id is " << companyId << std::endl;
             delete result;
             delete stmt;
             res.code = 200;
-            res.write("Authentication success");
+            res.write("Authentication success \n");
             return companyId;
         }
 
-        // If credentials are not valid, return false and deny access.
+        // If credentials are not valid, return -1 and deny access.
         delete result;
         delete stmt;
         res.code = 401; // Unauthorized
-        res.write("Authentication failed");
-        return -1;
-    } catch (sql::SQLException& e ) {
+        res.write("Authentication failed \n");
+        res.end();
+    } catch (sql::SQLException& e ) { // Catch any SQL errors
         res.code = 500;
-        res.write("Database Error: " + std::string(e.what()));
+        res.write("Database Error: " + std::string(e.what()) + "\n");
+        res.end();
     }
 
     return -1;
 }
+
 
 std::string GetTestTable(sql::Connection* conn){
     sql::Statement* stmt;
