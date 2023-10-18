@@ -19,6 +19,7 @@ int main()
     DBDisConnect(conn);
     return x; });
 
+    // need to implement
     // CROW_ROUTE(app, "/check/SubscriptionbyCompany")
     //     .methods(crow::HTTPMethod::GET)
     // ([&] (const crow::request& req, crow::response& res)
