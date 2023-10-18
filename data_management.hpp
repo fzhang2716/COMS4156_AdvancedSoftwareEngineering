@@ -16,9 +16,9 @@
 
 class DataManagementService {
 public:
-    void collectData(const std::vector<std::string>& rawData);
-    void updateData();
-    void authenticateUser(const crow::request& req, crow::response& res);
+    int isUserAuthenticated(const crow::request& req, crow::response& res, sql::Connection* conn);
+    void getCompanyInfo(const crow::request& req, crow::response& res);
+    void addCompany(const crow::request& req, crow::response& res);
 };
 
 /**
