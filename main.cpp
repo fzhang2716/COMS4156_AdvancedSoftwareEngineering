@@ -5,13 +5,11 @@ int main()
 {
     crow::SimpleApp app;
 
-
     CROW_ROUTE(app, "/test")
     ([]()
      {
         // result of a function
         return "somthing"; });
-    
 
     CROW_ROUTE(app, "/json")
     ([]
@@ -21,15 +19,25 @@ int main()
     DBDisConnect(conn);
     return x; });
 
+    // CROW_ROUTE(app, "/check/SubscriptionbyCompany")
+    //     .methods(crow::HTTPMethod::GET)
+    // ([&] (const crow::request& req, crow::response& res)
+    // {
+    //     sql::Connection* conn = DBConnect();
+    //     // User Authentication
+    //     // std::string checkResult = getSubscriptionByCompany(req, res, conn);
+
+    //     DBDisConnect(conn);
+    //     return "None";
+    // });
 
     /**
      * Get a company's information
      * Example request: http://localhost:3000/company?username=company1&password=pwd
-    */
+     */
     CROW_ROUTE(app, "/company")
-        .methods(crow::HTTPMethod::GET)
-    ([&] (const crow::request& req, crow::response& res)
-    {
+        .methods(crow::HTTPMethod::GET)([&](const crow::request &req, crow::response &res)
+                                        {
         sql::Connection* conn = DBConnect();
         // User Authentication
         int companyId = isUserAuthenticated(req, res, conn);
@@ -64,8 +72,16 @@ int main()
                 res.end();
             }
         }
-        DBDisConnect(conn);
+        DBDisConnect(conn); });
+
+    CROW_ROUTE(app, "/addCompany")
+    .methods("POST"_method)
+    ([](const crow::request& req){
+        sql::Connection* conn = DBConnect();
+        std::string res = addCompany(req, conn);
+
+        return res;
     });
-    
+
     app.port(3000).multithreaded().run();
 }
