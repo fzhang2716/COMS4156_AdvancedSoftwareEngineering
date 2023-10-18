@@ -37,6 +37,7 @@ Our project is a subscription management service that provides sub-services like
 
 
 ### [Fakeit](https://github.com/eranpeer/FakeIt)
+( A simple mocking framework for C++ )
 1. ```
     git clone https://github.com/Microsoft/vcpkg.git
     ```
@@ -54,8 +55,8 @@ Our project is a subscription management service that provides sub-services like
     ```
 (Add '-I"vcpkg/packages/fakeit_x64-linux/include/standalone"' when compiling)
 
-## Compile
-Run Makefile:
+## Compile and Run
+In root directory, run Makefile:
 
 ```
 make
