@@ -103,7 +103,7 @@ sql::Connection* DBConnect(){
 
     driver = sql::mysql::get_mysql_driver_instance();
     // Connect IP adress, username, password
-    conn = driver->connect("tcp://34.133.236.213", "admin", "debugteam"); 
+    conn = driver->connect("tcp://34.150.169.58", "admin", "debugteam"); 
 
     return conn;
 }
