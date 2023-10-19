@@ -32,5 +32,12 @@ int main()
         dataservice.addMember(req, res);
     });
 
+    ////Post Method: collect subscription information and add to database
+    CROW_ROUTE(app, "/addSubscription")
+    .methods(crow::HTTPMethod::POST)
+    ([&](const crow::request &req, crow::response &res){
+        dataservice.addSubscription(req, res);
+    });
+
     app.port(3000).multithreaded().run();
 }

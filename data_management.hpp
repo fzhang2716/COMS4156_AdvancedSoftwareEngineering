@@ -20,6 +20,7 @@ public:
     void getCompanyInfo(const crow::request& req, crow::response& res);
     void addCompany(const crow::request& req, crow::response& res);
     void addMember(const crow::request& req, crow::response& res);
+    void addSubscription(const crow::request& req, crow::response& res);
 };
 
 /**
