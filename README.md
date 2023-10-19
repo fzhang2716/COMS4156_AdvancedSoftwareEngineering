@@ -36,24 +36,20 @@ Our project is a subscription management service that provides sub-services like
     ```
 
 
-### [Fakeit](https://github.com/eranpeer/FakeIt)
-( A simple mocking framework for C++ )
+### [Catch2](https://github.com/catchorg/Catch2)
+( A unit testing framework for C++)
 1. ```
-    git clone https://github.com/Microsoft/vcpkg.git
+    git clone -b v2.x https://github.com/catchorg/Catch2.git
     ```
 2. ```
-    cd vcpkg
+    cd Catch2
     ```
 3. ```
-    ./bootstrap-vcpkg.sh
+    cmake -Bbuild -H. -DBUILD_TESTING=OFF
     ```
 4. ```
-    ./vcpkg integrate install
+    sudo cmake --build build/ --target install
     ```
-5. ```
-    ./vcpkg install fakeit
-    ```
-(Add '-I"vcpkg/packages/fakeit_x64-linux/include/standalone"' when compiling)
 
 ## Compile and Run
 In root directory, run Makefile:
