@@ -15,7 +15,7 @@ int main() {
     */
     CROW_ROUTE(app, "/company")
     .methods(crow::HTTPMethod::GET)
-    ([&] (const crow::request& req, crow::response& res){
+    ([&] (const crow::request& req, crow::response &res){
         dataservice.getCompanyInfo(req, res);
     });
 

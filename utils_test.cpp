@@ -12,7 +12,8 @@
 Query queryGenerator;
 
 TEST_CASE("Authentication Query", "[single-file]" ) {
-    std::string query = queryGenerator.authenticationQuery("username", "password");
+    std::string query =
+        queryGenerator.authenticationQuery("username", "password");
     std::string target_query = "SELECT * FROM service.company_table WHERE company_name = 'username' AND hash_pwd = 'password'";
     REQUIRE(query == target_query);
 }

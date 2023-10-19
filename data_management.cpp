@@ -9,7 +9,8 @@
 
 Query queryGenerator;
 
-int DataManagementService::isUserAuthenticated(const crow::request &req, crow::response &res, sql::Connection *conn) {
+int DataManagementService::isUserAuthenticated(const crow::request &req,
+    crow::response &res, sql::Connection *conn) {
     // Try extract username and password from the request.
     try {
         std::string username = req.url_params.get("username");
@@ -18,7 +19,8 @@ int DataManagementService::isUserAuthenticated(const crow::request &req, crow::r
         // Try query the databse
         try {
             sql::Statement *stmt = conn->createStatement();
-            std::string query = queryGenerator.authenticationQuery(username, password);
+            std::string query = queryGenerator.authenticationQuery(username,
+            password);
             sql::ResultSet *result = stmt->executeQuery(query);
 
             if (result->next()) {
@@ -55,10 +57,11 @@ int DataManagementService::isUserAuthenticated(const crow::request &req, crow::r
     return -1;
 }
 
-void DataManagementService::getCompanyInfo(const crow::request &req, crow::response &res) {
+void DataManagementService::getCompanyInfo(const crow::request &req,
+    crow::response &res) {
     sql::Connection *conn = DBConnect();
     // User Authentication
-    int companyId = isUserAuthenticated(req, res, conn);
+    int companyId = DataManagementService::isUserAuthenticated(req, res, conn);
 
     if (companyId != -1) {
         sql::Statement *stmt = conn->createStatement();
@@ -69,9 +72,12 @@ void DataManagementService::getCompanyInfo(const crow::request &req, crow::respo
             if (queryResult->rowsCount() > 0) {
                 std::string companyData = "";
                 while (queryResult->next()) {
-                    companyData += "Company ID: " + queryResult->getString("company_id") + "; ";
-                    companyData += "Company Name: " + queryResult->getString("company_name") + "; ";
-                    companyData += "Company email: " + queryResult->getString("email") + " \n";
+                    companyData += "Company ID: " +
+                    queryResult->getString("company_id") + "; ";
+                    companyData += "Company Name: " +
+                    queryResult->getString("company_name") + "; ";
+                    companyData += "Company email: " +
+                    queryResult->getString("email") + " \n";
                 }
                 res.code = 200;  // OK
                 res.write("Result: " + companyData);
@@ -94,7 +100,8 @@ void DataManagementService::getCompanyInfo(const crow::request &req, crow::respo
     DBDisConnect(conn);
 }
 
-void DataManagementService::addCompany(const crow::request &req, crow::response &res) {
+void DataManagementService::addCompany(const crow::request &req,
+    crow::response &res) {
     sql::Connection *conn = DBConnect();
     // Try extract companyId, email, hashPwd, and companyName from the request.
     try {
@@ -104,7 +111,8 @@ void DataManagementService::addCompany(const crow::request &req, crow::response 
         std::string companyName = req.url_params.get("company_name");
 
         try {
-            std::string query = queryGenerator.addCompanyInfoQuery(companyId, email, hashPwd, companyName);
+            std::string query = queryGenerator.addCompanyInfoQuery(companyId,
+                email, hashPwd, companyName);
             sql::Statement *stmt = conn->createStatement();
             stmt->execute(query);
             res.code = 200;  // OK
@@ -128,7 +136,8 @@ void DataManagementService::addCompany(const crow::request &req, crow::response 
     DBDisConnect(conn);
 }
 
-void DataManagementService::addMember(const crow::request &req, crow::response &res) {
+void DataManagementService::addMember(const crow::request &req,
+    crow::response &res) {
     sql::Connection *conn = DBConnect();
     auto bodyInfo = crow::json::load(req.body);
 
@@ -141,7 +150,8 @@ void DataManagementService::addMember(const crow::request &req, crow::response &
         std::string memberStatus = bodyInfo["member_status"].s();
 
         try {
-            std::string query = queryGenerator.addMemberQuery(memberId, firstName, lastName, email, phoneNumber, memberStatus);
+            std::string query = queryGenerator.addMemberQuery(memberId,
+                firstName, lastName, email, phoneNumber, memberStatus);
             sql::Statement *stmt = conn->createStatement();
             stmt->execute(query);
             res.code = 200;  // OK
@@ -165,7 +175,8 @@ void DataManagementService::addMember(const crow::request &req, crow::response &
     DBDisConnect(conn);
 }
 
-void DataManagementService::addSubscription(const crow::request &req, crow::response &res) {
+void DataManagementService::addSubscription(const crow::request &req,
+    crow::response &res) {
     sql::Connection *conn = DBConnect();
     auto bodyInfo = crow::json::load(req.body);
 
@@ -180,7 +191,11 @@ void DataManagementService::addSubscription(const crow::request &req, crow::resp
         std::string billingInfo = bodyInfo["billing_info"].s();
 
         try {
-            std::string queryString = "Insert into service.subscription_table Values (" + subscriptionId + ", " + memberId + ", " + companyId + ", '" + subscriptionType + "', '" + subscriptionStatus + "', '" + nextDueDate + "', '" + startDate + "', '" + billingInfo + "');";
+            std::string queryString =
+                "Insert into service.subscription_table Values (" +
+                subscriptionId + ", " + memberId + ", " + companyId + ", '" +
+                subscriptionType + "', '" + subscriptionStatus + "', '" +
+                nextDueDate + "', '" + startDate + "', '" + billingInfo + "');";
             sql::Statement *stmt = conn->createStatement();
             stmt->execute(queryString);
             res.code = 200;  // OK
@@ -190,7 +205,8 @@ void DataManagementService::addSubscription(const crow::request &req, crow::resp
         catch (sql::SQLException &e) {
             // Catch any SQL errors
             res.code = 500;  // Internal Server Error
-            res.write("Add Subscription Error: " + std::string(e.what()) + "\n");
+            res.write("Add Subscription Error: " +
+                std::string(e.what()) + "\n");
             res.end();
         }
     }
