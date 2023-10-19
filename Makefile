@@ -12,8 +12,8 @@ LDLIBS = -lmysqlcppconn
 # Targets needed to bring the executable up to date
 all: main
 
-main: main.o data_management.o
-	$(CC) $(CFLAGS) -pthread -o main main.o data_management.o $(LDLIBS)
+main: main.o data_management.o utils.o
+	$(CC) $(CFLAGS) -pthread -o main main.o data_management.o utils.o $(LDLIBS)
 
 main.o: main.cpp
 	$(CC) $(CFLAGS) -c main.cpp
@@ -21,8 +21,11 @@ main.o: main.cpp
 data_management.o: data_management.cpp
 	$(CC) $(CFLAGS) -c data_management.cpp
 
+utils.o: utils.cpp
+	$(CC) $(CFLAGS) -c utils.cpp
+
 clean:
-	$(RM) main main.o data_management.o
+	$(RM) main main.o data_management.o utils.o
 # main: main.cpp data_management.cpp
 # 	$(CC) $(CFLAGS) -pthread -o main main.cpp $(LDLIBS)
 
