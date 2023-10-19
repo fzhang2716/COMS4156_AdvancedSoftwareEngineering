@@ -1,4 +1,7 @@
 #include "data_management.hpp"
+#include "utils.hpp"
+
+Query queryGenerator;
 
 int DataManagementService::isUserAuthenticated(const crow::request& req, crow::response& res, sql::Connection* conn) {
     // Extract username and password from the request.
@@ -8,7 +11,8 @@ int DataManagementService::isUserAuthenticated(const crow::request& req, crow::r
     // Try query the databse
     try{
         sql::Statement* stmt = conn->createStatement();
-        sql::ResultSet* result = stmt->executeQuery("SELECT * FROM service.company_table WHERE company_name = '" + username + "' AND hash_pwd = '" + password + "'");
+        std::string query = queryGenerator.authenticationQuery(username, password);
+        sql::ResultSet* result = stmt->executeQuery(query);
 
         if (result->next()) {
             int companyId = result->getInt("company_id");
@@ -40,11 +44,11 @@ void DataManagementService::getCompanyInfo(const crow::request& req, crow::respo
         int companyId = isUserAuthenticated(req, res, conn);
 
         if(companyId != -1){
-            sql::PreparedStatement* prep_stmt = conn->prepareStatement("SELECT * FROM service.company_table WHERE company_id = ?");
-            prep_stmt->setInt(1,companyId);
+            sql::Statement* stmt = conn->createStatement();
+            std::string query = queryGenerator.companyInfoQuery(companyId);
 
             try{
-                sql::ResultSet* queryResult = prep_stmt->executeQuery();
+                sql::ResultSet* queryResult = stmt->executeQuery(query);
                 if(queryResult->rowsCount() > 0){
                     std::string companyData= ""; 
                     while( queryResult->next()){
@@ -62,7 +66,7 @@ void DataManagementService::getCompanyInfo(const crow::request& req, crow::respo
                 }
                 
                 delete queryResult;
-                delete prep_stmt;
+                delete stmt;
             } catch (const sql::SQLException& e){
                 res.code = 500;
                 res.write("Database Error: " + std::string(e.what()) + "\n");
@@ -78,11 +82,11 @@ void DataManagementService::addCompany(const crow::request& req, crow::response&
     std::string email = req.url_params.get("email");
     std::string hashPwd = req.url_params.get("hash_pwd");
     std::string companyName = req.url_params.get("company_name");
-    std::string queryString = "Insert into service.company_table Values (" + companyId  + ", '" + companyName + "', '" + email + "', '" + hashPwd + "');";
+    std::string query = queryGenerator.addCompanyInfoQuery(companyId, email, hashPwd, companyName);
     
     try{
         sql::Statement* stmt = conn->createStatement();
-        stmt->execute(queryString);
+        stmt->execute(query);
         res.code = 200;
         res.write("Add Company Success \n");
         res.end();
@@ -106,11 +110,11 @@ void DataManagementService::addMember(const crow::request& req, crow::response& 
     std::string email = bodyInfo["email"].s();
     std::string phoneNumber = bodyInfo["phone_number"].s();
     std::string memberStatus  = bodyInfo["member_status"].s();
-    std::string queryString = "Insert into service.member_table Values (" + memberId  + ", '" + firstName + "', '" + lastName + "', '" + email + "', '" + phoneNumber + "', '"+ memberStatus + "');";
+    std::string query = queryGenerator.addMemberQuery(memberId, firstName, lastName, email, phoneNumber, memberStatus);
 
     try{
         sql::Statement* stmt = conn->createStatement();
-        stmt->execute(queryString);
+        stmt->execute(query);
         res.code = 200;
         res.write("Add Memeber Success \n");
         res.end();
