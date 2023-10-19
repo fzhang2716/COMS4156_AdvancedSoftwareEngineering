@@ -91,6 +91,29 @@ int main()
     });
 
     
+    // Add a subscription's infomation
+    // Example request: http://localhost:3000/addSubscription
+    // {
+    // "subscription_id": "6",
+    // "member_id": "3",
+    // "company_id": "5",
+    // "subscription_type": "Free",
+    // "subscription_status": "active",
+    // "next_due_date": "2023-10-29 00:00:00",
+    // "start_date": "2023-9-17 00:00:00",
+    // "billing_info": "infomation"
+    // }
+
+    CROW_ROUTE(app, "/addSubscription")
+    .methods(crow::HTTPMethod::POST)
+    ([&](const crow::request &req, crow::response &res){
+        sql::Connection* conn = DBConnect();
+        addSubscription(req, conn, res);
+
+        res.end();
+        DBDisConnect(conn);
+    });
+        
     // Add a memeber's infomation
     // Example request: http://localhost:3000/addMemeber
     // {
@@ -101,7 +124,6 @@ int main()
     // "phone_number": "123213",
     // "member_status": "gold"
     // }
-    
     CROW_ROUTE(app, "/addMemeber")
     .methods(crow::HTTPMethod::POST)
     ([&](const crow::request &req, crow::response &res){

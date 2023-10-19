@@ -133,6 +133,36 @@ void addCompany(const crow::request& req, sql::Connection* conn, crow::response&
 }
 
 
+void addSubscription(const crow::request& req, sql::Connection* conn, crow::response& res){
+
+    auto bodyInfo = crow::json::load(req.body);
+
+    std::string subscriptionId  = bodyInfo["subscription_id"].s();
+    std::string memberId  = bodyInfo["member_id"].s();
+    std::string companyId  = bodyInfo["company_id"].s();
+    std::string subscriptionType  = bodyInfo["subscription_type"].s();
+    std::string subscriptionStatus = bodyInfo["subscription_status"].s();
+    std::string nextDueDate  = bodyInfo["next_due_date"].s();
+    std::string startDate = bodyInfo["start_date"].s();
+    std::string billingInfo  = bodyInfo["billing_info"].s();
+
+    std::string queryString = "Insert into service.subscription_table Values (" + subscriptionId  + ", " + memberId + ", " + companyId + ", '" + subscriptionType + "', '" + subscriptionStatus + "', '"+ nextDueDate + "', '" + startDate + "', '" + billingInfo + "');";
+
+    try{
+        sql::Statement* stmt = conn->createStatement();
+        stmt->execute(queryString);
+        res.code = 200;
+        res.write("Add Subscription Success \n");
+        res.end();
+    } catch (sql::SQLException& e ) { // Catch any SQL errors
+        res.code = 500;
+        res.write("Add Subscription Error: " + std::string(e.what()) + "\n");
+        res.end();
+    }
+
+}
+
+
 void addMember(const crow::request& req, sql::Connection* conn, crow::response& res){
 
     auto bodyInfo = crow::json::load(req.body);
