@@ -8,6 +8,12 @@ int DataManagementService::isUserAuthenticated(const crow::request& req, crow::r
     std::string username = req.url_params.get("username");
     std::string password = req.url_params.get("password");
 
+    if(!username || !password){
+        res.code = 400 // Bad Request
+        res.write("Invalid request \n");
+        return -1;
+    }
+
     // Try query the databse
     try{
         sql::Statement* stmt = conn->createStatement();
@@ -82,6 +88,7 @@ void DataManagementService::addCompany(const crow::request& req, crow::response&
     std::string email = req.url_params.get("email");
     std::string hashPwd = req.url_params.get("hash_pwd");
     std::string companyName = req.url_params.get("company_name");
+
     std::string query = queryGenerator.addCompanyInfoQuery(companyId, email, hashPwd, companyName);
     
     try{
