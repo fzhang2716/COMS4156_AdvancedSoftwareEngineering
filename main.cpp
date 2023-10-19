@@ -26,7 +26,7 @@ int main()
     });
 
     //Post Method: collect member information and add to database
-    CROW_ROUTE(app, "/addMemeber")
+    CROW_ROUTE(app, "/addMember")
     .methods(crow::HTTPMethod::POST)
     ([&](const crow::request &req, crow::response &res){
         dataservice.addMember(req, res);
