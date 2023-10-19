@@ -19,6 +19,7 @@ public:
     int isUserAuthenticated(const crow::request& req, crow::response& res, sql::Connection* conn);
     void getCompanyInfo(const crow::request& req, crow::response& res);
     void addCompany(const crow::request& req, crow::response& res);
+    void addMember(const crow::request& req, crow::response& res);
 };
 
 /**

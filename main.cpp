@@ -17,12 +17,19 @@ int main()
         dataservice.getCompanyInfo(req, res);
     });
 
-    //Post Method: get company information
+    //Post Method: collect company information and add to database
     CROW_ROUTE(app, "/addCompany")
     .methods(crow::HTTPMethod::POST)
     ([&](const crow::request &req, crow::response &res)
     {    
         dataservice.addCompany(req, res);
+    });
+
+    //Post Method: collect member information and add to database
+    CROW_ROUTE(app, "/addMemeber")
+    .methods(crow::HTTPMethod::POST)
+    ([&](const crow::request &req, crow::response &res){
+        dataservice.addMember(req, res);
     });
 
     app.port(3000).multithreaded().run();
