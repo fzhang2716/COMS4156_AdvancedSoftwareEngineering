@@ -1,8 +1,11 @@
-#include "crow.h"
-#include "data_management.hpp"
+/*
+ *   Copyright (c) 2023 Debugteam
+ *   All rights reserved.
+ */
+#include "./Crow/include/crow.h"
+#include "./data_management.hpp"
 
-int main()
-{
+int main() {
     crow::SimpleApp app;
     DataManagementService dataservice;
 
@@ -12,27 +15,25 @@ int main()
     */
     CROW_ROUTE(app, "/company")
     .methods(crow::HTTPMethod::GET)
-    ([&] (const crow::request& req, crow::response& res)
-    {
+    ([&] (const crow::request& req, crow::response& res){
         dataservice.getCompanyInfo(req, res);
     });
 
-    //Post Method: collect company information and add to database
+    // Post Method: collect company information and add to database
     CROW_ROUTE(app, "/addCompany")
     .methods(crow::HTTPMethod::POST)
-    ([&](const crow::request &req, crow::response &res)
-    {    
+    ([&](const crow::request &req, crow::response &res){
         dataservice.addCompany(req, res);
     });
 
-    //Post Method: collect member information and add to database
+    // Post Method: collect member information and add to database
     CROW_ROUTE(app, "/addMember")
     .methods(crow::HTTPMethod::POST)
     ([&](const crow::request &req, crow::response &res){
         dataservice.addMember(req, res);
     });
 
-    ////Post Method: collect subscription information and add to database
+    // Post Method: collect subscription information and add to database
     CROW_ROUTE(app, "/addSubscription")
     .methods(crow::HTTPMethod::POST)
     ([&](const crow::request &req, crow::response &res){
