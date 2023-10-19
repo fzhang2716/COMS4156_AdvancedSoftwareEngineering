@@ -133,6 +133,32 @@ void addCompany(const crow::request& req, sql::Connection* conn, crow::response&
 }
 
 
+void addMember(const crow::request& req, sql::Connection* conn, crow::response& res){
+
+    auto bodyInfo = crow::json::load(req.body);
+
+    std::string memberId = bodyInfo["member_id"].s();
+    std::string firstName = bodyInfo["first_name"].s();
+    std::string lastName = bodyInfo["last_name"].s();
+    std::string email = bodyInfo["email"].s();
+    std::string phoneNumber = bodyInfo["phone_number"].s();
+    std::string memberStatus  = bodyInfo["member_status"].s();
+    std::string queryString = "Insert into service.member_table Values (" + memberId  + ", '" + firstName + "', '" + lastName + "', '" + email + "', '" + phoneNumber + "', '"+ memberStatus + "');";
+
+    try{
+        sql::Statement* stmt = conn->createStatement();
+        stmt->execute(queryString);
+        res.code = 200;
+        res.write("Add Memeber Success \n");
+        res.end();
+    } catch (sql::SQLException& e ) { // Catch any SQL errors
+        res.code = 500;
+        res.write("Add Memeber Error: " + std::string(e.what()) + "\n");
+        res.end();
+    }
+
+}
+
 std::string GetTestTable(sql::Connection* conn){
     sql::Statement* stmt;
     sql::ResultSet* res;

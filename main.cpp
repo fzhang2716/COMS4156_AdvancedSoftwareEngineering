@@ -90,5 +90,27 @@ int main()
         DBDisConnect(conn);
     });
 
+    
+    // Add a memeber's infomation
+    // Example request: http://localhost:3000/addMemeber
+    // {
+    // "member_id": "5",
+    // "first_name": "mike",
+    // "last_name": "hughs",
+    // "email": "m@gmail.com",
+    // "phone_number": "123213",
+    // "member_status": "gold"
+    // }
+    
+    CROW_ROUTE(app, "/addMemeber")
+    .methods(crow::HTTPMethod::POST)
+    ([&](const crow::request &req, crow::response &res){
+        sql::Connection* conn = DBConnect();
+        addMember(req, conn, res);
+
+        res.end();
+        DBDisConnect(conn);
+    });
+
     app.port(3000).multithreaded().run();
 }
