@@ -67,7 +67,7 @@ make
 ### Get user's company info
 
 #### Request
-`GET \company?username=usr&password=pwd` 
+`GET /company?username=usr&password=pwd` 
 
 ```
 curl -G -i -d "username=company1" -d "password=pwd" http://localhost:3000/company
@@ -100,3 +100,33 @@ Authentication failed
 
 ### Create a new user (company)
 
+#### Request
+`POST /addCompany?company_id=id&email=email&hash_pwd=pwd&company_name=name`
+
+```
+curl -i -L -X POST 'http://localhost:3000/addCompany?company_id=60&email=com60@gmail.com&hash_pwd=12321&company_name=com60'
+```
+
+#### Response
+
+If success:
+```
+HTTP/1.1 200 OK
+Content-Length: 21
+Server: Crow/master
+Date: Thu, 19 Oct 2023 19:26:19 GMT
+Connection: Keep-Alive
+
+Add Company Success 
+```
+
+If failed:
+```
+HTTP/1.1 500 Internal Server Error
+Content-Length: 27
+Server: Crow/master
+Date: Thu, 19 Oct 2023 19:29:53 GMT
+Connection: Keep-Alive
+
+500 Internal Server Error
+```
