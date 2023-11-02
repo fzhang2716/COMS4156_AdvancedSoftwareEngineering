@@ -25,9 +25,8 @@ TEST_CASE("Company Info Query", "[single-file]" ) {
 }
 
 TEST_CASE("Add Company Info Query", "[single-file]" ) {
-    std::string query = queryGenerator.addCompanyInfoQuery("1",
-    "email", "hashPwd", "companyName");
-    std::string target_query = "Insert into service.company_table Values (1, 'companyName', 'email', 'hashPwd');";
+    std::string query = queryGenerator.addCompanyInfoQuery("email", "companyName");
+    std::string target_query = "Insert into service.company_table (email, company_name) Values ('email', 'companyName');";
     REQUIRE(query == target_query);
 }
 

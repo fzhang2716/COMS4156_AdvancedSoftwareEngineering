@@ -16,11 +16,10 @@ std::string Query::companyInfoQuery(int companyId) {
     + std::to_string(companyId);
 }
 
-std::string Query::addCompanyInfoQuery(const std::string& companyId,
-const std::string& email, const std::string& hashPwd,
+std::string Query::addCompanyInfoQuery(const std::string& email,
 const std::string& companyName) {
-    return "Insert into service.company_table Values (" + companyId
-    + ", '" + companyName + "', '" + email + "', '" + hashPwd + "');";
+    return "Insert into service.company_table (email, company_name) Values ('" + email
+    + "', '" + companyName + "');";
 }
 
 std::string Query::addMemberQuery(const std::string& memberId,

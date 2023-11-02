@@ -22,6 +22,10 @@
 
 class DataManagementService {
  public:
+    const std::string secret_key = "4156debugteam";
+ 
+    std::string generateJwtToken(int user_id);
+    
     /**
      * Check if the client is authorized
      * 
@@ -32,7 +36,7 @@ class DataManagementService {
     */
     int isUserAuthenticated(const crow::request& req, crow::response& res,
                             sql::Connection* conn);
-    /**
+     /**
      * Get the client's company information
      * 
      * @param req the API request from client
@@ -41,7 +45,7 @@ class DataManagementService {
     */
     void getCompanyInfo(const crow::request& req, crow::response& res);
     /**
-     * Add a new company
+     * Add a new client as company
      * 
      * @param req the API request from client
      * @param res the response to be sent

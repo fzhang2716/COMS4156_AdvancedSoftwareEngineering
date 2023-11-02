@@ -2,12 +2,26 @@
  *   Copyright (c) 2023 Debugteam
  *   All rights reserved.
  */
-#include "./data_management.hpp"
+#include "data_management.hpp"
+#include "utils.hpp"
+#include <jwt-cpp/jwt.h>
 #include <exception>
-#include "./utils.hpp"
 
+using namespace std;
 
 Query queryGenerator;
+
+std::string DataManagementService::generateJwtToken(int user_id){
+    // create a token valid for 1 year
+    auto token = jwt::create()
+        .set_issuer("SubManager")
+        .set_type("JWT")
+        .set_subject(std::to_string(user_id))
+        .set_expires_at(std::chrono::system_clock::now() + std::chrono::hours(24 * 365))
+        .sign(jwt::algorithm::hs256{DataManagementService::secret_key});
+    
+    return token;
+}
 
 int DataManagementService::isUserAuthenticated(const crow::request &req,
     crow::response &res, sql::Connection *conn) {
@@ -105,19 +119,36 @@ void DataManagementService::addCompany(const crow::request &req,
     sql::Connection *conn = DBConnect();
     // Try extract companyId, email, hashPwd, and companyName from the request.
     try {
-        std::string companyId = req.url_params.get("company_id");
-        std::string email = req.url_params.get("email");
-        std::string hashPwd = req.url_params.get("hash_pwd");
-        std::string companyName = req.url_params.get("company_name");
+        auto bodyInfo = crow::json::load(req.body);
+        std::string email = bodyInfo["email"].s();
+        std::string companyName = bodyInfo["company_name"].s();;
 
         try {
-            std::string query = queryGenerator.addCompanyInfoQuery(companyId,
-                email, hashPwd, companyName);
+            std::string query = queryGenerator.addCompanyInfoQuery(email, companyName);
             sql::Statement *stmt = conn->createStatement();
             stmt->execute(query);
-            res.code = 200;  // OK
-            res.write("Add Company Success \n");
-            res.end();
+
+            sql::Statement *stmt2 = conn->createStatement();
+            sql::ResultSet *queryResult = stmt2->executeQuery("SELECT LAST_INSERT_ID() as last_id");
+
+            if(queryResult->next()){
+                int company_id = queryResult->getInt("last_id");
+                std::string jwtToken = generateJwtToken(company_id);
+                
+                res.code = 200;  // OK
+                res.write("Add Company Success \n");
+                res.write("Please save your JWT token: " + jwtToken + "\n");
+                res.end();
+
+            }else{
+                res.code = 500;  // Internal Server Error
+                res.write("Add Company Failed due to database issue.\n");
+                res.end();
+            }
+
+            delete stmt;
+            delete stmt2;
+            delete queryResult;
         }
         catch (sql::SQLException &e) {
             // Catch any SQL errors
@@ -139,9 +170,9 @@ void DataManagementService::addCompany(const crow::request &req,
 void DataManagementService::addMember(const crow::request &req,
     crow::response &res) {
     sql::Connection *conn = DBConnect();
-    auto bodyInfo = crow::json::load(req.body);
-
+    
     try {
+        auto bodyInfo = crow::json::load(req.body);
         std::string memberId = bodyInfo["member_id"].s();
         std::string firstName = bodyInfo["first_name"].s();
         std::string lastName = bodyInfo["last_name"].s();
@@ -178,9 +209,9 @@ void DataManagementService::addMember(const crow::request &req,
 void DataManagementService::addSubscription(const crow::request &req,
     crow::response &res) {
     sql::Connection *conn = DBConnect();
-    auto bodyInfo = crow::json::load(req.body);
-
+    
     try {
+        auto bodyInfo = crow::json::load(req.body);
         std::string subscriptionId = bodyInfo["subscription_id"].s();
         std::string memberId = bodyInfo["member_id"].s();
         std::string companyId = bodyInfo["company_id"].s();
@@ -227,7 +258,7 @@ sql::Connection *DBConnect() {
 
     driver = sql::mysql::get_mysql_driver_instance();
     // Connect IP adress, username, password
-    conn = driver->connect("tcp://34.150.169.58", "admin", "debugteam");
+    conn = driver->connect("tcp://172.22.32.1:3306", "admin", "debugteam");
 
     return conn;
 }

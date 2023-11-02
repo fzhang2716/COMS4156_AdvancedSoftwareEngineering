@@ -4,10 +4,17 @@
  */
 #include "./Crow/include/crow.h"
 #include "./data_management.hpp"
+#include <jwt-cpp/jwt.h>
 
 int main() {
     crow::SimpleApp app;
     DataManagementService dataservice;
+
+    CROW_ROUTE(app, "/register")
+    .methods(crow::HTTPMethod::POST)
+    ([&] (const crow::request& req, crow::response &res){
+        
+    });
 
     /**
      * Get a company's information

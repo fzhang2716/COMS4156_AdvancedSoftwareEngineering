@@ -1,12 +1,40 @@
 # COMS4156_AdvancedSoftwareEngineering
 
-Install crow:
-1. "git clone https://github.com/CrowCpp/Crow.git"
-2. navigate to Crow && "mkdir build"
+## Overview
+Our project is a subscription management service that provides sub-services like subscription data management, analytics, insights feedback, notification sending, alerting, and reports generation.
+
+## Install (Linux)
+### [Crow](https://crowcpp.org/master/getting_started/setup/linux/)
+( C++ framework for creating HTTP or Websocket web services )
+
+1. ```
+    git clone https://github.com/CrowCpp/Crow.git
+    ```
+2. navigate to Crow, then
+    ```
+    mkdir build
+    ```
 3. navigate to build
-4. "sudo apt install libasio-dev"
-5. "cmake .. -DCROW_BUILD_EXAMPLES=OFF -DCROW_BUILD_TESTS=OFF"
-6. make install
+4. ```
+    sudo apt install libasio-dev
+    ```
+5. ```
+    cmake .. -DCROW_BUILD_EXAMPLES=OFF -DCROW_BUILD_TESTS=OFF
+    ```
+6. ```
+    make install
+    ```
+
+### [MySQL Connector/C++](https://dev.mysql.com/doc/dev/connector-cpp/latest/)
+( C++ library for applications to communicate with MySQL database servers )
+
+1. ```
+    sudo apt update
+    ```
+2. ```
+    sudo apt-get install libmysqlcppconn-dev
+    ```
+
 
 ### [Catch2](https://github.com/catchorg/Catch2)
 ( A unit testing framework for C++)
@@ -22,6 +50,12 @@ Install crow:
 4. ```
     sudo cmake --build build/ --target install
     ```
+
+### [jwt-cpp](https://github.com/Thalhammer/jwt-cpp)
+(A header only library for creating and validating JSON Web Tokens in C++11)
+```
+git clone https://github.com/Thalhammer/jwt-cpp.git
+```
 
 ## Compile and Run
 In root directory, run Makefile:
