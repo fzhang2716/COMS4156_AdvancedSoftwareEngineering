@@ -23,6 +23,21 @@ std::string DataManagementService::generateJwtToken(int user_id){
     return token;
 }
 
+int DataManagementService::verifyJwtToken(const std::string& token){
+    try{
+        auto decoded = jwt::decode(token);
+        jwt::verify()
+        .allow_algorithm(jwt::algorithm::hs256{DataManagementService::secret_key})
+        .with_issuer("SubManager")
+        .verify(decoded);
+
+        cout << "subject id:" << decoded.get_subject() << "\n";
+        return std::stoi(decoded.get_subject());
+    } catch (const std::exception &e){
+        return -1;
+    }
+}
+
 int DataManagementService::isUserAuthenticated(const crow::request &req,
     crow::response &res, sql::Connection *conn) {
     // Try extract username and password from the request.
@@ -60,7 +75,7 @@ int DataManagementService::isUserAuthenticated(const crow::request &req,
             res.end();
         }
     }
-    catch (std::exception &e) {
+    catch (const std::exception &e) {
         // Catch invalid request errors
         res.code = 400;  // Bad Request
         res.write("Invalid request \n");
@@ -72,10 +87,8 @@ int DataManagementService::isUserAuthenticated(const crow::request &req,
 }
 
 void DataManagementService::getCompanyInfo(const crow::request &req,
-    crow::response &res) {
+    crow::response &res, int companyId) {
     sql::Connection *conn = DBConnect();
-    // User Authentication
-    int companyId = DataManagementService::isUserAuthenticated(req, res, conn);
 
     if (companyId != -1) {
         sql::Statement *stmt = conn->createStatement();

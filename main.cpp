@@ -6,24 +6,53 @@
 #include "./data_management.hpp"
 #include <jwt-cpp/jwt.h>
 
-int main() {
-    crow::SimpleApp app;
-    DataManagementService dataservice;
+DataManagementService dataservice;
 
-    CROW_ROUTE(app, "/register")
-    .methods(crow::HTTPMethod::POST)
-    ([&] (const crow::request& req, crow::response &res){
-        
-    });
+struct JwtMiddleware : crow::ILocalMiddleware {
+    struct context {
+        int companyId;
+    };
+
+    void before_handle(crow::request& req, crow::response& res, context& ctx){
+        std::string authHeader = req.get_header_value("Authorization");
+        if(authHeader.find("Bearer ") != 0){
+            res.code = 401; //Unauthorized
+            res.write("JWT token not found \n");
+            res.end();
+            return;
+        }
+
+        std::string jwtToken = authHeader.substr(7);
+
+        int id = dataservice.verifyJwtToken(jwtToken);
+        if( id == -1){
+            res.code = 401; //Unauthorized
+            res.write("Invalid token \n");
+            res.end();
+        } else{
+            ctx.companyId = id;
+        }
+
+    }
+
+    void after_handle(crow::request& req, crow::response& res, context& ctx){
+    }
+};
+
+int main() {
+    crow::App<JwtMiddleware> app;
 
     /**
      * Get a company's information
      * Example request: http://localhost:3000/company?username=company1&password=pwd
     */
     CROW_ROUTE(app, "/company")
+    .CROW_MIDDLEWARES(app, JwtMiddleware)
     .methods(crow::HTTPMethod::GET)
     ([&] (const crow::request& req, crow::response &res){
-        dataservice.getCompanyInfo(req, res);
+        auto& ctx = app.get_context<JwtMiddleware>(req);
+        int companyId = ctx.companyId;
+        dataservice.getCompanyInfo(req, res, companyId);
     });
 
     // Post Method: collect company information and add to database
