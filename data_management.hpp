@@ -24,21 +24,24 @@
 class DataManagementService {
  public:
     const std::string secret_key = "4156debugteam";
- 
-    std::string generateJwtToken(int user_id);
-
-    int verifyJwtToken(const std::string& token);
+    const std::string sendGrid_key = "";
     
     /**
-     * Check if the client is authorized
+     * Generate a JWT token for the client
      * 
-     * @param req the API request from client
-     * @param res the response to be sent
-     * @param conn the database connection
-     * @return the company_id of the client if authorized, or -1 if not
+     * @param client_id the client's id
+     * @return a string JWT token
     */
-    int isUserAuthenticated(const crow::request& req, crow::response& res,
-                            sql::Connection* conn);
+    std::string generateJwtToken(int client_id);
+
+    /**
+     * Verify the client's token
+     * 
+     * @param token the JWT token that client provides
+     * @return the company_id of the client if authorized; otherwise, -1
+    */
+    int verifyJwtToken(const std::string& token);
+    
     /**
      * Add a new client as company
      * 
@@ -47,6 +50,7 @@ class DataManagementService {
      * 
     */
     void addCompany(const crow::request& req, crow::response& res);
+    
      /**
      * Recover the client's JWT token by sending him an email
      * 
@@ -55,6 +59,7 @@ class DataManagementService {
      * 
     */
     void recoverCompany(const crow::request& req, crow::response& res);
+    
      /**
      * Get the client's company information
      * 
@@ -63,6 +68,7 @@ class DataManagementService {
      * 
     */
     void getCompanyInfo(const crow::request& req, crow::response& res, int companyId);
+    
     /**
      * Add a new member
      * 
@@ -71,6 +77,7 @@ class DataManagementService {
      * 
     */
     void addMember(const crow::request& req, crow::response& res);
+    
      /**
      * Add a new subscription
      * 

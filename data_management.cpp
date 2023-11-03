@@ -12,12 +12,12 @@ using namespace std;
 
 Query queryGenerator;
 
-std::string DataManagementService::generateJwtToken(int user_id){
+std::string DataManagementService::generateJwtToken(int client_id){
     // create a token valid for 1 year
     auto token = jwt::create()
         .set_issuer("SubManager")
         .set_type("JWT")
-        .set_subject(std::to_string(user_id))
+        .set_subject(std::to_string(client_id))
         .set_expires_at(std::chrono::system_clock::now() + std::chrono::hours(24 * 365))
         .sign(jwt::algorithm::hs256{DataManagementService::secret_key});
     
@@ -39,53 +39,6 @@ int DataManagementService::verifyJwtToken(const std::string& token){
     }
 }
 
-int DataManagementService::isUserAuthenticated(const crow::request &req,
-    crow::response &res, sql::Connection *conn) {
-    // Try extract username and password from the request.
-    try {
-        std::string username = req.url_params.get("username");
-        std::string password = req.url_params.get("password");
-
-        // Try query the databse
-        try {
-            sql::Statement *stmt = conn->createStatement();
-            std::string query = queryGenerator.authenticationQuery(username,
-            password);
-            sql::ResultSet *result = stmt->executeQuery(query);
-
-            if (result->next()) {
-                int companyId = result->getInt("company_id");
-                delete result;
-                delete stmt;
-                res.code = 200;
-                res.write("Authentication success \n");
-                return companyId;
-            }
-
-            // If credentials are not valid, return -1 and deny access.
-            delete result;
-            delete stmt;
-            res.code = 401;  // Unauthorized
-            res.write("Authentication failed \n");
-            res.end();
-        }
-        catch (sql::SQLException &e) {
-            // Catch any SQL errors
-            res.code = 500;  // Internal Server Error
-            res.write("Database Error: " + std::string(e.what()) + "\n");
-            res.end();
-        }
-    }
-    catch (const std::exception &e) {
-        // Catch invalid request errors
-        res.code = 400;  // Bad Request
-        res.write("Invalid request \n");
-        res.end();
-        return -1;
-    }
-
-    return -1;
-}
 
 void DataManagementService::getCompanyInfo(const crow::request &req,
     crow::response &res, int companyId) {
@@ -212,7 +165,8 @@ void DataManagementService::recoverCompany(const crow::request& req, crow::respo
                 if(curl){
                     const char *url = "https://api.sendgrid.com/v3/mail/send";
                     struct curl_slist* headers = NULL;
-                    headers = curl_slist_append(headers, "Authorization: Bearer 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");
+                    std::string auth = "Authorization: Bearer "+ DataManagementService::sendGrid_key;
+                    headers = curl_slist_append(headers, auth.c_str());
                     headers = curl_slist_append(headers, "Content-Type: application/json");
 
                     // Set the JSON payload with email details
@@ -258,7 +212,7 @@ void DataManagementService::recoverCompany(const crow::request& req, crow::respo
                 }
             } else{
                 res.code = 400;  // Bad Request
-                res.write("Your email has not registed\n");
+                res.write("Your email has not been registered\n");
                 res.end();
             }
 
