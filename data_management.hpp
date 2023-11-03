@@ -14,6 +14,7 @@
 #include <cppconn/statement.h>
 #include <cppconn/prepared_statement.h>
 #include <stdlib.h>
+#include <curl/curl.h>
 
 #include <string>
 #include <iostream>
@@ -38,14 +39,6 @@ class DataManagementService {
     */
     int isUserAuthenticated(const crow::request& req, crow::response& res,
                             sql::Connection* conn);
-     /**
-     * Get the client's company information
-     * 
-     * @param req the API request from client
-     * @param res the response to be sent
-     * 
-    */
-    void getCompanyInfo(const crow::request& req, crow::response& res, int companyId);
     /**
      * Add a new client as company
      * 
@@ -54,6 +47,22 @@ class DataManagementService {
      * 
     */
     void addCompany(const crow::request& req, crow::response& res);
+     /**
+     * Recover the client's JWT token by sending him an email
+     * 
+     * @param req the API request from client
+     * @param res the response to be sent
+     * 
+    */
+    void recoverCompany(const crow::request& req, crow::response& res);
+     /**
+     * Get the client's company information
+     * 
+     * @param req the API request from client
+     * @param res the response to be sent
+     * 
+    */
+    void getCompanyInfo(const crow::request& req, crow::response& res, int companyId);
     /**
      * Add a new member
      * 

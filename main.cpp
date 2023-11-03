@@ -62,6 +62,13 @@ int main() {
         dataservice.addCompany(req, res);
     });
 
+    //Post Method: request a new access token
+    CROW_ROUTE(app, "/recoverCompany")
+    .methods(crow::HTTPMethod::POST)
+    ([&](const crow::request &req, crow::response &res){
+        dataservice.recoverCompany(req, res);
+    });
+
     // Post Method: collect member information and add to database
     CROW_ROUTE(app, "/addMember")
     .methods(crow::HTTPMethod::POST)
