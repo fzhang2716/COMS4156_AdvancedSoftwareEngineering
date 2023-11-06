@@ -78,9 +78,12 @@ int main() {
 
     // Post Method: collect subscription information and add to database
     CROW_ROUTE(app, "/addSubscription")
+    .CROW_MIDDLEWARES(app, JwtMiddleware)
     .methods(crow::HTTPMethod::POST)
     ([&](const crow::request &req, crow::response &res){
-        dataservice.addSubscription(req, res);
+        auto& ctx = app.get_context<JwtMiddleware>(req);
+        int companyId = ctx.companyId;
+        dataservice.addSubscription(req, res, companyId);
     });
 
     app.port(3000).multithreaded().run();

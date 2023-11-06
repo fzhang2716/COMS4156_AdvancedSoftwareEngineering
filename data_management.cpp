@@ -282,45 +282,44 @@ void DataManagementService::addMember(const crow::request &req,
 }
 
 void DataManagementService::addSubscription(const crow::request &req,
-    crow::response &res) {
+    crow::response &res, int companyId) {
     sql::Connection *conn = DBConnect();
-    
-    try {
-        auto bodyInfo = crow::json::load(req.body);
-        std::string subscriptionId = bodyInfo["subscription_id"].s();
-        std::string memberId = bodyInfo["member_id"].s();
-        std::string companyId = bodyInfo["company_id"].s();
-        std::string subscriptionType = bodyInfo["subscription_type"].s();
-        std::string subscriptionStatus = bodyInfo["subscription_status"].s();
-        std::string nextDueDate = bodyInfo["next_due_date"].s();
-        std::string startDate = bodyInfo["start_date"].s();
-        std::string billingInfo = bodyInfo["billing_info"].s();
 
+    if(companyId != -1){
         try {
-            std::string queryString =
-                "Insert into service.subscription_table Values (" +
-                subscriptionId + ", " + memberId + ", " + companyId + ", '" +
-                subscriptionType + "', '" + subscriptionStatus + "', '" +
-                nextDueDate + "', '" + startDate + "', '" + billingInfo + "');";
-            sql::Statement *stmt = conn->createStatement();
-            stmt->execute(queryString);
-            res.code = 200;  // OK
-            res.write("Add Subscription Success \n");
+            auto bodyInfo = crow::json::load(req.body);
+            std::string memberId = bodyInfo["member_id"].s();
+            std::string subscriptionType = bodyInfo["subscription_type"].s();
+            std::string subscriptionStatus = bodyInfo["subscription_status"].s();
+            std::string nextDueDate = bodyInfo["next_due_date"].s();
+            std::string startDate = bodyInfo["start_date"].s();
+            std::string billingInfo = bodyInfo["billing_info"].s();
+
+            try {
+                std::string queryString =
+                    "Insert into service.subscription_table (member_id, company_id, subscription_type, subscription_status, next_due_date, start_date, billing_info) Values ('" + memberId + "', '" + std::to_string(companyId) + "', '" +
+                    subscriptionType + "', '" + subscriptionStatus + "', '" +
+                    nextDueDate + "', '" + startDate + "', '" + billingInfo + "');";
+                sql::Statement *stmt = conn->createStatement();
+                stmt->execute(queryString);
+                res.code = 200;  // OK
+                res.write("Add Subscription Success \n");
+                res.end();
+            }
+            catch (sql::SQLException &e) {
+                // Catch any SQL errors
+                res.code = 500;  // Internal Server Error
+                res.write("Add Subscription Error: " +
+                    std::string(e.what()) + "\n");
+                res.end();
+            }
+        }
+        catch (std::exception &e) {
+            // Catch invalid request errors
+            res.code = 400;  // Bad Request
+            res.write("Invalid request \n");
             res.end();
         }
-        catch (sql::SQLException &e) {
-            // Catch any SQL errors
-            res.code = 500;  // Internal Server Error
-            res.write("Add Subscription Error: " +
-                std::string(e.what()) + "\n");
-            res.end();
-        }
-    }
-    catch (std::exception &e) {
-        // Catch invalid request errors
-        res.code = 400;  // Bad Request
-        res.write("Invalid request \n");
-        res.end();
     }
 
     DBDisConnect(conn);
@@ -332,7 +331,7 @@ sql::Connection *DBConnect() {
     sql::Connection *conn;
 
     driver = sql::mysql::get_mysql_driver_instance();
-    // Connect IP adress, username, password
+    // Connect IP adress, username, password (TODO: replace IP adress)
     conn = driver->connect("tcp://172.22.32.1:3306", "admin", "debugteam");
 
     return conn;

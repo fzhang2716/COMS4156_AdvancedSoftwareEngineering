@@ -85,7 +85,7 @@ class DataManagementService {
      * @param res the response to be sent
      * 
     */
-    void addSubscription(const crow::request& req, crow::response& res);
+    void addSubscription(const crow::request& req, crow::response& res, int companyId);
 };
 
 /**
