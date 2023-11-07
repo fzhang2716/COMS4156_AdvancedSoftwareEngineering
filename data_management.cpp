@@ -243,40 +243,41 @@ void DataManagementService::recoverCompany(const crow::request& req, crow::respo
 }
 
 void DataManagementService::addMember(const crow::request &req,
-    crow::response &res) {
+    crow::response &res, int companyId) {
     sql::Connection *conn = DBConnect();
     
-    try {
-        auto bodyInfo = crow::json::load(req.body);
-        std::string memberId = bodyInfo["member_id"].s();
-        std::string firstName = bodyInfo["first_name"].s();
-        std::string lastName = bodyInfo["last_name"].s();
-        std::string email = bodyInfo["email"].s();
-        std::string phoneNumber = bodyInfo["phone_number"].s();
-        std::string memberStatus = bodyInfo["member_status"].s();
-
+    if(companyId != -1) {
         try {
-            std::string query = queryGenerator.addMemberQuery(memberId,
-                firstName, lastName, email, phoneNumber, memberStatus);
-            sql::Statement *stmt = conn->createStatement();
-            stmt->execute(query);
-            res.code = 200;  // OK
-            res.write("Add Member Success \n");
+            auto bodyInfo = crow::json::load(req.body);
+            std::string firstName = bodyInfo["first_name"].s();
+            std::string lastName = bodyInfo["last_name"].s();
+            std::string email = bodyInfo["email"].s();
+            std::string phoneNumber = bodyInfo["phone_number"].s();
+            std::string memberStatus = bodyInfo["member_status"].s();
+
+            try {
+                std::string query = queryGenerator.addMemberQuery(std::to_string(companyId),
+                    firstName, lastName, email, phoneNumber, memberStatus);
+                sql::Statement *stmt = conn->createStatement();
+                stmt->execute(query);
+                res.code = 200;  // OK
+                res.write("Add Member Success \n");
+                res.end();
+            }
+            catch (sql::SQLException &e) {
+                // Catch any SQL errors
+                res.code = 500;  // Internal Server Error
+                res.write("Add Member Error: " + std::string(e.what()) + "\n");
+                res.end();
+            }
             res.end();
         }
-        catch (sql::SQLException &e) {
-            // Catch any SQL errors
-            res.code = 500;  // Internal Server Error
-            res.write("Add Member Error: " + std::string(e.what()) + "\n");
+        catch (std::exception &e) {
+            // Catch invalid request errors
+            res.code = 400;  // Bad Request
+            res.write("Invalid request \n");
             res.end();
         }
-        res.end();
-    }
-    catch (std::exception &e) {
-        // Catch invalid request errors
-        res.code = 400;  // Bad Request
-        res.write("Invalid request \n");
-        res.end();
     }
     DBDisConnect(conn);
 }

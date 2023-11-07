@@ -22,11 +22,11 @@ const std::string& companyName) {
     + "', '" + companyName + "');";
 }
 
-std::string Query::addMemberQuery(const std::string& memberId,
+std::string Query::addMemberQuery(const std::string& companyId,
 const std::string& firstName, const std::string& lastName,
 const std::string& email, const std::string& phoneNumber,
 const std::string& memberStatus) {
-    return "Insert into service.member_table Values (" + memberId  + ", '"
+    return "Insert into service.member_table (company_id, first_name, last_name, email, phone_number, member_status) Values (" + companyId  + ", '"
     + firstName + "', '" + lastName + "', '" + email + "', '" +
     phoneNumber + "', '"+ memberStatus + "');";
 }

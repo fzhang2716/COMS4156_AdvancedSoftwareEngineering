@@ -32,6 +32,6 @@ TEST_CASE("Add Company Info Query", "[single-file]" ) {
 
 TEST_CASE("Add Member Query", "[single-file]" ) {
     std::string query = queryGenerator.addMemberQuery("1", "firstName", "lastName", "email", "1111111111", "gold");
-    std::string target_query = "Insert into service.member_table Values (1, 'firstName', 'lastName', 'email', '1111111111', 'gold');";
+    std::string target_query = "Insert into service.member_table (company_id, first_name, last_name, email, phone_number, member_status) Values (1, 'firstName', 'lastName', 'email', '1111111111', 'gold');";
     REQUIRE(query == target_query);
 }
