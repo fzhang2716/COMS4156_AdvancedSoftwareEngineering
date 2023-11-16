@@ -333,7 +333,7 @@ sql::Connection *DBConnect() {
 
     driver = sql::mysql::get_mysql_driver_instance();
     // Connect IP adress, username, password (TODO: replace IP adress)
-    conn = driver->connect("tcp://172.22.32.1:3306", "admin", "debugteam");
+    conn = driver->connect("tcp://database-1.cwyxftpcqhs4.us-east-2.rds.amazonaws.com", "admin", "debugteam");
 
     return conn;
 }
