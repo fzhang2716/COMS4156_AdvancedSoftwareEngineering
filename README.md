@@ -51,6 +51,19 @@ Our project is a subscription management service that provides sub-services like
     sudo cmake --build build/ --target install
     ```
 
+### [jwt-cpp](https://github.com/Thalhammer/jwt-cpp)
+(A header only library for creating and validating JSON Web Tokens in C++11)
+```
+git clone https://github.com/Thalhammer/jwt-cpp.git
+```
+
+### [cURL](https://curl.se/)
+
+```
+sudo apt-get update
+sudo apt-get install libcurl4-openssl-dev
+
+```
 ## Compile and Run
 In root directory, run Makefile:
 
@@ -95,47 +108,19 @@ Connection: Keep-Alive
 Invalid request 
 ```
 
-### Get user's company info:
+
+### Register as a new client (company):
 
 #### Request
-`GET /company?username=usr&password=pwd` 
+`POST /addCompany`
 
 ```
-curl -G -i -d "username=company1" -d "password=pwd" http://localhost:3000/company
-```
-
-#### Response
-
-If authentication succeed (client provided matching username and password):
-```
-HTTP/1.1 200 OK
-Content-Length: 106
-Server: Crow/master
-Date: Wed, 18 Oct 2023 23:42:34 GMT
-Connection: Keep-Alive
-
-Authentication success 
-Result: Company ID: 1; Company Name: company1; Company email: company1@gmail.com
-```
-
-If authentication failed (client did not provide matching username and password):
-```
-HTTP/1.1 401 Unauthorized
-Content-Length: 23
-Server: Crow/master
-Date: Wed, 18 Oct 2023 23:43:37 GMT
-Connection: Keep-Alive
-
-Authentication failed 
-```
-
-### Create a new user (company):
-
-#### Request
-`POST /addCompany?company_id=id&email=email&hash_pwd=pwd&company_name=name`
-
-```
-curl -i -L -X POST 'http://localhost:3000/addCompany?company_id=60&email=com60@gmail.com&hash_pwd=12321&company_name=com60'
+curl -i --location 'http://localhost:3000/addCompany' \
+--header 'Content-Type: text/plain' \
+--data-raw '{
+    "email" : "eg@gmail.com",
+    "company_name" : "EG"
+}'
 ```
 
 #### Response
@@ -143,12 +128,13 @@ curl -i -L -X POST 'http://localhost:3000/addCompany?company_id=60&email=com60@g
 If succeed:
 ```
 HTTP/1.1 200 OK
-Content-Length: 21
+Content-Length: 195
 Server: Crow/master
-Date: Thu, 19 Oct 2023 19:26:19 GMT
+Date: Fri, 03 Nov 2023 04:10:27 GMT
 Connection: Keep-Alive
 
 Add Company Success 
+Please save your JWT token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzA1MjA2MjgsImlzcyI6IlN1Yk1hbmFnZXIiLCJzdWIiOiIxNiJ9.kfC9TVEi8AgCLSrXF8obpQLi76gjXhdvtP5M6_kJaXU
 ```
 
 If failed:
@@ -156,14 +142,87 @@ If failed:
 e.g. duplicate id
 ```
 HTTP/1.1 500 Internal Server Error
-Content-Length: 72
+Content-Length: 119
 Server: Crow/master
-Date: Thu, 19 Oct 2023 21:39:02 GMT
+Date: Fri, 03 Nov 2023 04:10:45 GMT
 Connection: Keep-Alive
 
-Add Company Error: Duplicate entry '60' for key 'company_table.PRIMARY'
+Add Company Error: You have already registered with this email, if you lost your JWT token, please apply for a new one.
 ```
 
+### Get user's company info:
+
+#### Request
+`GET /company` 
+
+```
+curl -i --location 'http://localhost:3000/company' \
+--header 'Authorization: Bearer {JWT token}'
+```
+
+#### Response
+
+If authentication succeed (client provided matching username and password):
+```
+HTTP/1.1 200 OK
+Content-Length: 81
+Server: Crow/master
+Date: Fri, 03 Nov 2023 04:07:06 GMT
+Connection: Keep-Alive
+
+Result: Company ID: 1; Company Name: CompanyA; Company email:1@gmail.com 
+```
+
+If authentication failed (client did not provide matching username and password):
+```
+HTTP/1.1 401 Unauthorized
+Content-Length: 15
+Server: Crow/master
+Date: Fri, 03 Nov 2023 04:08:01 GMT
+Connection: Keep-Alive
+
+Invalid token 
+```
+### Re-apply for the access token:
+
+#### Request
+`GET /recoverCompany` 
+
+```
+curl -i --location 'http://localhost:3000/recoverCompany' \
+--header 'Content-Type: text/plain' \
+--data-raw '{
+    "email" : "eg@gmail.com"
+}'
+```
+
+#### Response
+
+If authentication succeed (client provided matching username and password):
+```
+HTTP/1.1 200 OK
+Content-Length: 40
+Server: Crow/master
+Date: Fri, 03 Nov 2023 04:12:38 GMT
+Connection: Keep-Alive
+
+An email has been send to your address 
+```
+
+Then, client needs to find his new API key in his email.
+
+If authentication failed (email has not been registered):
+```
+HTTP/1.1 400 Bad Request
+Content-Length: 28
+Server: Crow/master
+Date: Fri, 03 Nov 2023 04:14:22 GMT
+Connection: Keep-Alive
+
+Your email has not been registered
+```
+
+## TODO: update below
 ### Add a new member:
 
 #### Request

@@ -1,0 +1,6 @@
+Catch2/build/
+
+*.o
+*.exe
+*.out
+*.app

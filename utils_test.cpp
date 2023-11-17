@@ -25,14 +25,13 @@ TEST_CASE("Company Info Query", "[single-file]" ) {
 }
 
 TEST_CASE("Add Company Info Query", "[single-file]" ) {
-    std::string query = queryGenerator.addCompanyInfoQuery("1",
-    "email", "hashPwd", "companyName");
-    std::string target_query = "Insert into service.company_table Values (1, 'companyName', 'email', 'hashPwd');";
+    std::string query = queryGenerator.addCompanyInfoQuery("email", "companyName");
+    std::string target_query = "Insert into service.company_table (email, company_name) Values ('email', 'companyName');";
     REQUIRE(query == target_query);
 }
 
 TEST_CASE("Add Member Query", "[single-file]" ) {
     std::string query = queryGenerator.addMemberQuery("1", "firstName", "lastName", "email", "1111111111", "gold");
-    std::string target_query = "Insert into service.member_table Values (1, 'firstName', 'lastName', 'email', '1111111111', 'gold');";
+    std::string target_query = "Insert into service.member_table (company_id, first_name, last_name, email, phone_number, member_status) Values (1, 'firstName', 'lastName', 'email', '1111111111', 'gold');";
     REQUIRE(query == target_query);
 }
