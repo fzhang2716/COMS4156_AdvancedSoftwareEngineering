@@ -15,11 +15,6 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
     
-    - name: Set up environment
-      uses: actions/setup-cpp@v2
-      with:
-        cpp-version: '17'
-    
     - name: Install dependencies
       run: |
         sudo apt update
