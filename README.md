@@ -7,49 +7,32 @@ Our project is a subscription management service that provides sub-services like
 ### [Crow](https://crowcpp.org/master/getting_started/setup/linux/)
 ( C++ framework for creating HTTP or Websocket web services )
 
-1. ```
-    git clone https://github.com/CrowCpp/Crow.git
-    ```
-2. navigate to Crow, then
-    ```
-    mkdir build
-    ```
-3. navigate to build
-4. ```
-    sudo apt install libasio-dev
-    ```
-5. ```
-    cmake .. -DCROW_BUILD_EXAMPLES=OFF -DCROW_BUILD_TESTS=OFF
-    ```
-6. ```
-    make install
-    ```
+ ```
+ git clone https://github.com/CrowCpp/Crow.git
+ cd Crow
+ mkdir build
+ sudo apt install libasio-dev
+ cmake .. -DCROW_BUILD_EXAMPLES=OFF -DCROW_BUILD_TESTS=OFF
+ sudo make install
+ ```
 
 ### [MySQL Connector/C++](https://dev.mysql.com/doc/dev/connector-cpp/latest/)
 ( C++ library for applications to communicate with MySQL database servers )
 
-1. ```
-    sudo apt update
-    ```
-2. ```
-    sudo apt-get install libmysqlcppconn-dev
-    ```
+```
+sudo apt update
+sudo apt-get install libmysqlcppconn-dev
+```
 
 
 ### [Catch2](https://github.com/catchorg/Catch2)
 ( A unit testing framework for C++)
-1. ```
-    git clone -b v2.x https://github.com/catchorg/Catch2.git
-    ```
-2. ```
-    cd Catch2
-    ```
-3. ```
-    cmake -Bbuild -H. -DBUILD_TESTING=OFF
-    ```
-4. ```
-    sudo cmake --build build/ --target install
-    ```
+ ```
+ git clone -b v2.x https://github.com/catchorg/Catch2.git
+ cd Catch2
+ cmake -Bbuild -H. -DBUILD_TESTING=OFF
+ sudo cmake --build build/ --target install
+ ```
 
 ### [jwt-cpp](https://github.com/Thalhammer/jwt-cpp)
 (A header only library for creating and validating JSON Web Tokens in C++11)
