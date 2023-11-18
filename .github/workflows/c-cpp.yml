@@ -26,6 +26,7 @@ jobs:
     - name: Build Crow
       run: |
         git clone https://github.com/CrowCpp/Crow.git
+        cd Crow
         mkdir build
         cd build
         sudo apt install libasio-dev
