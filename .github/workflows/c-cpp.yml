@@ -12,12 +12,43 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-    - name: configure
-      run: ./configure
-    - name: make
-      run: make
-    - name: make check
-      run: make check
-    - name: make distcheck
-      run: make distcheck
+    - name: Checkout repository
+    - uses: actions/checkout@v2
+    
+    - name: Set up environment
+      run: actions/setup-cpp@v2
+      with:
+        cpp-version: '17'
+    
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt-get update
+        sudo apt-get install libcurl4-openssl-dev
+        sudo apt-get install libmysqlcppconn-dev
+        git clone https://github.com/Thalhammer/jwt-cpp.git
+    
+    - name: Build Crow
+      run: |
+        git clone https://github.com/CrowCpp/Crow.git
+        mkdir build
+        sudo apt install libasio-dev
+        cmake .. -DCROW_BUILD_EXAMPLES=OFF -DCROW_BUILD_TESTS=OFF
+        make install
+        cd ..
+    
+    - name: Build Catch2
+      run: |
+        git clone -b v2.x https://github.com/catchorg/Catch2.git
+        cd Catch2
+        cmake -Bbuild -H. -DBUILD_TESTING=OFF
+        sudo cmake --build build/ --target install
+        cd ..
+
+    - name: Build Project
+      run: |
+          make clean
+          make all
+
+    - name: Run Tests
+      run: ./test
