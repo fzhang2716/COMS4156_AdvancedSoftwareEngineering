@@ -27,6 +27,7 @@ jobs:
       run: |
         git clone https://github.com/CrowCpp/Crow.git
         mkdir build
+        cd build
         sudo apt install libasio-dev
         cmake .. -DCROW_BUILD_EXAMPLES=OFF -DCROW_BUILD_TESTS=OFF
         make install
