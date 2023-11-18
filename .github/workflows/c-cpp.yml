@@ -31,7 +31,7 @@ jobs:
         cd build
         sudo apt install libasio-dev
         cmake .. -DCROW_BUILD_EXAMPLES=OFF -DCROW_BUILD_TESTS=OFF
-        make install
+        sudo make install
         cd ..
     
     - name: Build Catch2
