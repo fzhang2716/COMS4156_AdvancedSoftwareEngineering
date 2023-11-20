@@ -30,9 +30,8 @@ const std::string& companyName, int companyId) {
 
 std::string Query::addMemberQuery(const std::string& companyId,
 const std::string& firstName, const std::string& lastName,
-const std::string& email, const std::string& phoneNumber,
-const std::string& memberStatus) {
+const std::string& email, const std::string& phoneNumber) {
     return "Insert into service.member_table (company_id, first_name, last_name, email, phone_number, member_status) Values (" + companyId  + ", '"
     + firstName + "', '" + lastName + "', '" + email + "', '" +
-    phoneNumber + "', '"+ memberStatus + "');";
+    phoneNumber + "');";
 }

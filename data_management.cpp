@@ -294,11 +294,10 @@ void DataManagementService::addMember(const crow::request &req,
             std::string lastName = bodyInfo["last_name"].s();
             std::string email = bodyInfo["email"].s();
             std::string phoneNumber = bodyInfo["phone_number"].s();
-            std::string memberStatus = bodyInfo["member_status"].s();
 
             try {
                 std::string query = queryGenerator.addMemberQuery(std::to_string(companyId),
-                    firstName, lastName, email, phoneNumber, memberStatus);
+                    firstName, lastName, email, phoneNumber);
                 sql::Statement *stmt = conn->createStatement();
                 stmt->execute(query);
                 res.code = 200;  // OK
