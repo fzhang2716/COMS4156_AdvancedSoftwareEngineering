@@ -322,6 +322,48 @@ void DataManagementService::addMember(const crow::request &req,
     DBDisConnect(conn);
 }
 
+void DataManagementService::removeMember(const crow::request &req,
+    crow::response &res, int companyId, std::string removeEmail) {
+    sql::Connection *conn = DBConnect();
+
+    if (companyId != -1) {
+        sql::Statement *searchStmt = conn->createStatement();
+        std::string query = queryGenerator.searchMemeberByCompanyIdAndEmailQuery(companyId, removeEmail);
+        try {
+            sql::ResultSet *queryResult = searchStmt->executeQuery(query);
+            if (queryResult->rowsCount() > 0) {
+                sql::Statement *DeleteStmt = conn->createStatement();
+                std::string query = queryGenerator.deleteMemeberByCompanyIdAndEmailQuery(companyId, removeEmail);
+                DeleteStmt->executeQuery(query);
+                res.code = 204;
+                res.write("Delete success");
+            } else {
+                res.code = 404;
+                res.write("No matching Memeber found");
+            }
+            res.end();
+        }
+        catch (sql::SQLException &e) {
+            // Catch any SQL errors
+            if (e.getErrorCode() == 0) {
+                res.code = 204;  // 204 is standard code for success delete
+                res.write("Delete Memeber success");
+            } else {
+                res.code = 500;
+                res.write("Delete Memeber Error: " + std::string(e.what()) + "\n");
+            }
+            res.end();
+        }
+        catch (std::exception &e) {
+            // Catch invalid request errors
+            res.code = 400;  // Bad Request
+            res.write("Invalid request \n");
+            res.end();
+        }
+    }
+    DBDisConnect(conn);
+}
+
 void DataManagementService::addSubscription(const crow::request &req,
     crow::response &res, int companyId) {
     sql::Connection *conn = DBConnect();

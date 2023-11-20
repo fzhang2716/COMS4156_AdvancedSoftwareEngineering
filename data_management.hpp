@@ -88,7 +88,16 @@ class DataManagementService {
     void addMember(const crow::request& req, crow::response& res, int companyId);
     
      /**
-     * Add a new subscription
+     * Add a new memeber
+     * 
+     * @param req the API request from client
+     * @param res the response to be sent
+     * 
+    */
+    void removeMember(const crow::request& req, crow::response& res, int companyId, std::string deleteEmail);
+    
+     /**
+     * delete a existed memeber
      * 
      * @param req the API request from client
      * @param res the response to be sent

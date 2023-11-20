@@ -86,15 +86,20 @@ int main() {
         dataservice.addMember(req, res, companyId);
     });
 
-    // Post Method: collect member information and add to database
-    CROW_ROUTE(app, "/member/addMember")
+    // Delete Method: collect member information and add to database
+    CROW_ROUTE(app, "/member/removeMember/<string>")
     .CROW_MIDDLEWARES(app, JwtMiddleware)
-    .methods(crow::HTTPMethod::POST)
-    ([&](const crow::request &req, crow::response &res){
-        auto& ctx = app.get_context<JwtMiddleware>(req);
-        int companyId = ctx.companyId;
-        dataservice.addMember(req, res, companyId);
-    });
+    .methods("DELETE"_method)(
+        [&](const crow::request &req, crow::response &res, std::string deleteEmail) {
+
+            auto& ctx = app.get_context<JwtMiddleware>(req);
+            int companyId = ctx.companyId;
+            dataservice.removeMember(req, res, companyId, deleteEmail);
+            res.code = 204; // Set the HTTP status code to 204 (No Content)
+
+        }
+    );
+
     // Post Method: collect subscription information and add to database
     CROW_ROUTE(app, "/subscription/addSubscription")
     .CROW_MIDDLEWARES(app, JwtMiddleware)
