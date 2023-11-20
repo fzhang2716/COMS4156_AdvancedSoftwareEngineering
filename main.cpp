@@ -56,7 +56,7 @@ int main() {
     });
 
     // Post Method: collect company information and add to database
-    CROW_ROUTE(app, "/addCompany")
+    CROW_ROUTE(app, "/company/addCompany")
     .methods(crow::HTTPMethod::POST)
     ([&](const crow::request &req, crow::response &res){
         dataservice.addCompany(req, res);
