@@ -364,11 +364,55 @@ void DataManagementService::removeMember(const crow::request &req,
     DBDisConnect(conn);
 }
 
+void DataManagementService::changeMemberInfo(const crow::request &req,
+    crow::response &res) {
+    sql::Connection *conn = DBConnect();
+    try {
+        auto bodyInfo = crow::json::load(req.body);
+        int companyId = bodyInfo["company_id"].i();
+        std::string email = bodyInfo["email"].s();
+        // email and company id is the primary key, might not needed if there is a different way to identify memeber
+        std::string firstName = bodyInfo["first_name"].s();
+        std::string lastName = bodyInfo["last_name"].s();
+        std::string phoneNumber = bodyInfo["phone_number"].s();
+
+        sql::Statement *stmt = conn->createStatement();
+        std::string query = queryGenerator.searchMemeberByCompanyIdAndEmailQuery(companyId, email);
+        sql::ResultSet *queryResult = stmt->executeQuery(query);
+        if (queryResult->rowsCount() > 0) {
+            std::string query = queryGenerator.updateMemberInfoQuery(std::to_string(companyId),
+            firstName, lastName, email, phoneNumber);
+            stmt->executeQuery(query);
+        } else {
+            res.code = 404;  // OK
+            res.write("No Query Found To Update");
+            res.end();
+        }
+    }
+    catch(const sql::SQLException &e) {
+        if (e.getErrorCode() == 0) {
+                res.code = 200;  // OK
+                res.write("Update success");
+        } else {
+            res.code = 500;
+            res.write("Change Member Info Error: " + std::string(e.what()) + "\n");
+        }
+        res.end();
+    }
+    catch (const std::exception &e) {
+        // Catch invalid request errors
+        res.code = 400;  // Bad Request
+        res.write("Invalid request \n");
+        res.end();
+    }
+    DBDisConnect(conn);
+}
+
 void DataManagementService::addSubscription(const crow::request &req,
     crow::response &res, int companyId) {
     sql::Connection *conn = DBConnect();
 
-    if(companyId != -1){
+    if (companyId != -1) {
         try {
             auto bodyInfo = crow::json::load(req.body);
             std::string memberId = bodyInfo["member_id"].s();

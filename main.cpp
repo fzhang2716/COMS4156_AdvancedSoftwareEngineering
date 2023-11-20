@@ -91,14 +91,17 @@ int main() {
     .CROW_MIDDLEWARES(app, JwtMiddleware)
     .methods("DELETE"_method)(
         [&](const crow::request &req, crow::response &res, std::string deleteEmail) {
-
             auto& ctx = app.get_context<JwtMiddleware>(req);
             int companyId = ctx.companyId;
             dataservice.removeMember(req, res, companyId, deleteEmail);
-            res.code = 204; // Set the HTTP status code to 204 (No Content)
+        });
 
-        }
-    );
+    // Put Method: update member infomation
+    CROW_ROUTE(app, "/member/changeMemberInfo")
+    .methods(crow::HTTPMethod::PUT)(
+        [&](const crow::request &req, crow::response &res) {
+            dataservice.changeMemberInfo(req, res);
+        });
 
     // Post Method: collect subscription information and add to database
     CROW_ROUTE(app, "/subscription/addSubscription")
