@@ -55,11 +55,18 @@ int main() {
         dataservice.getCompanyInfo(req, res, companyId);
     });
 
-    // Post Method: collect company information and add to database
+    // Update Method: collect company information and add to database
     CROW_ROUTE(app, "/company/addCompany")
     .methods(crow::HTTPMethod::POST)
     ([&](const crow::request &req, crow::response &res){
         dataservice.addCompany(req, res);
+    });
+
+    // PUT Method: update company infomation by ID
+    CROW_ROUTE(app, "/company/changeCompany")
+    .methods(crow::HTTPMethod::PUT)
+    ([&](const crow::request &req, crow::response &res){
+        dataservice.changeCompany(req, res);
     });
 
     //Post Method: request a new access token

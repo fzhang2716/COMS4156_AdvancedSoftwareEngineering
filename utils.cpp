@@ -22,6 +22,12 @@ const std::string& companyName) {
     + "', '" + companyName + "');";
 }
 
+std::string Query::updateCompanyInfoQuery(const std::string& email,
+const std::string& companyName, int companyId) {
+    return "UPDATE service.company_table SET email ='" + email
+    + "'," + "company_name = '"+ companyName + "' WHERE company_id = " + std::to_string(companyId) + ";";
+}
+
 std::string Query::addMemberQuery(const std::string& companyId,
 const std::string& firstName, const std::string& lastName,
 const std::string& email, const std::string& phoneNumber,
