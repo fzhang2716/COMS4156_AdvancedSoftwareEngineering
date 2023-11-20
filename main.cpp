@@ -77,7 +77,7 @@ int main() {
     });
 
     // Post Method: collect member information and add to database
-    CROW_ROUTE(app, "/addMember")
+    CROW_ROUTE(app, "/member/addMember")
     .CROW_MIDDLEWARES(app, JwtMiddleware)
     .methods(crow::HTTPMethod::POST)
     ([&](const crow::request &req, crow::response &res){
