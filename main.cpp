@@ -86,8 +86,17 @@ int main() {
         dataservice.addMember(req, res, companyId);
     });
 
+    // Post Method: collect member information and add to database
+    CROW_ROUTE(app, "/member/addMember")
+    .CROW_MIDDLEWARES(app, JwtMiddleware)
+    .methods(crow::HTTPMethod::POST)
+    ([&](const crow::request &req, crow::response &res){
+        auto& ctx = app.get_context<JwtMiddleware>(req);
+        int companyId = ctx.companyId;
+        dataservice.addMember(req, res, companyId);
+    });
     // Post Method: collect subscription information and add to database
-    CROW_ROUTE(app, "/addSubscription")
+    CROW_ROUTE(app, "/subscription/addSubscription")
     .CROW_MIDDLEWARES(app, JwtMiddleware)
     .methods(crow::HTTPMethod::POST)
     ([&](const crow::request &req, crow::response &res){
