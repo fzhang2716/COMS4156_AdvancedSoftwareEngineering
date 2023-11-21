@@ -415,16 +415,17 @@ void DataManagementService::addSubscription(const crow::request &req,
     if (companyId != -1) {
         try {
             auto bodyInfo = crow::json::load(req.body);
-            std::string memberId = bodyInfo["member_id"].s();
+            std::string memberEmail = bodyInfo["member_email"].s();
             std::string subscriptionType = bodyInfo["subscription_type"].s();
             std::string subscriptionStatus = bodyInfo["subscription_status"].s();
             std::string nextDueDate = bodyInfo["next_due_date"].s();
             std::string startDate = bodyInfo["start_date"].s();
             std::string billingInfo = bodyInfo["billing_info"].s();
 
+
             try {
                 std::string queryString =
-                    "Insert into service.subscription_table (member_id, company_id, subscription_type, subscription_status, next_due_date, start_date, billing_info) Values ('" + memberId + "', '" + std::to_string(companyId) + "', '" +
+                    "Insert into service.subscription_table (member_email, company_id, subscription_type, subscription_status, next_due_date, start_date, billing_info) Values ('" + memberEmail + "', '" + std::to_string(companyId) + "', '" +
                     subscriptionType + "', '" + subscriptionStatus + "', '" +
                     nextDueDate + "', '" + startDate + "', '" + billingInfo + "');";
                 sql::Statement *stmt = conn->createStatement();
