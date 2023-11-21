@@ -113,6 +113,14 @@ class DataManagementService {
      * 
     */
     void addSubscription(const crow::request& req, crow::response& res, int companyId);
+    /**
+     * change infomation of an existing memeber
+     * 
+     * @param req the API request from client
+     * @param res the response to be sent
+     * 
+    */
+    void updateSubscription(const crow::request& req, crow::response& res, int companyId);
 };
 
 /**

@@ -113,5 +113,16 @@ int main() {
         dataservice.addSubscription(req, res, companyId);
     });
 
+    // Put Method: update the status of a given subscription
+    CROW_ROUTE(app, "/subscription/updateSubscription")
+    .CROW_MIDDLEWARES(app, JwtMiddleware)
+    .methods(crow::HTTPMethod::PUT)
+    ([&](const crow::request &req, crow::response &res){
+        auto& ctx = app.get_context<JwtMiddleware>(req);
+        int companyId = ctx.companyId;
+        dataservice.updateSubscription(req, res, companyId);
+    });
+
+
     app.port(3000).multithreaded().run();
 }

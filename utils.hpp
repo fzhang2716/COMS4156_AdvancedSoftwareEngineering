@@ -18,6 +18,14 @@ public:
     const std::string& email, const std::string& phoneNumber);
     std::string updateMemberInfoQuery(const std::string& companyId, const std::string& firstName,
     const std::string& lastName, const std::string& email, const std::string& phoneNumber);
+    std::string searchSubscriptioByCompanyIdAndEmailAndSubscriptionNameQuery(int companyId,
+    const std::string& email, const std::string& subscriptionName);
+    std::string updateSubscriptionAction(int companyId, const std::string& email,
+    const std::string& subscriptionName, const std::string& subscriptionStatus,
+    const std::string& currentTime, const std::string& newAction);
+
 };
+
+std::string getCurrentDateTime();
 
 #endif  //  UTILS_HPP

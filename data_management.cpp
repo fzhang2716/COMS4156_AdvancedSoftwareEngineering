@@ -453,6 +453,59 @@ void DataManagementService::addSubscription(const crow::request &req,
     DBDisConnect(conn);
 }
 
+
+void DataManagementService::updateSubscription(const crow::request &req,
+    crow::response &res, int companyId) {
+    sql::Connection *conn = DBConnect();
+    try {
+        auto bodyInfo = crow::json::load(req.body);
+        std::string email = bodyInfo["email"].s();
+        std::string subscriptionName = bodyInfo["subscription_name"].s();
+        std::string newAction = bodyInfo["new_action"].s();
+
+        sql::Statement *stmt = conn->createStatement();
+        std::string query = queryGenerator.searchSubscriptioByCompanyIdAndEmailAndSubscriptionNameQuery
+        (companyId, email, subscriptionName);
+        sql::ResultSet *queryResult = stmt->executeQuery(query);
+        if (queryResult->rowsCount() > 0) {
+            std::string subscriptionStatus = "";
+
+            while (queryResult->next()) {
+                subscriptionStatus += queryResult->getString("subscription_status");
+            }
+            std::string currentTime = "" + getCurrentDateTime();
+            std::string query = queryGenerator.
+            updateSubscriptionAction(companyId, email, subscriptionName, subscriptionStatus, currentTime, newAction);
+            stmt->execute(query);
+            res.code = 200;
+            res.write("Update Success");
+
+        } else {
+            res.code = 404;
+            res.write("No Query Found To Update");
+        }
+        res.end();
+    }
+    catch(const sql::SQLException &e) {
+        if (e.getErrorCode() == 0) {
+                res.code = 200;  // OK
+                res.write("Update success");
+        } else {
+            res.code = 500;
+            res.write("Change Member Info Error: " + std::string(e.what()) + "\n");
+        }
+        res.end();
+    }
+    catch (const std::exception &e) {
+        // Catch invalid request errors
+        res.code = 400;  // Bad Request
+        res.write("Invalid request \n");
+        res.end();
+    }
+    DBDisConnect(conn);
+}
+
+
 sql::Connection *DBConnect() {
     // Database connection
     sql::mysql::MySQL_Driver *driver;

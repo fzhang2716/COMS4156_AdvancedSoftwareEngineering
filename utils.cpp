@@ -3,6 +3,9 @@
  *   All rights reserved.
  */
 #include <string>
+#include <chrono>
+#include <ctime>
+#include <iomanip>
 #include "./utils.hpp"
 
 std::string Query::authenticationQuery(const std::string& username,
@@ -54,3 +57,26 @@ const std::string& email, const std::string& phoneNumber) {
     + "'," + "last_name = '"+ lastName + "'," + "phone_number = '"+ phoneNumber+ "' WHERE company_id = "
     + companyId + " AND email = '" + email + "';";
 }
+
+std::string Query::searchSubscriptioByCompanyIdAndEmailAndSubscriptionNameQuery(int companyId, const std::string& email, const std::string& subscriptionName) {
+    return "SELECT * FROM service.subscription_table WHERE company_id = "
+    + std::to_string(companyId) + " AND member_email = '" + email + "' AND subscription_name = '" + subscriptionName + "';";
+}
+
+std::string Query::updateSubscriptionAction(int companyId, const std::string& email,
+    const std::string& subscriptionName, const std::string& subscriptionStatus,
+    const std::string& currentTime, const std::string& newAction){
+    return "UPDATE service.subscription_table SET last_action = '"
+    + subscriptionStatus + "', last_action_date = '" + currentTime + "', subscription_status = '" + newAction + "' WHERE company_id = " + std::to_string(companyId) + " AND member_email = '" + email + + "' AND subscription_name = '" + subscriptionName + "';";
+}
+
+
+
+std::string getCurrentDateTime() {
+    auto current = std::chrono::system_clock::now();
+    std::time_t currentTime = std::chrono::system_clock::to_time_t(current);
+    std::stringstream res;
+    res << std::put_time(std::localtime(&currentTime), "%Y-%m-%d %H:%M:%S");
+    return res.str();
+}
+
