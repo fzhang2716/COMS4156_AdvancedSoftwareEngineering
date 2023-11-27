@@ -65,24 +65,27 @@ class DataManagementService {
      * 
      * @param req the API request from client
      * @param res the response to be sent
+     * @param companyId the companyId decoded from client's JWT
      * 
     */
     void getCompanyInfo(const crow::request& req, crow::response& res, int companyId);
     
     /**
-     * Add a new member
+     * Change a company's information
      * 
      * @param req the API request from client
      * @param res the response to be sent
+     * @param companyId the companyId decoded from client's JWT
      * 
     */
-    void changeCompany(const crow::request& req, crow::response& res);
+    void changeCompany(const crow::request& req, crow::response& res, int companyId);
     
     /**
      * Add a new member
      * 
      * @param req the API request from client
      * @param res the response to be sent
+     * @param companyId the companyId decoded from client's JWT
      * 
     */
     void addMember(const crow::request& req, crow::response& res, int companyId);

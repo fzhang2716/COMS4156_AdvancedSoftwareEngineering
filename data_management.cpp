@@ -144,41 +144,33 @@ void DataManagementService::addCompany(const crow::request &req,
 
 
 void DataManagementService::changeCompany(const crow::request &req,
-    crow::response &res) {
+    crow::response &res, int companyId) {
     sql::Connection *conn = DBConnect();
-    // Try extract companyId, email, hashPwd, and companyName from the request.
-    try {
-        auto bodyInfo = crow::json::load(req.body);
-        int companyId = bodyInfo["company_id"].i();
-        std::string email = bodyInfo["email"].s();
-        std::string companyName = bodyInfo["company_name"].s();
-        sql::Statement *stmt = conn->createStatement();
-        std::string query = queryGenerator.companyInfoQuery(companyId);
-        sql::ResultSet *queryResult = stmt->executeQuery(query);
-        if (queryResult->rowsCount() > 0) {
-            std::string query = queryGenerator.updateCompanyInfoQuery(email, companyName, companyId);
-            stmt->executeQuery(query);
-        } else {
-            res.code = 200;  // OK
-            res.write("No Query Found To Update");
+    
+    if (companyId != -1){
+        try {
+            auto bodyInfo = crow::json::load(req.body);
+            std::string companyName = bodyInfo["company_name"].s(); 
+            std::string query = queryGenerator.updateCompanyInfoQuery(companyName, companyId);
+            sql::Statement *stmt = conn->createStatement();
+
+            std::cout << query << endl;
+            stmt->execute(query);
+            res.code = 200;
+            res.write("Update Company Success \n");
             res.end();
         }
-    }
-    catch(const sql::SQLException &e) {
-        if (e.getErrorCode() == 0) {
-                res.code = 200;  // OK
-                res.write("Update success");
-        } else {
+        catch(const sql::SQLException &e) {
             res.code = 500;
             res.write("Add Company Error: " + std::string(e.what()) + "\n");
+            res.end();
         }
-        res.end();
-    }
-    catch (const std::exception &e) {
-        // Catch invalid request errors
-        res.code = 400;  // Bad Request
-        res.write("Invalid request \n");
-        res.end();
+        catch (const std::exception &e) {
+            // Catch invalid request errors
+            res.code = 400;  // Bad Request
+            res.write("Invalid request \n");
+            res.end();
+        }
     }
     DBDisConnect(conn);
 }

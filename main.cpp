@@ -62,11 +62,14 @@ int main() {
         dataservice.addCompany(req, res);
     });
 
-    // PUT Method: update company infomation by ID
+    // PUT Method: update a company's infomation
     CROW_ROUTE(app, "/company/changeCompany")
-    .methods(crow::HTTPMethod::PUT)
+     .CROW_MIDDLEWARES(app, JwtMiddleware)
+    .methods(crow::HTTPMethod::PATCH)
     ([&](const crow::request &req, crow::response &res){
-        dataservice.changeCompany(req, res);
+        auto& ctx = app.get_context<JwtMiddleware>(req);
+        int companyId = ctx.companyId;
+        dataservice.changeCompany(req, res, companyId);
     });
 
     //Post Method: request a new access token
