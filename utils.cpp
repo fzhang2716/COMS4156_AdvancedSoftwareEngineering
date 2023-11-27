@@ -6,6 +6,7 @@
 #include <chrono>
 #include <ctime>
 #include <iomanip>
+#include <iostream>
 #include "./utils.hpp"
 
 std::string Query::authenticationQuery(const std::string& username,
@@ -51,10 +52,32 @@ const std::string& email, const std::string& phoneNumber) {
 std::string Query::updateMemberInfoQuery(const std::string& companyId,
 const std::string& firstName, const std::string& lastName,
 const std::string& email, const std::string& phoneNumber) {
-    return "UPDATE service.member_table SET first_name ='" + firstName
-    + "'," + "last_name = '"+ lastName + "'," + "phone_number = '"+ phoneNumber+ "' WHERE company_id = "
+    std::string query = "UPDATE service.member_table SET ";
+    if(!firstName.empty()){
+        query += "first_name ='" + firstName + "', ";
+    }
+    if(!lastName.empty()){
+        query += "last_name = '"+ lastName + "', ";
+    }
+    if(!phoneNumber.empty()){
+        query += "phone_number = '"+ phoneNumber+ "', ";
+    }
+
+    query.pop_back();
+    query.pop_back(); // remove trailing comma and space
+    query += " WHERE company_id = "
     + companyId + " AND email = '" + email + "';";
+    return query;
 }
+
+std::string Query::addSubscriptionQuery(const std::string& memberEmail, int companyId, const std::string& subscriptionName, 
+    const std::string& subscriptionType, const std::string& subscriptionStatus, const std::string& nextDueDate, 
+    const std::string& startDate, const std::string& billingInfo){
+       
+    return "Insert into service.subscription_table (member_email, company_id, subscription_name, subscription_type, subscription_status, next_due_date, start_date, billing_info) Values ('" + memberEmail + "', '" + std::to_string(companyId) + "', '" +
+    subscriptionName + "', '" + subscriptionType + "', '" + subscriptionStatus + "', '" +
+    nextDueDate + "', '" + startDate + "', '" + billingInfo + "');";
+    }
 
 std::string Query::searchSubscriptioByCompanyIdAndEmailAndSubscriptionNameQuery(int companyId, const std::string& email, const std::string& subscriptionName) {
     return "SELECT * FROM service.subscription_table WHERE company_id = "

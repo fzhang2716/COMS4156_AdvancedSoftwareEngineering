@@ -55,14 +55,14 @@ int main() {
         dataservice.getCompanyInfo(req, res, companyId);
     });
 
-    // Update Method: collect company information and add to database
+    // Post Method: collect company information and add to database
     CROW_ROUTE(app, "/company/addCompany")
     .methods(crow::HTTPMethod::POST)
     ([&](const crow::request &req, crow::response &res){
         dataservice.addCompany(req, res);
     });
 
-    // PUT Method: update a company's infomation
+    // Patch Method: update a company's infomation
     CROW_ROUTE(app, "/company/changeCompany")
      .CROW_MIDDLEWARES(app, JwtMiddleware)
     .methods(crow::HTTPMethod::PATCH)
@@ -89,7 +89,7 @@ int main() {
         dataservice.addMember(req, res, companyId);
     });
 
-    // Delete Method: collect member information and add to database
+    // Delete Method: delete member
     CROW_ROUTE(app, "/member/removeMember/<string>")
     .CROW_MIDDLEWARES(app, JwtMiddleware)
     .methods("DELETE"_method)(
@@ -99,11 +99,14 @@ int main() {
             dataservice.removeMember(req, res, companyId, deleteEmail);
         });
 
-    // Put Method: update member infomation
+    // Patch Method: update member infomation
     CROW_ROUTE(app, "/member/changeMemberInfo")
-    .methods(crow::HTTPMethod::PUT)(
+    .CROW_MIDDLEWARES(app, JwtMiddleware)
+    .methods(crow::HTTPMethod::PATCH)(
         [&](const crow::request &req, crow::response &res) {
-            dataservice.changeMemberInfo(req, res);
+            auto& ctx = app.get_context<JwtMiddleware>(req);
+            int companyId = ctx.companyId;
+            dataservice.changeMemberInfo(req, res, companyId);
         });
 
     // Post Method: collect subscription information and add to database
@@ -116,10 +119,10 @@ int main() {
         dataservice.addSubscription(req, res, companyId);
     });
 
-    // Put Method: update the status of a given subscription
+    // Patch Method: update the status of a given subscription
     CROW_ROUTE(app, "/subscription/updateSubscription")
     .CROW_MIDDLEWARES(app, JwtMiddleware)
-    .methods(crow::HTTPMethod::PUT)
+    .methods(crow::HTTPMethod::PATCH)
     ([&](const crow::request &req, crow::response &res){
         auto& ctx = app.get_context<JwtMiddleware>(req);
         int companyId = ctx.companyId;

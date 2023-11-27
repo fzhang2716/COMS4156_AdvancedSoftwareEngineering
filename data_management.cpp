@@ -328,22 +328,17 @@ void DataManagementService::removeMember(const crow::request &req,
                 std::string query = queryGenerator.deleteMemeberByCompanyIdAndEmailQuery(companyId, removeEmail);
                 DeleteStmt->executeQuery(query);
                 res.code = 204;
-                res.write("Delete success");
+                res.write("Delete Member Success");
             } else {
-                res.code = 404;
-                res.write("No matching Memeber found");
+                res.code = 400;
+                res.write("No Matching Memeber Found");
             }
             res.end();
         }
         catch (sql::SQLException &e) {
             // Catch any SQL errors
-            if (e.getErrorCode() == 0) {
-                res.code = 204;  // 204 is standard code for success delete
-                res.write("Delete Memeber success");
-            } else {
-                res.code = 500;
-                res.write("Delete Memeber Error: " + std::string(e.what()) + "\n");
-            }
+            res.code = 500;  // Internal Server Error
+            res.write("Delete Memeber Error: " + std::string(e.what()) + "\n");
             res.end();
         }
         catch (std::exception &e) {
@@ -357,45 +352,44 @@ void DataManagementService::removeMember(const crow::request &req,
 }
 
 void DataManagementService::changeMemberInfo(const crow::request &req,
-    crow::response &res) {
+    crow::response &res, int companyId) {
     sql::Connection *conn = DBConnect();
-    try {
-        auto bodyInfo = crow::json::load(req.body);
-        int companyId = bodyInfo["company_id"].i();
-        std::string email = bodyInfo["email"].s();
-        // email and company id is the primary key, might not needed if there is a different way to identify memeber
-        std::string firstName = bodyInfo["first_name"].s();
-        std::string lastName = bodyInfo["last_name"].s();
-        std::string phoneNumber = bodyInfo["phone_number"].s();
+    if (companyId != -1){
+        try {
+            auto bodyInfo = crow::json::load(req.body);
+            std::string email = bodyInfo["email"].s();
+            // email and company id is the primary key, might not needed if there is a different way to identify memeber
+            std::string firstName = bodyInfo["first_name"].s();
+            std::string lastName = bodyInfo["last_name"].s();
+            std::string phoneNumber = bodyInfo["phone_number"].s();
 
-        sql::Statement *stmt = conn->createStatement();
-        std::string query = queryGenerator.searchMemeberByCompanyIdAndEmailQuery(companyId, email);
-        sql::ResultSet *queryResult = stmt->executeQuery(query);
-        if (queryResult->rowsCount() > 0) {
-            std::string query = queryGenerator.updateMemberInfoQuery(std::to_string(companyId),
-            firstName, lastName, email, phoneNumber);
-            stmt->executeQuery(query);
-        } else {
-            res.code = 404;  // OK
-            res.write("No Query Found To Update");
-            res.end();
-        }
-    }
-    catch(const sql::SQLException &e) {
-        if (e.getErrorCode() == 0) {
+            sql::Statement *stmt = conn->createStatement();
+            std::string query = queryGenerator.searchMemeberByCompanyIdAndEmailQuery(companyId, email);
+            sql::ResultSet *queryResult = stmt->executeQuery(query);
+            if (queryResult->rowsCount() > 0) {
+                std::string query = queryGenerator.updateMemberInfoQuery(std::to_string(companyId),
+                firstName, lastName, email, phoneNumber);
+                stmt->execute(query);
                 res.code = 200;  // OK
                 res.write("Update success");
-        } else {
+                res.end();
+            } else {
+                res.code = 400;   // Bad Request
+                res.write("No Query Found To Update");
+                res.end();
+            }
+        }
+        catch(const sql::SQLException &e) {
             res.code = 500;
             res.write("Change Member Info Error: " + std::string(e.what()) + "\n");
+            res.end();
         }
-        res.end();
-    }
-    catch (const std::exception &e) {
-        // Catch invalid request errors
-        res.code = 400;  // Bad Request
-        res.write("Invalid request \n");
-        res.end();
+        catch (const std::exception &e) {
+            // Catch invalid request errors
+            res.code = 400;  // Bad Request
+            res.write("Invalid request \n");
+            res.end();
+        }
     }
     DBDisConnect(conn);
 }
@@ -408,31 +402,44 @@ void DataManagementService::addSubscription(const crow::request &req,
         try {
             auto bodyInfo = crow::json::load(req.body);
             std::string memberEmail = bodyInfo["member_email"].s();
+            std::string subscriptionName = bodyInfo["subscription_name"].s();
             std::string subscriptionType = bodyInfo["subscription_type"].s();
             std::string subscriptionStatus = bodyInfo["subscription_status"].s();
             std::string nextDueDate = bodyInfo["next_due_date"].s();
             std::string startDate = bodyInfo["start_date"].s();
             std::string billingInfo = bodyInfo["billing_info"].s();
 
+            sql::Statement *stmt = conn->createStatement();
+            std::string query = queryGenerator.searchMemeberByCompanyIdAndEmailQuery(companyId, memberEmail);
+            sql::ResultSet *queryResult = stmt->executeQuery(query);
 
-            try {
-                std::string queryString =
-                    "Insert into service.subscription_table (member_email, company_id, subscription_type, subscription_status, next_due_date, start_date, billing_info) Values ('" + memberEmail + "', '" + std::to_string(companyId) + "', '" +
-                    subscriptionType + "', '" + subscriptionStatus + "', '" +
-                    nextDueDate + "', '" + startDate + "', '" + billingInfo + "');";
-                sql::Statement *stmt = conn->createStatement();
-                stmt->execute(queryString);
-                res.code = 200;  // OK
-                res.write("Add Subscription Success \n");
+            if (queryResult->rowsCount() > 0) {
+                try {
+                    std::string queryString = queryGenerator.addSubscriptionQuery(memberEmail, companyId, subscriptionName, subscriptionType, subscriptionStatus, nextDueDate, startDate, billingInfo);
+                    sql::Statement *stmt = conn->createStatement();
+                    stmt->execute(queryString);
+                    res.code = 200;  // OK
+                    res.write("Add Subscription Success \n");
+                    res.end();
+                }
+                catch (sql::SQLException &e) {
+                    // Catch any SQL errors
+                    res.code = 500;  // Internal Server Error
+                    res.write("Add Subscription Error: " +
+                        std::string(e.what()) + "\n");
+                    res.end();
+                }
+            }
+            else{
+                res.code = 400;  // Bad Request
+                res.write("Member Not Exists");
                 res.end();
             }
-            catch (sql::SQLException &e) {
-                // Catch any SQL errors
-                res.code = 500;  // Internal Server Error
-                res.write("Add Subscription Error: " +
-                    std::string(e.what()) + "\n");
-                res.end();
-            }
+        }
+        catch(const sql::SQLException &e) {
+            res.code = 500;
+            res.write("Add Subscription Error: " + std::string(e.what()) + "\n");
+            res.end();
         }
         catch (std::exception &e) {
             // Catch invalid request errors
@@ -449,50 +456,48 @@ void DataManagementService::addSubscription(const crow::request &req,
 void DataManagementService::updateSubscription(const crow::request &req,
     crow::response &res, int companyId) {
     sql::Connection *conn = DBConnect();
-    try {
-        auto bodyInfo = crow::json::load(req.body);
-        std::string email = bodyInfo["email"].s();
-        std::string subscriptionName = bodyInfo["subscription_name"].s();
-        std::string newAction = bodyInfo["new_action"].s();
 
-        sql::Statement *stmt = conn->createStatement();
-        std::string query = queryGenerator.searchSubscriptioByCompanyIdAndEmailAndSubscriptionNameQuery
-        (companyId, email, subscriptionName);
-        sql::ResultSet *queryResult = stmt->executeQuery(query);
-        if (queryResult->rowsCount() > 0) {
-            std::string subscriptionStatus = "";
+    if(companyId != -1) {
+        try {
+            auto bodyInfo = crow::json::load(req.body);
+            std::string email = bodyInfo["email"].s();
+            std::string subscriptionName = bodyInfo["subscription_name"].s();
+            std::string newAction = bodyInfo["new_action"].s();
 
-            while (queryResult->next()) {
-                subscriptionStatus += queryResult->getString("subscription_status");
+            sql::Statement *stmt = conn->createStatement();
+            std::string query = queryGenerator.searchSubscriptioByCompanyIdAndEmailAndSubscriptionNameQuery
+            (companyId, email, subscriptionName);
+            sql::ResultSet *queryResult = stmt->executeQuery(query);
+            if (queryResult->rowsCount() > 0) {
+                std::string subscriptionStatus = "";
+
+                while (queryResult->next()) {
+                    subscriptionStatus += queryResult->getString("subscription_status");
+                }
+                std::string currentTime = "" + getCurrentDateTime();
+                std::string query = queryGenerator.
+                updateSubscriptionAction(companyId, email, subscriptionName, subscriptionStatus, currentTime, newAction);
+                stmt->execute(query);
+                res.code = 200;
+                res.write("Update Success");
+
+            } else {
+                res.code = 400;
+                res.write("No Query Found To Update");
             }
-            std::string currentTime = "" + getCurrentDateTime();
-            std::string query = queryGenerator.
-            updateSubscriptionAction(companyId, email, subscriptionName, subscriptionStatus, currentTime, newAction);
-            stmt->execute(query);
-            res.code = 200;
-            res.write("Update Success");
-
-        } else {
-            res.code = 404;
-            res.write("No Query Found To Update");
+            res.end();
         }
-        res.end();
-    }
-    catch(const sql::SQLException &e) {
-        if (e.getErrorCode() == 0) {
-                res.code = 200;  // OK
-                res.write("Update success");
-        } else {
+        catch(const sql::SQLException &e) {
             res.code = 500;
             res.write("Change Member Info Error: " + std::string(e.what()) + "\n");
+            res.end();
         }
-        res.end();
-    }
-    catch (const std::exception &e) {
-        // Catch invalid request errors
-        res.code = 400;  // Bad Request
-        res.write("Invalid request \n");
-        res.end();
+        catch (const std::exception &e) {
+            // Catch invalid request errors
+            res.code = 400;  // Bad Request
+            res.write("Invalid request \n");
+            res.end();
+        }
     }
     DBDisConnect(conn);
 }
