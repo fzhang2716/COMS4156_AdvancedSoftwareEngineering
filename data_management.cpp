@@ -7,9 +7,9 @@
 #include <jwt-cpp/jwt.h>
 #include <exception>
 #include <curl/curl.h>
+#include <json/json.h>
 
 using namespace std;
-
 Query queryGenerator;
 
 std::string DataManagementService::generateJwtToken(int client_id){
@@ -485,6 +485,58 @@ void DataManagementService::updateSubscription(const crow::request &req,
                 res.code = 400;
                 res.write("No Query Found To Update");
             }
+            res.end();
+        }
+        catch(const sql::SQLException &e) {
+            res.code = 500;
+            res.write("Change Member Info Error: " + std::string(e.what()) + "\n");
+            res.end();
+        }
+        catch (const std::exception &e) {
+            // Catch invalid request errors
+            res.code = 400;  // Bad Request
+            res.write("Invalid request \n");
+            res.end();
+        }
+    }
+    DBDisConnect(conn);
+}
+
+void DataManagementService::getExpiringSubscriptionByTime(const crow::request &req,
+    crow::response &res, int companyId) {
+    Json::Value jsonObject;
+    sql::Connection *conn = DBConnect();
+
+    if(companyId != -1) {
+        try {
+            int rangeDays;
+            std::string subscriptionName;
+            int counter = 1;
+            
+            rangeDays = crow::utility::lexical_cast<int>(req.url_params.get("days"));
+            std::string targetTime = "" + timeAddition(rangeDays);
+
+            if (req.url_params.get("subscription_name") == nullptr) {
+                subscriptionName = "";
+            } else {
+                subscriptionName = crow::utility::lexical_cast<string>(req.url_params.get("subscription_name"));
+            }
+
+            sql::Statement *stmt = conn->createStatement();
+            std::string query = queryGenerator.searchFutureExpireSubscriptioByCompanyIdAndEmailAndrangeDaysAndsubscriptionId(companyId, targetTime, subscriptionName);
+            sql::ResultSet *queryResult = stmt->executeQuery(query);
+
+            if (queryResult->rowsCount() > 0) {
+                std::string companyData = "";
+                while (queryResult->next()) {
+                    std::string currEmail = queryResult->getString("member_email");
+                    jsonObject[std::to_string(counter)] = currEmail;
+                    counter += 1;
+                }                
+            }
+            std::string jsonString = jsonObject.toStyledString();
+            res.code = 200;  // OK
+            res.write(jsonString);
             res.end();
         }
         catch(const sql::SQLException &e) {

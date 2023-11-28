@@ -91,6 +91,17 @@ std::string Query::updateSubscriptionAction(int companyId, const std::string& em
     + subscriptionStatus + "', last_action_date = '" + currentTime + "', subscription_status = '" + newAction + "' WHERE company_id = " + std::to_string(companyId) + " AND member_email = '" + email + + "' AND subscription_name = '" + subscriptionName + "';";
 }
 
+std::string Query::searchFutureExpireSubscriptioByCompanyIdAndEmailAndrangeDaysAndsubscriptionId
+(int companyId, const std::string&  targetTime, const std::string&  subscriptionName) {
+    std::string queryStmt = "SELECT member_email FROM service.subscription_table WHERE company_id = "
+    + std::to_string(companyId) + " AND next_due_date <= '" + targetTime + "' ";
+    if (subscriptionName.size() != 0) {
+        queryStmt += "AND subscription_name = '" + subscriptionName + "'";
+    }
+
+    std::cout << queryStmt;
+    return queryStmt + ";";
+}
 
 
 std::string getCurrentDateTime() {
@@ -100,4 +111,15 @@ std::string getCurrentDateTime() {
     res << std::put_time(std::localtime(&currentTime), "%Y-%m-%d %H:%M:%S");
     return res.str();
 }
+
+std::string timeAddition(int numDays) {
+    auto current = std::chrono::system_clock::now();
+    std::chrono::hours hoursToAdd(numDays*24);
+    std::chrono::system_clock::time_point target = current + hoursToAdd;
+    std::time_t targetTime = std::chrono::system_clock::to_time_t(target);
+    std::stringstream res;
+    res << std::put_time(std::localtime(&targetTime), "%Y-%m-%d %H:%M:%S");
+    return res.str();
+}
+
 
