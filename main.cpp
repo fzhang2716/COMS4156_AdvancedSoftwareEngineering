@@ -56,10 +56,20 @@ int main() {
     });
 
     // Post Method: collect company information and add to database
-    CROW_ROUTE(app, "/addCompany")
+    CROW_ROUTE(app, "/company/addCompany")
     .methods(crow::HTTPMethod::POST)
     ([&](const crow::request &req, crow::response &res){
         dataservice.addCompany(req, res);
+    });
+
+    // Patch Method: update a company's infomation
+    CROW_ROUTE(app, "/company/changeCompany")
+     .CROW_MIDDLEWARES(app, JwtMiddleware)
+    .methods(crow::HTTPMethod::PATCH)
+    ([&](const crow::request &req, crow::response &res){
+        auto& ctx = app.get_context<JwtMiddleware>(req);
+        int companyId = ctx.companyId;
+        dataservice.changeCompany(req, res, companyId);
     });
 
     //Post Method: request a new access token
@@ -70,7 +80,7 @@ int main() {
     });
 
     // Post Method: collect member information and add to database
-    CROW_ROUTE(app, "/addMember")
+    CROW_ROUTE(app, "/member/addMember")
     .CROW_MIDDLEWARES(app, JwtMiddleware)
     .methods(crow::HTTPMethod::POST)
     ([&](const crow::request &req, crow::response &res){
@@ -79,8 +89,28 @@ int main() {
         dataservice.addMember(req, res, companyId);
     });
 
+    // Delete Method: delete member
+    CROW_ROUTE(app, "/member/removeMember/<string>")
+    .CROW_MIDDLEWARES(app, JwtMiddleware)
+    .methods("DELETE"_method)(
+        [&](const crow::request &req, crow::response &res, std::string deleteEmail) {
+            auto& ctx = app.get_context<JwtMiddleware>(req);
+            int companyId = ctx.companyId;
+            dataservice.removeMember(req, res, companyId, deleteEmail);
+        });
+
+    // Patch Method: update member infomation
+    CROW_ROUTE(app, "/member/changeMemberInfo")
+    .CROW_MIDDLEWARES(app, JwtMiddleware)
+    .methods(crow::HTTPMethod::PATCH)(
+        [&](const crow::request &req, crow::response &res) {
+            auto& ctx = app.get_context<JwtMiddleware>(req);
+            int companyId = ctx.companyId;
+            dataservice.changeMemberInfo(req, res, companyId);
+        });
+
     // Post Method: collect subscription information and add to database
-    CROW_ROUTE(app, "/addSubscription")
+    CROW_ROUTE(app, "/subscription/addSubscription")
     .CROW_MIDDLEWARES(app, JwtMiddleware)
     .methods(crow::HTTPMethod::POST)
     ([&](const crow::request &req, crow::response &res){
@@ -88,6 +118,17 @@ int main() {
         int companyId = ctx.companyId;
         dataservice.addSubscription(req, res, companyId);
     });
+
+    // Patch Method: update the status of a given subscription
+    CROW_ROUTE(app, "/subscription/updateSubscription")
+    .CROW_MIDDLEWARES(app, JwtMiddleware)
+    .methods(crow::HTTPMethod::PATCH)
+    ([&](const crow::request &req, crow::response &res){
+        auto& ctx = app.get_context<JwtMiddleware>(req);
+        int companyId = ctx.companyId;
+        dataservice.updateSubscription(req, res, companyId);
+    });
+
 
     app.port(3000).multithreaded().run();
 }

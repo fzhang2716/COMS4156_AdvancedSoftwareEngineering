@@ -65,27 +65,70 @@ class DataManagementService {
      * 
      * @param req the API request from client
      * @param res the response to be sent
+     * @param companyId the companyId decoded from client's JWT
      * 
     */
     void getCompanyInfo(const crow::request& req, crow::response& res, int companyId);
+    
+    /**
+     * Change a company's information
+     * 
+     * @param req the API request from client
+     * @param res the response to be sent
+     * @param companyId the companyId decoded from client's JWT
+     * 
+    */
+    void changeCompany(const crow::request& req, crow::response& res, int companyId);
     
     /**
      * Add a new member
      * 
      * @param req the API request from client
      * @param res the response to be sent
+     * @param companyId the companyId decoded from client's JWT
      * 
     */
     void addMember(const crow::request& req, crow::response& res, int companyId);
     
-     /**
-     * Add a new subscription
+    /**
+     * delete a existed memeber
      * 
      * @param req the API request from client
      * @param res the response to be sent
+     * @param deletedEmail the email of the member account to be deleted
+     * 
+    */
+    void removeMember(const crow::request& req, crow::response& res, int companyId, std::string deleteEmail);
+    
+    /**
+     * change infomation of an existing memeber
+     * 
+     * @param req the API request from client
+     * @param res the response to be sent
+     * @param companyId the companyId decoded from client's JWT
+     * 
+    */
+    void changeMemberInfo(const crow::request& req, crow::response& res, int companyId);
+    
+     /**
+     * Add a new subscription for its member
+     * 
+     * @param req the API request from client
+     * @param res the response to be sent
+     * @param companyId the companyId decoded from client's JWT
      * 
     */
     void addSubscription(const crow::request& req, crow::response& res, int companyId);
+    
+    /**
+     * change infomation of an existing subscription
+     * 
+     * @param req the API request from client
+     * @param res the response to be sent
+     * @param companyId the companyId decoded from client's JWT
+     * 
+    */
+    void updateSubscription(const crow::request& req, crow::response& res, int companyId);
 };
 
 /**
