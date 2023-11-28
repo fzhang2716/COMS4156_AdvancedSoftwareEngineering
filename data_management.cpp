@@ -381,19 +381,22 @@ void DataManagementService::removeMember(const crow::request &req,
             if (queryResult->rowsCount() > 0) {
                 sql::Statement *DeleteStmt = conn->createStatement();
                 std::string query = queryGenerator.deleteMemeberByCompanyIdAndEmailQuery(companyId, removeEmail);
-                DeleteStmt->executeQuery(query);
+                DeleteStmt->executeUpdate(query);
                 res.code = 204;
                 res.write("Delete Member Success");
+                res.end();
             } else {
                 res.code = 400;
                 res.write("No Matching Memeber Found");
+                res.end();
             }
-            res.end();
         }
         catch (sql::SQLException &e) {
             // Catch any SQL errors
             res.code = 500;  // Internal Server Error
-            res.write("Delete Memeber Error: " + std::string(e.what()) + "\n");
+            res.write("SQL Exception - Error code: " + std::to_string(e.getErrorCode()) + "\n");
+            res.write("SQL State: " + e.getSQLState() + "\n");
+            res.write("What: " + std::string(e.what()) + "\n");
             res.end();
         }
         catch (std::exception &e) {
