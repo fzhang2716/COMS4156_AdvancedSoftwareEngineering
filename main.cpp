@@ -127,29 +127,60 @@ int main() {
         if(!email.empty()){
             session.set("email", email);
             session.set("companyId", std::to_string(companyId));
-            res.write("login passed");
+            res.write("Login Successfully");
         }
         res.end();
     });
 
+    CROW_ROUTE(app, "/member/logout")
+    .methods(crow::HTTPMethod::POST)
+    .CROW_MIDDLEWARES(app, JwtMiddleware)
+    ([&](const crow::request& req, crow::response &res){
+        auto& session = app.get_context<Session>(req);
+
+        session.remove("email");
+        session.remove("companyId");
+        res.write("Logout Successfully");
+        res.code = 200;
+        res.end();
+    });
+
     // Delete Method: delete member
-    CROW_ROUTE(app, "/member/removeMember/<string>")
+    CROW_ROUTE(app, "/admin/member/removeMember/<string>")
     .CROW_MIDDLEWARES(app, JwtMiddleware)
     .methods("DELETE"_method)(
-        [&](const crow::request &req, crow::response &res, std::string deleteEmail) {
+    [&](const crow::request &req, crow::response &res, std::string deleteEmail) {
             auto& ctx = app.get_context<JwtMiddleware>(req);
             int companyId = ctx.companyId;
             dataservice.removeMember(req, res, companyId, deleteEmail);
-        });
+    });
 
     // Patch Method: update member infomation
     CROW_ROUTE(app, "/member/changeMemberInfo")
     .CROW_MIDDLEWARES(app, JwtMiddleware)
     .methods(crow::HTTPMethod::PATCH)(
+    [&](const crow::request &req, crow::response &res) {
+            auto& session = app.get_context<Session>(req);
+            auto& ctx = app.get_context<JwtMiddleware>(req);
+            int companyId = ctx.companyId;
+            std::string email = session.get("email", "NA");
+            if(email == "NA"){
+                res.write("Auhorization Failed. Have not logged in.");
+                res.code = 400;
+                res.end();
+            }else{
+                dataservice.changeMemberInfo(req, res, companyId, email);
+            }
+    });
+    
+    // Patch Method: update member infomation
+    CROW_ROUTE(app, "/admin/member/changeMemberInfo")
+    .CROW_MIDDLEWARES(app, JwtMiddleware)
+    .methods(crow::HTTPMethod::PATCH)(
         [&](const crow::request &req, crow::response &res) {
             auto& ctx = app.get_context<JwtMiddleware>(req);
             int companyId = ctx.companyId;
-            dataservice.changeMemberInfo(req, res, companyId);
+            dataservice.changeMemberInfoAdmin(req, res, companyId);
         });
 
     // Post Method: collect subscription information and add to database
