@@ -6,11 +6,22 @@
 #include "utils.hpp"
 #include <jwt-cpp/jwt.h>
 #include <exception>
+#include <cstdlib>
 #include <curl/curl.h>
 
 using namespace std;
 
 Query queryGenerator;
+
+std::string DataManagementService::generateSessionSecret(){
+    const std::string characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    const int length = 32;
+    std::string sessionSecret;
+    for (int i = 0; i < length; ++i) {
+        sessionSecret += characters[std::rand() % characters.length()];
+    }
+    return sessionSecret;
+}
 
 std::string DataManagementService::generateJwtToken(int client_id){
     // create a token valid for 1 year
@@ -314,6 +325,49 @@ void DataManagementService::addMember(const crow::request &req,
     }
     DBDisConnect(conn);
 }
+
+
+std::string DataManagementService::memberLogin(const crow::request& req, crow::response& res, int companyId){
+    sql::Connection *conn = DBConnect();
+    std::string sessionEmail = "";
+
+    if(companyId != -1){
+        try{
+            auto bodyInfo = crow::json::load(req.body);
+            std::string email = bodyInfo["email"].s();
+            std::string password = bodyInfo["password"].s();
+            
+            try {
+                
+                sql::Statement *stmt = conn->createStatement();
+                std::string query = queryGenerator.searchMemeberForLogin(companyId, email, password);
+                sql::ResultSet *queryResult = stmt->executeQuery(query);
+                if(queryResult->next()){
+                    sessionEmail = email;
+                    res.code = 200;
+                } 
+                delete queryResult;
+                delete stmt;
+            }
+            catch (sql::SQLException &e) {
+                // Catch any SQL errors
+                res.code = 500;  // Internal Server Error
+                res.write("Login Error: " + std::string(e.what()) + "\n");
+                res.end();
+            }
+        }
+        catch (std::exception &e) {
+            // Catch invalid request errors
+            res.code = 400;  // Bad Request
+            res.write("Invalid request \n");
+            res.end();
+        }
+    }
+    DBDisConnect(conn);
+    return sessionEmail;
+}
+
+
 
 void DataManagementService::removeMember(const crow::request &req,
     crow::response &res, int companyId, std::string removeEmail) {

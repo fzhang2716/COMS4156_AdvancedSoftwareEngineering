@@ -25,6 +25,11 @@ class DataManagementService {
  public:
     const std::string secret_key = "4156debugteam";
     const std::string sendGrid_key = "";
+
+    /**
+     * Generate a random session secret for member login
+    */
+    std::string generateSessionSecret();
     
     /**
      * Generate a JWT token for the client
@@ -90,6 +95,12 @@ class DataManagementService {
     */
     void addMember(const crow::request& req, crow::response& res, int companyId);
     
+    /**
+     * Member Login
+    */
+    std::string memberLogin(const crow::request& req, crow::response& res, int companyId);
+
+
     /**
      * delete a existed memeber
      * 

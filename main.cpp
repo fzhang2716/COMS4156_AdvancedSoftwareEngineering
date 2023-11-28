@@ -3,6 +3,7 @@
  *   All rights reserved.
  */
 #include "./Crow/include/crow.h"
+#include "crow/middlewares/session.h"
 #include "./data_management.hpp"
 #include <jwt-cpp/jwt.h>
 
@@ -40,7 +41,30 @@ struct JwtMiddleware : crow::ILocalMiddleware {
 };
 
 int main() {
-    crow::App<JwtMiddleware> app;
+    // Set up session with in memoery store
+    using Session = crow::SessionMiddleware<crow::InMemoryStore>;
+    // Register cookie parser
+    crow::App<JwtMiddleware, crow::CookieParser, Session> app{Session{
+        crow::CookieParser::Cookie(dataservice.generateSessionSecret()).max_age(24*60*60).path("/"), 
+        4,
+        crow::InMemoryStore{}
+    }};
+
+    // For testing session keys
+    CROW_ROUTE(app, "/")
+    ([&](const crow::request& req)
+    {
+        auto& session = app.get_context<Session>(req);
+
+        // get all currently present keys
+        auto keys = session.keys();
+
+        std::string out;
+        for (const auto& key : keys)
+            // .string(key) converts a value of any type to a string
+            out += "<p> " + key + " = " + session.string(key) + "</p>";
+        return out;
+    });
 
     /**
      * Get a company's information
@@ -87,6 +111,25 @@ int main() {
         auto& ctx = app.get_context<JwtMiddleware>(req);
         int companyId = ctx.companyId;
         dataservice.addMember(req, res, companyId);
+    });
+
+    CROW_ROUTE(app, "/member/login")
+    .methods(crow::HTTPMethod::POST)
+    .CROW_MIDDLEWARES(app, JwtMiddleware)
+    ([&](const crow::request& req, crow::response &res){
+        auto& session = app.get_context<Session>(req);
+        auto& ctx = app.get_context<JwtMiddleware>(req);
+        int companyId = ctx.companyId;
+
+        std::string email = dataservice.memberLogin(req, res, companyId);
+        std::cout << "email from login:" << email << std::endl;
+        
+        if(!email.empty()){
+            session.set("email", email);
+            session.set("companyId", std::to_string(companyId));
+            res.write("login passed");
+        }
+        res.end();
     });
 
     // Delete Method: delete member

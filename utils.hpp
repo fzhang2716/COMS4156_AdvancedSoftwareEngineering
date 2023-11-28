@@ -11,6 +11,7 @@ public:
     std::string authenticationQuery(const std::string& username, const std::string& password);
     std::string companyInfoQuery(int companyId);
     std::string searchMemeberByCompanyIdAndEmailQuery(int companyId, const std::string& email);
+    std::string searchMemeberForLogin(int companyId, const std::string& email, const std::string& hash_pwd);
     std::string deleteMemeberByCompanyIdAndEmailQuery(int companyId, const std::string& email);
     std::string addCompanyInfoQuery(const std::string& email, const std::string& companyName);
     std::string updateCompanyInfoQuery(const std::string& companyName, int companyId);

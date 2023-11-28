@@ -25,6 +25,11 @@ std::string Query::searchMemeberByCompanyIdAndEmailQuery(int companyId, const st
     + std::to_string(companyId) + " AND email = '" + email + "';";
 }
 
+std::string Query::searchMemeberForLogin(int companyId, const std::string& email, const std::string& hash_pwd) {
+    return "SELECT * FROM service.member_table WHERE company_id = "
+    + std::to_string(companyId) + " AND email = '" + email + "' AND hash_pwd = '" + hash_pwd + "';";
+}
+
 std::string Query::deleteMemeberByCompanyIdAndEmailQuery(int companyId, const std::string& email) {
     return "DELETE FROM service.member_table WHERE company_id = "
     + std::to_string(companyId) + " AND email = '" + email + "';";
