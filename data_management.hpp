@@ -151,6 +151,26 @@ class DataManagementService {
      * 
     */
     void updateSubscription(const crow::request& req, crow::response& res, int companyId);
+
+    /**
+     * return a list of exipiring subscriptions
+     * 
+     * @param req the API request from client
+     * @param res the response to be sent
+     * @param companyId the companyId decoded from client's JWT
+     * 
+    */
+    void getExpiringSubscriptionByTime(const crow::request& req, crow::response& res, int companyId);
+
+    /**
+     * send reminder to a list of email
+     * 
+     * @param req the API request from client
+     * @param res the response to be sent
+     * @param companyId the companyId decoded from client's JWT
+     * 
+    */
+    void sendReminder(const crow::request& req, crow::response& res, int companyId);
 };
 
 /**
