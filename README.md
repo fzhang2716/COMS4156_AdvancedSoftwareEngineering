@@ -45,7 +45,11 @@ git clone https://github.com/Thalhammer/jwt-cpp.git
 ```
 sudo apt-get update
 sudo apt-get install libcurl4-openssl-dev
+```
 
+### [JSONCPP](https://github.com/open-source-parsers/jsoncpp)
+```
+sudo apt-get install libjsoncpp-dev
 ```
 
 ## Compile and Run
