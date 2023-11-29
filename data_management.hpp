@@ -25,6 +25,11 @@ class DataManagementService {
  public:
     const std::string secret_key = "4156debugteam";
     const std::string sendGrid_key = "";
+
+    /**
+     * Generate a random session secret for member login
+    */
+    std::string generateSessionSecret();
     
     /**
      * Generate a JWT token for the client
@@ -91,6 +96,12 @@ class DataManagementService {
     void addMember(const crow::request& req, crow::response& res, int companyId);
     
     /**
+     * Member Login
+    */
+    std::string memberLogin(const crow::request& req, crow::response& res, int companyId);
+
+
+    /**
      * delete a existed memeber
      * 
      * @param req the API request from client
@@ -101,14 +112,25 @@ class DataManagementService {
     void removeMember(const crow::request& req, crow::response& res, int companyId, std::string deleteEmail);
     
     /**
-     * change infomation of an existing memeber
+     * change infomation of an existing memeber as admin
      * 
      * @param req the API request from client
      * @param res the response to be sent
      * @param companyId the companyId decoded from client's JWT
      * 
     */
-    void changeMemberInfo(const crow::request& req, crow::response& res, int companyId);
+    void changeMemberInfoAdmin(const crow::request& req, crow::response& res, int companyId);
+
+    /**
+     * change infomation of a member by himself
+     * 
+     * @param req the API request from client
+     * @param res the response to be sent
+     * @param companyId the companyId decoded from client's JWT
+     * @param email the email get from the session after login
+     * 
+    */
+    void changeMemberInfo(const crow::request& req, crow::response& res, int companyId, std::string email);
     
      /**
      * Add a new subscription for its member

@@ -47,6 +47,7 @@ sudo apt-get update
 sudo apt-get install libcurl4-openssl-dev
 
 ```
+
 ## Compile and Run
 In root directory, run Makefile:
 

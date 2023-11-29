@@ -25,6 +25,11 @@ std::string Query::searchMemeberByCompanyIdAndEmailQuery(int companyId, const st
     + std::to_string(companyId) + " AND email = '" + email + "';";
 }
 
+std::string Query::searchMemeberForLogin(int companyId, const std::string& email, const std::string& hash_pwd) {
+    return "SELECT * FROM service.member_table WHERE company_id = "
+    + std::to_string(companyId) + " AND email = '" + email + "' AND hash_pwd = '" + hash_pwd + "';";
+}
+
 std::string Query::deleteMemeberByCompanyIdAndEmailQuery(int companyId, const std::string& email) {
     return "DELETE FROM service.member_table WHERE company_id = "
     + std::to_string(companyId) + " AND email = '" + email + "';";
@@ -42,10 +47,10 @@ std::string Query::updateCompanyInfoQuery(const std::string& companyName, int co
 
 std::string Query::addMemberQuery(const std::string& companyId,
 const std::string& firstName, const std::string& lastName,
-const std::string& email, const std::string& phoneNumber) {
-    return "Insert into service.member_table (company_id, first_name, last_name, email, phone_number) Values ("
+const std::string& email, const std::string& hash_password, const std::string& phoneNumber) {
+    return "Insert into service.member_table (company_id, first_name, last_name, email, hash_pwd, phone_number) Values ("
     + companyId  + ", '"
-    + firstName + "', '" + lastName + "', '" + email + "', '" +
+    + firstName + "', '" + lastName + "', '" + email + "', '" + hash_password + "', '" +
     phoneNumber + "');";
 }
 

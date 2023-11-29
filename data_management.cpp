@@ -6,11 +6,22 @@
 #include "utils.hpp"
 #include <jwt-cpp/jwt.h>
 #include <exception>
+#include <cstdlib>
 #include <curl/curl.h>
 
 using namespace std;
 
 Query queryGenerator;
+
+std::string DataManagementService::generateSessionSecret(){
+    const std::string characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    const int length = 32;
+    std::string sessionSecret;
+    for (int i = 0; i < length; ++i) {
+        sessionSecret += characters[std::rand() % characters.length()];
+    }
+    return sessionSecret;
+}
 
 std::string DataManagementService::generateJwtToken(int client_id){
     // create a token valid for 1 year
@@ -285,11 +296,12 @@ void DataManagementService::addMember(const crow::request &req,
             std::string firstName = bodyInfo["first_name"].s();
             std::string lastName = bodyInfo["last_name"].s();
             std::string email = bodyInfo["email"].s();
+            std::string password = bodyInfo["password"].s();
             std::string phoneNumber = bodyInfo["phone_number"].s();
 
             try {
                 std::string query = queryGenerator.addMemberQuery(std::to_string(companyId),
-                    firstName, lastName, email, phoneNumber);
+                    firstName, lastName, email, password, phoneNumber);
                 sql::Statement *stmt = conn->createStatement();
                 stmt->execute(query);
                 res.code = 200;  // OK
@@ -314,6 +326,49 @@ void DataManagementService::addMember(const crow::request &req,
     DBDisConnect(conn);
 }
 
+
+std::string DataManagementService::memberLogin(const crow::request& req, crow::response& res, int companyId){
+    sql::Connection *conn = DBConnect();
+    std::string sessionEmail = "";
+
+    if(companyId != -1){
+        try{
+            auto bodyInfo = crow::json::load(req.body);
+            std::string email = bodyInfo["email"].s();
+            std::string password = bodyInfo["password"].s();
+            
+            try {
+                
+                sql::Statement *stmt = conn->createStatement();
+                std::string query = queryGenerator.searchMemeberForLogin(companyId, email, password);
+                sql::ResultSet *queryResult = stmt->executeQuery(query);
+                if(queryResult->next()){
+                    sessionEmail = email;
+                    res.code = 200;
+                } 
+                delete queryResult;
+                delete stmt;
+            }
+            catch (sql::SQLException &e) {
+                // Catch any SQL errors
+                res.code = 500;  // Internal Server Error
+                res.write("Login Error: " + std::string(e.what()) + "\n");
+                res.end();
+            }
+        }
+        catch (std::exception &e) {
+            // Catch invalid request errors
+            res.code = 400;  // Bad Request
+            res.write("Invalid request \n");
+            res.end();
+        }
+    }
+    DBDisConnect(conn);
+    return sessionEmail;
+}
+
+
+
 void DataManagementService::removeMember(const crow::request &req,
     crow::response &res, int companyId, std::string removeEmail) {
     sql::Connection *conn = DBConnect();
@@ -326,19 +381,22 @@ void DataManagementService::removeMember(const crow::request &req,
             if (queryResult->rowsCount() > 0) {
                 sql::Statement *DeleteStmt = conn->createStatement();
                 std::string query = queryGenerator.deleteMemeberByCompanyIdAndEmailQuery(companyId, removeEmail);
-                DeleteStmt->executeQuery(query);
+                DeleteStmt->executeUpdate(query);
                 res.code = 204;
                 res.write("Delete Member Success");
+                res.end();
             } else {
                 res.code = 400;
                 res.write("No Matching Memeber Found");
+                res.end();
             }
-            res.end();
         }
         catch (sql::SQLException &e) {
             // Catch any SQL errors
             res.code = 500;  // Internal Server Error
-            res.write("Delete Memeber Error: " + std::string(e.what()) + "\n");
+            res.write("SQL Exception - Error code: " + std::to_string(e.getErrorCode()) + "\n");
+            res.write("SQL State: " + e.getSQLState() + "\n");
+            res.write("What: " + std::string(e.what()) + "\n");
             res.end();
         }
         catch (std::exception &e) {
@@ -351,7 +409,7 @@ void DataManagementService::removeMember(const crow::request &req,
     DBDisConnect(conn);
 }
 
-void DataManagementService::changeMemberInfo(const crow::request &req,
+void DataManagementService::changeMemberInfoAdmin(const crow::request &req,
     crow::response &res, int companyId) {
     sql::Connection *conn = DBConnect();
     if (companyId != -1){
@@ -393,6 +451,46 @@ void DataManagementService::changeMemberInfo(const crow::request &req,
     }
     DBDisConnect(conn);
 }
+
+ void DataManagementService::changeMemberInfo(const crow::request& req, crow::response& res, int companyId, std::string email){
+    sql::Connection *conn = DBConnect();
+    if (companyId != -1){
+        try {
+            auto bodyInfo = crow::json::load(req.body);
+            std::string firstName = bodyInfo["first_name"].s();
+            std::string lastName = bodyInfo["last_name"].s();
+            std::string phoneNumber = bodyInfo["phone_number"].s();
+
+            sql::Statement *stmt = conn->createStatement();
+            std::string query = queryGenerator.searchMemeberByCompanyIdAndEmailQuery(companyId, email);
+            sql::ResultSet *queryResult = stmt->executeQuery(query);
+            if (queryResult->rowsCount() > 0) {
+                std::string query = queryGenerator.updateMemberInfoQuery(std::to_string(companyId),
+                firstName, lastName, email, phoneNumber);
+                stmt->execute(query);
+                res.code = 200;  // OK
+                res.write("Update success");
+                res.end();
+            } else {
+                res.code = 400;   // Bad Request
+                res.write("No Query Found To Update");
+                res.end();
+            }
+        }
+        catch(const sql::SQLException &e) {
+            res.code = 500;
+            res.write("Change Member Info Error: " + std::string(e.what()) + "\n");
+            res.end();
+        }
+        catch (const std::exception &e) {
+            // Catch invalid request errors
+            res.code = 400;  // Bad Request
+            res.write("Invalid request \n");
+            res.end();
+        }
+    }
+    DBDisConnect(conn);
+ }
 
 void DataManagementService::addSubscription(const crow::request &req,
     crow::response &res, int companyId) {
