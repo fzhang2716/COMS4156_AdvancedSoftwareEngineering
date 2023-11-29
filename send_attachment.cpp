@@ -27,7 +27,63 @@ std::string base64_encode(const std::string &input) {
     return result;
 }
 
-void send(const std::string &email, const std::string &attachment) {
+std::string make_payload(const std::string &email, const std::string &encoded, const std::string &message) {
+    if (encoded.size() == 0) {
+        return R"({
+            "personalizations": [
+                {
+                    "to": [
+                        {
+                            "email": ")" + email + R"("
+                        }
+                    ]
+                }
+            ],
+            "from": {
+                "email": "hl3608@columbia.edu"
+            },
+            "subject": "Request Result",
+            "content": [
+                {
+                    "type": "text/plain",
+                    "value": ")" + message + R"("
+                }
+            ]
+        })";
+    }
+    return R"({
+            "personalizations": [
+                {
+                    "to": [
+                        {
+                            "email": ")" + email + R"("
+                        }
+                    ]
+                }
+            ],
+            "from": {
+                "email": "hl3608@columbia.edu"
+            },
+            "subject": "Request Result",
+            "content": [
+                {
+                    "type": "text/plain",
+                    "value": ")" + message + R"("
+                }
+            ],
+            "attachments": [
+                {
+                    "content": ")" + encoded + R"(",
+                    "filename": "figure.pdf",
+                    "type": "application/pdf",
+                    "disposition": "attachment"
+                }
+            ]
+
+        })";
+}
+
+void send(const std::string &email, const std::string &attachment, const std::string &message) {
     CURL *curl = curl_easy_init();
 
     if (curl) {
@@ -43,42 +99,18 @@ void send(const std::string &email, const std::string &attachment) {
         headers = curl_slist_append(headers, "Content-Type: application/json");
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-        std::ifstream pdfFile(attachment, std::ios::binary);
-        std::ostringstream pdfStream;
-        pdfStream << pdfFile.rdbuf();
-        std::string pdfContent = pdfStream.str();
-        std::string encoded = base64_encode(pdfContent);
-
-        std::string jsonPayload = R"({
-            "personalizations": [
-                {
-                    "to": [
-                        {
-                            "email": ")" + email + R"("
-                        }
-                    ]
-                }
-            ],
-            "from": {
-                "email": "hl3608@columbia.edu"
-            },
-            "subject": "Picture",
-            "content": [
-                {
-                    "type": "text/plain",
-                    "value": "This is the picture"
-                }
-            ],
-            "attachments": [
-                {
-                    "content": ")" + encoded + R"(",
-                    "filename": "minimal.pdf",
-                    "type": "application/pdf",
-                    "disposition": "attachment"
-                }
-            ]
-
-        })";
+        std::string encoded;
+        if (attachment.size() > 0) {
+            std::ifstream pdfFile(attachment, std::ios::binary);
+            std::ostringstream pdfStream;
+            pdfStream << pdfFile.rdbuf();
+            std::string pdfContent = pdfStream.str();
+            encoded = base64_encode(pdfContent);
+        }
+        else {
+            encoded = "";
+        }
+        std::string jsonPayload = make_payload(email, encoded, message);
 
 
         curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
