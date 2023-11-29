@@ -98,8 +98,6 @@ std::string Query::searchFutureExpireSubscriptioByCompanyIdAndEmailAndrangeDaysA
     if (subscriptionName.size() != 0) {
         queryStmt += "AND subscription_name = '" + subscriptionName + "'";
     }
-
-    std::cout << queryStmt;
     return queryStmt + ";";
 }
 

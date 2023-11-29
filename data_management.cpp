@@ -511,7 +511,7 @@ void DataManagementService::getExpiringSubscriptionByTime(const crow::request &r
         try {
             int rangeDays;
             std::string subscriptionName;
-            int counter = 1;
+            int counter = 0;
             
             rangeDays = crow::utility::lexical_cast<int>(req.url_params.get("days"));
             std::string targetTime = "" + timeAddition(rangeDays);
@@ -534,6 +534,9 @@ void DataManagementService::getExpiringSubscriptionByTime(const crow::request &r
                     counter += 1;
                 }                
             }
+            jsonObject["number"] = std::to_string(counter);
+            jsonObject["target_time"] = targetTime;
+
             std::string jsonString = jsonObject.toStyledString();
             res.code = 200;  // OK
             res.write(jsonString);
@@ -554,6 +557,79 @@ void DataManagementService::getExpiringSubscriptionByTime(const crow::request &r
     DBDisConnect(conn);
 }
 
+void DataManagementService::sendReminder(const crow::request &req,
+                                         crow::response &res, int companyId) {
+    if (companyId != -1) {
+        try {
+            auto bodyInfo = crow::json::load(req.body);
+            int num = bodyInfo["number"].i();
+            int count = 0;
+            std::cout << num;
+            if (num == 0) {
+                res.code = 400;
+                res.write("No email to send");
+            } else {
+                std::string targetTime = bodyInfo["target_time"].s();
+                std::cout << targetTime;
+                while (count < num) {
+                    std::string email = bodyInfo[std::to_string(count)].s();
+
+                    std::cout << email;
+                    CURL *curl = curl_easy_init();
+                    if(curl) {
+                        const char *url = "https://api.sendgrid.com/v3/mail/send";
+                        struct curl_slist* headers = NULL;
+                        std::string auth = "Authorization: Bearer "+ DataManagementService::sendGrid_key;
+                        headers = curl_slist_append(headers, auth.c_str());
+                        headers = curl_slist_append(headers, "Content-Type: application/json");
+
+                        // Set the JSON payload with email details
+                        std::string jsonPayload = "{\"personalizations\":[{\"to\": [{\"email\":\"" + email +
+                        "\"}]}],\"from\": {\"email\":\"hl3608@columbia.edu\"},\"subject\": \"SubManager New Token\",\"content\": [{\"type\": \"text/plain\", \"value\": \"Your subscription is about to expire before"
+                        + targetTime + " \"}]}";
+
+                        curl_easy_setopt(curl, CURLOPT_URL, url);
+                        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+                        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, jsonPayload.c_str());
+
+                        try {
+                            CURLcode curl_res = curl_easy_perform(curl);
+
+                            // Check the response
+                            if (curl_res != CURLE_OK) {
+                                res.code = 500;  // Internal Server Error
+                                std::string errMsg(curl_easy_strerror(curl_res));
+                                res.write("Failed to send email" +  errMsg + "\n");
+                                res.end();
+                                fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(curl_res));
+                            }
+                            // Clean up
+                            curl_slist_free_all(headers);
+                            curl_easy_cleanup(curl);
+                        } catch (const std::exception &e) {
+                            res.code = 500;  // Internal Server Error
+                            res.write("Failed to send email" + std::string(e.what()) + "\n");
+                            res.end();
+                        }
+                    } else {
+                        res.code = 500;  // Internal Server Error
+                        res.write("Failed to send email with curl error\n");
+                        res.end();
+                    }
+                    count += 1;
+                }
+                res.code = 200;
+                res.write("Send successfully");
+                res.end();
+            }
+        } catch (const std::exception &e) {
+            // Catch invalid request errors
+            res.code = 400;  // Bad Request
+            res.write("Invalid request \n");
+            res.end();
+        }
+    }
+}
 
 sql::Connection *DBConnect() {
     // Database connection

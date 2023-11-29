@@ -129,7 +129,7 @@ int main() {
         dataservice.updateSubscription(req, res, companyId);
     });
 
-    // Get Method: send email to a list of about expiring subscription
+    // Get Method: get a list of email about expiring subscription
     CROW_ROUTE(app, "/company/getExpiringSubscriptionByTime")
     .CROW_MIDDLEWARES(app, JwtMiddleware)
     .methods(crow::HTTPMethod::GET)
@@ -137,6 +137,16 @@ int main() {
         auto& ctx = app.get_context<JwtMiddleware>(req);
         int companyId = ctx.companyId;
         dataservice.getExpiringSubscriptionByTime(req, res, companyId);
+    });
+
+    // Get Method: send email to a list of about expiring subscription
+    CROW_ROUTE(app, "/company/sendReminder")
+    .CROW_MIDDLEWARES(app, JwtMiddleware)
+    .methods(crow::HTTPMethod::GET)
+    ([&](const crow::request &req, crow::response &res){
+        auto& ctx = app.get_context<JwtMiddleware>(req);
+        int companyId = ctx.companyId;
+        dataservice.sendReminder(req, res, companyId);
     });
 
 
