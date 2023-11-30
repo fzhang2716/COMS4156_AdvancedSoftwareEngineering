@@ -8,6 +8,7 @@
 #include <iomanip>
 #include <iostream>
 #include "./utils.hpp"
+#include <jwt-cpp/jwt.h>
 
 std::string Query::authenticationQuery(const std::string& username,
 const std::string& password) {

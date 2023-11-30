@@ -145,6 +145,25 @@ int main() {
         res.end();
     });
 
+    CROW_ROUTE(app, "/member/profile")
+    .methods(crow::HTTPMethod::GET)
+    .CROW_MIDDLEWARES(app, JwtMiddleware)
+    ([&](const crow::request& req, crow::response &res){
+        auto& session = app.get_context<Session>(req);
+        auto& ctx = app.get_context<JwtMiddleware>(req);
+        int companyId = ctx.companyId;
+
+        std::string email = session.get("email", "NA");
+        if(email == "NA"){
+            res.write("Auhorization Failed. Have not logged in.");
+            res.code = 400;
+            res.end();
+        }else{
+            dataservice.getMemberInfo(req, res, companyId, email);
+        }       
+    });
+    
+
     // Delete Method: delete member
     CROW_ROUTE(app, "/admin/member/removeMember/<string>")
     .CROW_MIDDLEWARES(app, JwtMiddleware)
