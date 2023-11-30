@@ -345,7 +345,9 @@ std::string DataManagementService::memberLogin(const crow::request& req, crow::r
                 if(queryResult->next()){
                     sessionEmail = email;
                     res.code = 200;
-                } 
+                }else{
+                    res.code = 401; // Unauthorized
+                }
                 delete queryResult;
                 delete stmt;
             }
@@ -452,7 +454,7 @@ void DataManagementService::changeMemberInfoAdmin(const crow::request &req,
     DBDisConnect(conn);
 }
 
- void DataManagementService::changeMemberInfo(const crow::request& req, crow::response& res, int companyId, std::string email){
+void DataManagementService::changeMemberInfo(const crow::request& req, crow::response& res, int companyId, std::string email){
     sql::Connection *conn = DBConnect();
     if (companyId != -1){
         try {
@@ -490,7 +492,48 @@ void DataManagementService::changeMemberInfoAdmin(const crow::request &req,
         }
     }
     DBDisConnect(conn);
- }
+}
+
+void DataManagementService::getMemberInfo(const crow::request& req, crow::response& res, int companyId, std::string email){
+    sql::Connection *conn = DBConnect();
+    if (companyId != -1){
+        try {
+            sql::Statement *stmt = conn->createStatement();
+            std::string query = queryGenerator.searchMemeberByCompanyIdAndEmailQuery(companyId, email);
+            sql::ResultSet *queryResult = stmt->executeQuery(query);
+            
+            Json::Value jsonResponse;
+            // Tthere is at least one row in the result set
+            if (queryResult->next()) {
+                jsonResponse["email"] = static_cast<std::string>(queryResult->getString("email"));
+                jsonResponse["first_name"] = static_cast<std::string>(queryResult->getString("first_name"));
+                jsonResponse["last_name"] = static_cast<std::string>(queryResult->getString("last_name"));
+                res.code = 200;
+            } else {
+                jsonResponse["error"] = "No member found for the specified company and email";
+                res.code = 204; // No Content
+            }   
+
+            res.add_header("Content-Type", "application/json");
+            res.write(jsonResponse.toStyledString());
+            res.end();
+        }
+        catch(const sql::SQLException &e) {
+            res.code = 500;
+            res.write("Change Member Info Error: " + std::string(e.what()) + "\n");
+            res.end();
+        }
+        catch (const std::exception &e) {
+            // Catch invalid request errors
+            res.code = 400;  // Bad Request
+            res.write("Invalid request \n");
+            res.end();
+        }
+    }
+    DBDisConnect(conn);
+}
+
+
 
 void DataManagementService::addSubscription(const crow::request &req,
     crow::response &res, int companyId) {

@@ -5,7 +5,7 @@
  
 CC = g++
 CFLAGS = -Wall -I /usr/include/cppconn -I jwt-cpp/include -I /usr/include/jsoncpp
-TESTCFLAGS = -std=c++14 -Wall -I"Catch2/single_include" -I /usr/include/jsoncpp
+TESTCFLAGS = -std=c++14 -Wall -I"Catch2/single_include" -I /usr/include/jsoncpp -I jwt-cpp/include
 LDFLAGS = -L /usr/lib -L jwt-cpp/build -L /usr/include/jsoncpp
 CXXFLAGS = std=c++17
 LDLIBS = -lmysqlcppconn -lssl -lcrypto -lcurl -ljsoncpp

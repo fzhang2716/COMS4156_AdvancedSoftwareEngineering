@@ -131,6 +131,17 @@ class DataManagementService {
      * 
     */
     void changeMemberInfo(const crow::request& req, crow::response& res, int companyId, std::string email);
+
+     /**
+     * get infomation of a member
+     * 
+     * @param req the API request from client
+     * @param res the response to be sent
+     * @param companyId the companyId decoded from client's JWT
+     * @param email the email get from the session after login
+     * 
+    */
+    void getMemberInfo(const crow::request& req, crow::response& res, int companyId, std::string email);
     
      /**
      * Add a new subscription for its member
