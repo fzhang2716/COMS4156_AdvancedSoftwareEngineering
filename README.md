@@ -52,6 +52,15 @@ sudo apt-get install libcurl4-openssl-dev
 sudo apt-get install libjsoncpp-dev
 ```
 
+### [matplotlib-cpp](https://github.com/lava/matplotlib-cpp)
+```
+cd vcpkg
+./bootstrap-vcpkg.sh
+./vcpkg integrate install
+vcpkg install matplotlib-cpp
+```
+move "matplotlibcpp.h" to root directory
+
 ## Compile and Run
 In root directory, run Makefile:
 
