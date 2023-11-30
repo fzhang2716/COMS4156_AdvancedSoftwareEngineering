@@ -17,8 +17,8 @@ all: main test
 main: main.o data_management.o utils.o
 	$(CC) $(CFLAGS) -pthread -o main main.o data_management.o utils.o $(LDFLAGS) $(LDLIBS)
 
-test: utils_test.o utils.o
-	$(CC) $(TESTCFLAGS) -o test utils_test.o utils.o
+test: utils_test.o utils.o integration_test.o
+	$(CC) $(TESTCFLAGS) -o test utils_test.o utils.o integration_test.o $(LDFLAGS) $(LDLIBS)
 
 utils_test.o:
 	$(CC) $(TESTCFLAGS) -c utils_test.cpp
@@ -31,6 +31,9 @@ data_management.o: data_management.cpp
 
 utils.o: utils.cpp
 	$(CC) $(CFLAGS) -c utils.cpp
+
+integration_test.o: integration_test.cpp
+	$(CC) $(TESTCFLAGS) -c integration_test.cpp
 
 clean:
 	$(RM) main test main.o data_management.o utils.o utils_test.o
