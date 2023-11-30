@@ -11,43 +11,42 @@
 #include <crow.h>
 #include <thread>
 
-// Function to set up Crow routes for real testing
-void setupRoutes(crow::SimpleApp& app) {
-    // Implement the actual handlers for real routes here
-    // For example:
-    CROW_ROUTE(app, "/company")
-    .CROW_MIDDLEWARES(app, JwtMiddleware)
-    methods(crow::HTTPMethod::GET)
-    ([&] (const crow::request& req, crow::response &res){
-        auto& ctx = app.get_context<JwtMiddleware>(req);
-        int companyId = ctx.companyId;
-        dataservice.getCompanyInfo(req, res, companyId);
-    });
+DataManagementService dataservice;
 
-    // Add other real routes for testing here
-    // ...
+std::string jwtToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzIwMzA2ODgsImlzcyI6IlN1Yk1hbmFnZXIiLCJzdWIiOiIyMCJ9.DZGXi-CvQeQOhwK9HB4FYWZMjZr-J914FT5_UaFC_44";  //JWT token
+httplib::Headers headers = {
+    {"Authorization", "Bearer " + jwtToken}
+};
+
+crow::SimpleApp app;
+
+std::atomic<bool> serverRunning(false);
+std::thread serverThread([]() {
+    app.port(8080).run();
+    serverRunning = false;
+});
+
+void startServer() {
+    serverRunning = true;
+    serverThread.detach();
 }
 
-
-TEST_CASE("Real routes reliability test", "[real-routes]") {
-    crow::SimpleApp app;
-    setupRoutes(app); // Set up real routes
-
-    std::thread serverThread([&app]() { app.port(8080).run(); }); // Start server in a separate thread
-
-    // Perform API calls to real routes using cpp-httplib client
-    httplib::Client client("localhost", 8080);
-
-    // Example GET request to /company route
-    auto response = client.Get("/company");
-    std::string response1;
-    if (response && response->status == 200) {
-        response1 = response->body;
+void stopServer() {
+    if (serverRunning) {
+        serverRunning = false;
     }
+}
 
-    // Add assertions to check the reliability of your real routes
-    // Ensure response1 contains the expected data based on your API implementation
-    REQUIRE(response1 == "Expected real changeMemberInfo response");
+TEST_CASE("/company test", "[routes]" ) {
+    startServer();
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    httplib::Client client("localhost", 3000);
 
-    serverThread.detach(); // Detach the server thread
+    auto response = client.Get("/company", headers);
+    REQUIRE(response->status == 200);
+    std::string response1 = response->body;
+    response1.erase(std::remove(response1.begin(), response1.end(), '\n'), response1.end());
+    std::string targetReturn = "Result: Company ID: 20; Company Name: frank; Company email: hz2716@columbia.edu ";
+    REQUIRE(response1 == targetReturn);
+    stopServer();
 }
