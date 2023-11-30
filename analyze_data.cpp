@@ -8,7 +8,7 @@ float get_mean(const std::vector<float>& data) {
         return 0;
     }
     float mean = 0;
-    for (int i = 0; i < data.size(); ++i) {
+    for (unsigned int i = 0; i < data.size(); ++i) {
         mean = mean + data[i];
     }
     mean = mean / data.size();
@@ -42,7 +42,7 @@ float get_variance(const std::vector<float>& data) {
     }
     float mean = get_mean(data);
     float variance = 0;
-    for (int i = 0; i < data.size(); ++i) {
+    for (unsigned int i = 0; i < data.size(); ++i) {
         variance = variance + pow(data[i]-mean, 2);
     }
     variance = variance / data.size();
