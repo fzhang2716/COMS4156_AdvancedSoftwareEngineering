@@ -7,3 +7,6 @@
 [submodule "jwt-cpp"]
 	path = jwt-cpp
 	url = https://github.com/Thalhammer/jwt-cpp.git
+[submodule "cpp-httplib"]
+	path = cpp-httplib
+	url = https://github.com/username/cpp-httplib.git
