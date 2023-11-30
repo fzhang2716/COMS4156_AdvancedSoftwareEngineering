@@ -13,7 +13,7 @@
 
 DataManagementService dataservice;
 
-std::string jwtToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzIwMzA2ODgsImlzcyI6IlN1Yk1hbmFnZXIiLCJzdWIiOiIyMCJ9.DZGXi-CvQeQOhwK9HB4FYWZMjZr-J914FT5_UaFC_44";  //JWT token
+std::string jwtToken = "";  //JWT token
 httplib::Headers headers = {
     {"Authorization", "Bearer " + jwtToken}
 };

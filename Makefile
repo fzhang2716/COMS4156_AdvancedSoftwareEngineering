@@ -39,7 +39,7 @@ integration_test.o: integration_test.cpp
 	$(CC) $(TESTCFLAGS) -c integration_test.cpp
 
 clean:
-	$(RM) main test main.o data_management.o utils.o utils_test.o integration_test
+	$(RM) main test integration_test main.o data_management.o utils.o utils_test.o integration_test.o
 # main: main.cpp data_management.cpp
 # 	$(CC) $(CFLAGS) -pthread -o main main.cpp $(LDLIBS)
 
