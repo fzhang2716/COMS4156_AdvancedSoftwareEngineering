@@ -23,6 +23,13 @@ jobs:
         sudo apt-get install libmysqlcppconn-dev
         git clone https://github.com/Thalhammer/jwt-cpp.git
         sudo apt-get install libjsoncpp-dev
+
+    - name: Install Python3.9 and matplotlib-cpp
+      run: |
+        sudo apt install software-properties-common
+        sudo add-apt-repository ppa:deadsnakes/ppa
+        sudo apt install python3.9
+        sudo apt-get install python3-matplotlib python-numpy python3.9-dev
     
     - name: Build Crow
       run: |
@@ -48,5 +55,7 @@ jobs:
           make clean
           make all
 
-    - name: Run Tests
-      run: ./test
+    - name: Run Unit Tests
+      run: |
+        ./utils_test
+        ./analyze_data_test

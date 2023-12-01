@@ -12,6 +12,7 @@ Our project is a subscription management service that provides sub-services like
  cd Crow
  mkdir build
  sudo apt install libasio-dev
+ cd build
  cmake .. -DCROW_BUILD_EXAMPLES=OFF -DCROW_BUILD_TESTS=OFF
  sudo make install
  ```
@@ -53,13 +54,10 @@ sudo apt-get install libjsoncpp-dev
 ```
 
 ### [matplotlib-cpp](https://github.com/lava/matplotlib-cpp)
+Need to install Python3.9 first
 ```
-cd vcpkg
-./bootstrap-vcpkg.sh
-./vcpkg integrate install
-vcpkg install matplotlib-cpp
+sudo apt-get install python3-matplotlib python-numpy python3.9-dev
 ```
-move "matplotlibcpp.h" to root directory
 
 ## Compile and Run
 In root directory, run Makefile:
@@ -69,17 +67,42 @@ make
 ./main
 ```
 
-## Test
+## Unit Test
+### utilis test
 In root directory, run Makefile:
 ```
-make test
-./test
+make utils_test
+./utils_test
 ```
 
 Result:
 ```
 ===============================================================================
 All tests passed (4 assertions in 4 test cases)
+```
+
+### analyze data test
+In root directory, run Makefile:
+```
+make analyze_data_test
+./analyze_data_test
+```
+
+Result:
+```
+===============================================================================
+All tests passed (12 assertions in 6 test cases)
+```
+
+## Integration Test
+In root directory, run Makefile:
+```
+make integration_test
+./integration_test
+```
+
+Result:
+```
 ```
 
 ## Style Check
