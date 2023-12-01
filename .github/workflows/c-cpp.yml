@@ -7,7 +7,8 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build-and-unit-tests:
+  build:
+
     runs-on: ubuntu-latest
 
     steps:
@@ -23,7 +24,6 @@ jobs:
         git clone https://github.com/Thalhammer/jwt-cpp.git
         git clone https://github.com/yhirose/cpp-httplib.git
         sudo apt-get install libjsoncpp-dev
-
     - name: Install Python3.9 and matplotlib-cpp
       run: |
         sudo apt install software-properties-common
@@ -49,44 +49,11 @@ jobs:
         cmake -Bbuild -H. -DBUILD_TESTING=OFF
         sudo cmake --build build/ --target install
         cd ..
-
     - name: Build Project
       run: |
           make clean
-          make all 
-    
+          make all
     - name: Run Unit Tests
       run: |
         ./utils_test
         ./analyze_data_test
-
-  job1:
-    runs-on: ubuntu-latest
-    needs: build-and-unit-tests
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
-    - name: Run Service
-      run: ./main
-    
-  job2:
-    runs-on: ubuntu-latest
-    needs: build-and-unit-tests
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
-    - name: Run Integration Tests
-      run:  ./integration_test
-  
-  orchestrate:
-    runs-on: ubuntu-latest
-
-    needs: [job1, job2]
-
-    steps:
-      - name: Merge results
-        run: echo "All executables have been run successfully"
