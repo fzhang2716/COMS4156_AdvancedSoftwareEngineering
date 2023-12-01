@@ -56,7 +56,7 @@ sudo apt-get install libjsoncpp-dev
 ### [matplotlib-cpp](https://github.com/lava/matplotlib-cpp)
 Need to install Python3.9 first
 ```
-sudo apt-get install python3-matplotlib python-numpy python3.9-dev
+sudo apt-get install python3-matplotlib python3-numpy python3.9-dev
 ```
 
 ## Compile and Run
