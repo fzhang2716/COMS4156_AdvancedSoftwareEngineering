@@ -3,6 +3,9 @@
 ## Overview
 Our project is a subscription management service that provides sub-services like subscription data management, analytics, insights feedback, notification sending, alerting, and reports generation.
 
+## Client App Demo
+https://github.com/everssun/4156_final_project_client_app
+
 ## Install (Linux)
 ### [Crow](https://crowcpp.org/master/getting_started/setup/linux/)
 ( C++ framework for creating HTTP or Websocket web services )
