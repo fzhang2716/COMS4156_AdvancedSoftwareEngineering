@@ -106,6 +106,8 @@ make integration_test
 
 Result:
 ```
+===============================================================================
+All tests passed (2 assertions in 1 test case)
 ```
 
 ## Style Check
