@@ -22,6 +22,7 @@ jobs:
         sudo apt-get install libcurl4-openssl-dev
         sudo apt-get install libmysqlcppconn-dev
         git clone https://github.com/Thalhammer/jwt-cpp.git
+        git clone https://github.com/yhirose/cpp-httplib.git
         sudo apt-get install libjsoncpp-dev
 
     - name: Install Python3.9 and matplotlib-cpp

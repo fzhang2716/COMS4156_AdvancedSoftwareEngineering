@@ -52,7 +52,10 @@ sudo apt-get install libcurl4-openssl-dev
 ```
 sudo apt-get install libjsoncpp-dev
 ```
-
+### [cpp-httplib](https://github.com/yhirose/cpp-httplib)
+```
+git clone https://github.com/yhirose/cpp-httplib.git
+```
 ### [matplotlib-cpp](https://github.com/lava/matplotlib-cpp)
 Need to install Python3.9 first
 ```
