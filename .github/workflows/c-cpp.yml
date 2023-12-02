@@ -24,6 +24,7 @@ jobs:
         git clone https://github.com/Thalhammer/jwt-cpp.git
         git clone https://github.com/yhirose/cpp-httplib.git
         sudo apt-get install libjsoncpp-dev
+    
     - name: Install Python3.9 and matplotlib-cpp
       run: |
         sudo apt install software-properties-common
@@ -49,11 +50,21 @@ jobs:
         cmake -Bbuild -H. -DBUILD_TESTING=OFF
         sudo cmake --build build/ --target install
         cd ..
+    
     - name: Build Project
       run: |
           make clean
           make all
+    
     - name: Run Unit Tests
       run: |
         ./utils_test
         ./analyze_data_test
+
+    - name: Run Integration Test
+      run: |
+        ./main &
+        MAIN_PID=$!
+        sleep 10
+        ./integration_test
+        Kill $MAIN_PID
