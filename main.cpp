@@ -96,6 +96,16 @@ int main() {
         dataservice.changeCompany(req, res, companyId);
     });
 
+    // Get Method: get all members of a company
+    CROW_ROUTE(app, "/company/getMembers")
+     .CROW_MIDDLEWARES(app, JwtMiddleware)
+    .methods(crow::HTTPMethod::GET)
+    ([&](const crow::request &req, crow::response &res){
+        auto& ctx = app.get_context<JwtMiddleware>(req);
+        int companyId = ctx.companyId;
+        dataservice.getCompanyMembers(req, res, companyId);
+    });
+
     //Post Method: request a new access token
     CROW_ROUTE(app, "/recoverCompany")
     .methods(crow::HTTPMethod::POST)
