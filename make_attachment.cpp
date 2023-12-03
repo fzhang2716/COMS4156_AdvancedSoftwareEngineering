@@ -71,6 +71,22 @@ void plot_hist(const std::vector<float>& data, const std::string& field) {
     plt::save("figure.pdf");
 }
 
+void plot_hist(const std::vector<int>& data, const std::vector<std::string>& categories, const std::string& field) {
+    std::vector<double> x;
+    for (unsigned int i = 0; i < categories.size(); ++i) {
+        x.push_back(i);
+    }
+
+    plt::bar(data);
+    plt::xticks(x, categories);
+
+    plt::xlabel("Categories");
+    plt::ylabel("Frequency");
+    plt::title("Histogram of "+field);
+
+    plt::save("figure.pdf");
+}
+
 void plot_box(const std::vector<float>& data, const std::string& field) {
     plt::boxplot(data);
     plt::title("Histogram of "+field);
