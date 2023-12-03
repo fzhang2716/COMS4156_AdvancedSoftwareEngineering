@@ -8,6 +8,7 @@
 #include "./data_management.hpp"
 #include "cpp-httplib/httplib.h"
 #include <jwt-cpp/jwt.h>
+#include <json/json.h>
 #include <crow.h>
 #include <thread>
 
@@ -44,9 +45,21 @@ TEST_CASE("/company test", "[routes]" ) {
 
     auto response = client.Get("/company", headers);
     REQUIRE(response->status == 200);
-    std::string response1 = response->body;
-    response1.erase(std::remove(response1.begin(), response1.end(), '\n'), response1.end());
-    std::string targetReturn = "Result: Company ID: 20; Company Name: frank; Company email: hz2716@columbia.edu ";
-    REQUIRE(response1 == targetReturn);
+    //std::string response1 = response->body;
+    //response1.erase(std::remove(response1.begin(), response1.end(), '\n'), response1.end());
+    
+    Json::Value targetJson;
+    targetJson["company_id"] = "20";
+    targetJson["company_name"] = "frank";
+    targetJson["email"] = "hz2716@columbia.edu";
+    
+    // Parse request body as JSON
+    Json::CharReaderBuilder reader;
+    Json::Value responseJson;
+    std::istringstream responseBody(response->body);
+    Json::parseFromStream(reader, responseBody, &responseJson, nullptr);
+
+    // Compare the two JSON objects
+    REQUIRE(responseJson == targetJson);
     stopServer();
 }
