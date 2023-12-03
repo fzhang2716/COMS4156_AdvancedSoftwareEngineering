@@ -64,7 +64,5 @@ jobs:
     - name: Run Integration Test
       run: |
         ./main &
-        MAIN_PID=$!
         sleep 10
         ./integration_test
-        Kill $MAIN_PID
