@@ -61,31 +61,32 @@ void DataManagementService::getCompanyInfo(const crow::request &req,
 
         try {
             sql::ResultSet *queryResult = stmt->executeQuery(query);
-            if (queryResult->rowsCount() > 0) {
-                std::string companyData = "";
-                while (queryResult->next()) {
-                    companyData += "Company ID: " +
-                    queryResult->getString("company_id") + "; ";
-                    companyData += "Company Name: " +
-                    queryResult->getString("company_name") + "; ";
-                    companyData += "Company email: " +
-                    queryResult->getString("email") + " \n";
-                }
+            Json::Value jsonResponse;
+            if (queryResult->next()) {
+                jsonResponse["company_id"] = static_cast<std::string>(queryResult->getString("company_id"));
+                jsonResponse["company_name"] = static_cast<std::string>(queryResult->getString("company_name"));
+                jsonResponse["email"] = static_cast<std::string>(queryResult->getString("email"));
                 res.code = 200;  // OK
-                res.write("Result: " + companyData);
-                res.end();
             } else {
-                res.code = 200;  // OK
-                res.write("No Query Found");
-                res.end();
+                jsonResponse["error"] = "Error getting your company's information";
+                res.code = 204; // No Content
             }
-
+            res.add_header("Content-Type", "application/json");
+            res.write(jsonResponse.toStyledString());
+            res.end();
+            
             delete queryResult;
             delete stmt;
         }
         catch (const sql::SQLException &e) {
             res.code = 500;
             res.write("Database Error: " + std::string(e.what()) + "\n");
+            res.end();
+        }
+        catch (const std::exception &e) {
+            // Catch invalid request errors
+            res.code = 400;  // Bad Request
+            res.write("Invalid request \n");
             res.end();
         }
     }
