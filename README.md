@@ -183,7 +183,7 @@ Refer to this [API Curl Example](API.md) to see example API requests with curl.
 - **Endpoint:** `/company/getMembers?page=<int>&pageSize=<int>` (parameters are optional, defualt page=1, pageSize=10)
 - **Method:** GET
 - **Request Header:** 'Authorization: Bearer {JWT token}'
-- **Success Response:** HTTP 200 OK, JSON {"total_members", "total_pages", "members": [a JSON array of {"email", "first_name", "last_name", "phone_number"}]}
+- **Success Response:** HTTP 200 OK, with a JSON {"total_members", "total_pages", "members": [a JSON array of {"email", "first_name", "last_name", "phone_number"}]}
 - **Error Response:**
     - HTTP 400 Bad Request, with an error message
     - HTTP 401 Unauthorized, with an error message "JWT token not found" or "Invalid Token"
@@ -281,5 +281,16 @@ Refer to this [API Curl Example](API.md) to see example API requests with curl.
 - **Success Response:** HTTP 200 OK, with a message "Update Success"
 - **Error Response:**
     - HTTP 400 Bad Request, with an error message [e.g. no matching member eamil and subscription name]
+    - HTTP 401 Unauthorized, with an error message "JWT token not found" or "Invalid Token"
+    - HTTP 500 Internal Server Error, with an error message
+
+### - View a member's subscriptions as admin:
+- **Endpoint:** `/admin/subscription/viewSubscriptions`
+- **Method:** GET
+- **Request Header:** 'Authorization: Bearer {JWT token}'
+- **Request Body:** JSON {"email"}
+- **Success Response:** HTTP 200 OK, with a JSON {"total_subscriptions", "subscriptions": [a JSON array of {"subscription_id", "subscription_name", "subscription_type", "subscription_status", "billing_info", "start_date", "next_due_date", "last_action", "last_action_date"}]}
+- **Error Response:**
+    - HTTP 400 Bad Request, with an error message
     - HTTP 401 Unauthorized, with an error message "JWT token not found" or "Invalid Token"
     - HTTP 500 Internal Server Error, with an error message

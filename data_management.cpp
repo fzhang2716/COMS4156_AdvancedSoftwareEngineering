@@ -711,6 +711,64 @@ void DataManagementService::updateSubscription(const crow::request &req,
     DBDisConnect(conn);
 }
 
+void DataManagementService::viewSubscriptions(const crow::request& req, 
+crow::response& res, int companyId, bool isAdmin){
+    sql::Connection *conn = DBConnect();
+
+    if(companyId != -1) {
+        try{
+            auto bodyInfo = crow::json::load(req.body);
+            std::string email = bodyInfo["email"].s();
+            sql::Statement *stmt = conn->createStatement();
+            std::string query = queryGenerator.searchSubscriptioByCompanyIdAndEmailQuery(companyId, email);
+            sql::ResultSet *queryResult = stmt->executeQuery(query);
+            int total_subscriptions = static_cast<int>(queryResult->rowsCount());
+            
+            Json::Value jsonResponse;
+            Json::Value subscriptionsArray(Json::arrayValue);
+            // Tthere is at least one row in the result set
+            while (queryResult->next()) {
+                Json::Value subscriptionJson;
+                subscriptionJson["subscription_id"] = std::to_string(queryResult->getInt("subscription_id"));
+                subscriptionJson["subscription_name"] = static_cast<std::string>(queryResult->getString("subscription_name"));
+                subscriptionJson["subscription_type"] = static_cast<std::string>(queryResult->getString("subscription_type"));
+                subscriptionJson["subscription_status"] = static_cast<std::string>(queryResult->getString("subscription_status"));
+                subscriptionJson["start_date"] = static_cast<std::string>(queryResult->getString("start_date"));
+                subscriptionJson["next_due_date"] = static_cast<std::string>(queryResult->getString("next_due_date"));
+                subscriptionJson["billing_info"] = static_cast<std::string>(queryResult->getString("billing_info"));
+                
+                if(isAdmin){
+                    subscriptionJson["last_action"] = static_cast<std::string>(queryResult->getString("last_action"));
+                    subscriptionJson["last_action_date"] = static_cast<std::string>(queryResult->getString("last_action_date"));
+                }
+                subscriptionsArray.append(subscriptionJson);
+                
+            }
+            jsonResponse["total_subscriptions"] = std::to_string(total_subscriptions);
+            jsonResponse["subscriptions"] = subscriptionsArray;
+
+            res.code = 200;
+            res.add_header("Content-Type", "application/json");    
+            res.write(jsonResponse.toStyledString());
+            res.end();
+            delete queryResult;
+            delete stmt;
+        }
+        catch(const sql::SQLException &e) {
+            res.code = 500;
+            res.write("View member's subscription Error: " + std::string(e.what()) + "\n");
+            res.end();
+        }
+        catch (const std::exception &e) {
+            // Catch invalid request errors
+            res.code = 400;  // Bad Request
+            res.write("Invalid request \n");
+            res.end();
+        }
+    }
+    DBDisConnect(conn);
+}
+
 void DataManagementService::getExpiringSubscriptionByTime(const crow::request &req,
     crow::response &res, int companyId) {
     Json::Value jsonObject;

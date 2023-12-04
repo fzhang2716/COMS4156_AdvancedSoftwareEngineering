@@ -22,6 +22,7 @@ public:
     std::string addSubscriptionQuery(const std::string& memberEmail, int companyId, const std::string& subscriptionType,
     const std::string& subscriptionName, const std::string& subscriptionStatus, const std::string& nextDueDate,
     const std::string& startDate, const std::string& billingInfo);
+    std::string searchSubscriptioByCompanyIdAndEmailQuery(int companyId, const std::string& email);
     std::string searchSubscriptioByCompanyIdAndEmailAndSubscriptionNameQuery(int companyId,
     const std::string& email, const std::string& subscriptionName);
     std::string updateSubscriptionAction(int companyId, const std::string& email,

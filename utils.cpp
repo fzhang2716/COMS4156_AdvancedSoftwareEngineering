@@ -85,6 +85,11 @@ std::string Query::addSubscriptionQuery(const std::string& memberEmail, int comp
     nextDueDate + "', '" + startDate + "', '" + billingInfo + "');";
     }
 
+std::string Query::searchSubscriptioByCompanyIdAndEmailQuery(int companyId, const std::string& email) {
+    return "SELECT * FROM service.subscription_table WHERE company_id = "
+    + std::to_string(companyId) + " AND member_email = '" + email + "';";
+}
+
 std::string Query::searchSubscriptioByCompanyIdAndEmailAndSubscriptionNameQuery(int companyId, const std::string& email, const std::string& subscriptionName) {
     return "SELECT * FROM service.subscription_table WHERE company_id = "
     + std::to_string(companyId) + " AND member_email = '" + email + "' AND subscription_name = '" + subscriptionName + "';";

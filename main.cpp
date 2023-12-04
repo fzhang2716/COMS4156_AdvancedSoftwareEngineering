@@ -244,6 +244,16 @@ int main() {
         dataservice.updateSubscription(req, res, companyId);
     });
 
+    // Get Method: view subscriptions of a member with a company as admin
+    CROW_ROUTE(app, "/admin/subscription/viewSubscriptions")
+    .CROW_MIDDLEWARES(app, JwtMiddleware)
+    .methods(crow::HTTPMethod::GET)
+    ([&](const crow::request &req, crow::response &res){
+        auto& ctx = app.get_context<JwtMiddleware>(req);
+        int companyId = ctx.companyId;
+        dataservice.viewSubscriptions(req, res, companyId, true);
+    });
+
     // Get Method: get a list of email about expiring subscription
     CROW_ROUTE(app, "/company/getExpiringSubscriptionByTime")
     .CROW_MIDDLEWARES(app, JwtMiddleware)
