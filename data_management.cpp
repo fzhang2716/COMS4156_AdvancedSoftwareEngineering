@@ -575,6 +575,7 @@ void DataManagementService::getMemberInfo(const crow::request& req, crow::respon
                 jsonResponse["email"] = static_cast<std::string>(queryResult->getString("email"));
                 jsonResponse["first_name"] = static_cast<std::string>(queryResult->getString("first_name"));
                 jsonResponse["last_name"] = static_cast<std::string>(queryResult->getString("last_name"));
+                jsonResponse["phone_number"] = static_cast<std::string>(queryResult->getString("phone_number"));
                 res.code = 200;
             } else {
                 jsonResponse["error"] = "No member found for the specified company and email";
