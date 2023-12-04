@@ -187,6 +187,72 @@ void DataManagementService::changeCompany(const crow::request &req,
     DBDisConnect(conn);
 }
 
+void DataManagementService::getCompanyMembers(const crow::request& req, crow::response& res, int companyId){
+    sql::Connection *conn = DBConnect();
+    auto page_param = req.url_params.get("page");
+    auto pageSize_param = req.url_params.get("pageSize");
+    
+    // Pagination dafualt setting
+    int page = 1;
+    int pageSize = 10;
+
+    if(page_param != nullptr){
+        page = std::stoi(page_param);
+    }
+    if(pageSize_param != nullptr){
+        pageSize = std::stoi(pageSize_param);
+    }
+        
+    try{
+        // Get total number of members
+        sql::Statement *countStmt = conn->createStatement();
+        sql::ResultSet *countResult = countStmt->executeQuery("SELECT COUNT(*) as count FROM service.member_table WHERE company_id = '"
+            + std::to_string(companyId) + "'");
+        
+        countResult->next();
+        int totalMembers = countResult->getInt("count");
+        int totalPages = (totalMembers + pageSize - 1)/pageSize; //cround up to integer
+
+        sql::Statement *stmt = conn->createStatement();
+        sql::ResultSet *queryResult = stmt->executeQuery("SELECT * FROM service.member_table WHERE company_id = '"
+            + std::to_string(companyId) + "'" + " LIMIT " + std::to_string(pageSize) + " OFFSET " + std::to_string((page-1)*pageSize));
+        
+        Json::Value jsonResponse;
+        jsonResponse["total_members"] = std::to_string(totalMembers);
+        jsonResponse["total_pages"] = std::to_string(totalPages);
+        Json::Value membersArray(Json::arrayValue);
+        while (queryResult->next()) {
+            Json::Value memberJson;
+            memberJson["email"] = static_cast<std::string>(queryResult->getString("email"));
+            memberJson["first_name"] = static_cast<std::string>(queryResult->getString("first_name"));
+            memberJson["last_name"] = static_cast<std::string>(queryResult->getString("last_name"));
+            memberJson["phone_number"] = static_cast<std::string>(queryResult->getString("phone_number"));
+            
+            membersArray.append(memberJson);
+        }
+        jsonResponse["members"] = membersArray;
+        
+        res.code = 200;
+        res.add_header("Content-Type", "application/json");    
+        res.write(jsonResponse.toStyledString());
+        res.end();
+        delete queryResult;
+        delete stmt;
+
+    } catch(const sql::SQLException &e) {
+            res.code = 500;
+            res.write("Get Company Members Error: " + std::string(e.what()) + "\n");
+            res.end();
+    } catch (const std::exception &e) {
+        // Catch invalid request errors
+        res.code = 400;  // Bad Request
+        res.write("Invalid request \n");
+        res.end();
+    }
+    
+    DBDisConnect(conn);
+}
+
 void DataManagementService::recoverCompany(const crow::request& req, crow::response& res){
     sql::Connection *conn = DBConnect();
 
@@ -509,10 +575,11 @@ void DataManagementService::getMemberInfo(const crow::request& req, crow::respon
                 jsonResponse["email"] = static_cast<std::string>(queryResult->getString("email"));
                 jsonResponse["first_name"] = static_cast<std::string>(queryResult->getString("first_name"));
                 jsonResponse["last_name"] = static_cast<std::string>(queryResult->getString("last_name"));
+                jsonResponse["phone_number"] = static_cast<std::string>(queryResult->getString("phone_number"));
                 res.code = 200;
             } else {
                 jsonResponse["error"] = "No member found for the specified company and email";
-                res.code = 204; // No Content
+                res.code = 400; 
             }   
 
             res.add_header("Content-Type", "application/json");
