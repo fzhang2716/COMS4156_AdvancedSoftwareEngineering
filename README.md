@@ -126,7 +126,10 @@ Refer to this [Postman Workspace](https://app.getpostman.com/join-team?invite_co
 
 Refer to this [API Curl Example](API.md) to see example API requests with curl.
 
-### - Register as a new client (company):
+> [!NOTE]  
+> Our service's target clients are any SAAS providers or entities who provide subscriptions to their members. Our clients are referred to as "Company", and their members are referred to as "members". To use our service, clients (a.k.a companies) need to send a request to the "/addCompany" endpoint for a JWT token. JWT token authorization is used in most APIs. Note that our service provides some unprotected endpoints for the company's admin and some login cookie-protected endpoints for the company's members.
+
+### - Register as a new company:
 - **Endpoint:** `/addCompany`
 - **Method:** POST
 - **Request Body:** JSON {"email", "company_name"}
@@ -135,7 +138,7 @@ Refer to this [API Curl Example](API.md) to see example API requests with curl.
     - HTTP 500 Internal Server Error, with an error message [e.g. registered email]
     - HTTP 400 Bad Request, with an error message [e.g. invalid request body]
 
-### - Get client's company info:
+### - Get company's info:
 - **Endpoint:** `/company`
 - **Method:** GET
 - **Request Header:** 'Authorization: Bearer {JWT token}'
@@ -145,7 +148,7 @@ Refer to this [API Curl Example](API.md) to see example API requests with curl.
     - HTTP 401 Unauthorized, with an error message "JWT token not found" or "Invalid Token"
     - HTTP 500 Internal Server Error, with an error message
 
-### - Client re-apply for the access token:
+### - Company re-apply for the access token:
 - **Endpoint:** `/recoverCompany`
 - **Method:** POST
 - **Request Body:** JSON {"email"}
@@ -154,7 +157,7 @@ Refer to this [API Curl Example](API.md) to see example API requests with curl.
     - HTTP 400 Bad Request, with an error message [e.g. Email has not been registered]
     - HTTP 500 Internal Server Error, with an error message
 
-### - Update client's company info:
+### - Update company's info:
 - **Endpoint:** `/company/changeCompany`
 - **Method:** PATCH
 - **Request Header:** 'Authorization: Bearer {JWT token}'
@@ -246,6 +249,16 @@ Refer to this [API Curl Example](API.md) to see example API requests with curl.
 - **Success Response:** HTTP 200 OK, with a JSON {"email", "first_name", "last_name"}
 - **Error Response:**
     - HTTP 400 Bad Request, with an error message [e.g. member not loged in]
+    - HTTP 401 Unauthorized, with an error message "JWT token not found" or "Invalid Token"
+    - HTTP 500 Internal Server Error, with an error message
+
+### - Get member's info as admin:
+- **Endpoint:** `/admin/member/profile/<string:memberEmail>`
+- **Method:** GET
+- **Request Header:** 'Authorization: Bearer {JWT token}'
+- **Success Response:** HTTP 200 OK, with a JSON {"email", "first_name", "last_name"}
+- **Error Response:**
+    - HTTP 400 Bad Request, with an error message [e.g. no matching member email]
     - HTTP 401 Unauthorized, with an error message "JWT token not found" or "Invalid Token"
     - HTTP 500 Internal Server Error, with an error message
 

@@ -578,7 +578,7 @@ void DataManagementService::getMemberInfo(const crow::request& req, crow::respon
                 res.code = 200;
             } else {
                 jsonResponse["error"] = "No member found for the specified company and email";
-                res.code = 204; // No Content
+                res.code = 400; 
             }   
 
             res.add_header("Content-Type", "application/json");

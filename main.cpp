@@ -123,6 +123,7 @@ int main() {
         dataservice.addMember(req, res, companyId);
     });
 
+    // Post Method: member login
     CROW_ROUTE(app, "/member/login")
     .methods(crow::HTTPMethod::POST)
     .CROW_MIDDLEWARES(app, JwtMiddleware)
@@ -142,6 +143,7 @@ int main() {
         res.end();
     });
 
+    // Post Method: member logout
     CROW_ROUTE(app, "/member/logout")
     .methods(crow::HTTPMethod::POST)
     .CROW_MIDDLEWARES(app, JwtMiddleware)
@@ -155,6 +157,7 @@ int main() {
         res.end();
     });
 
+    // Get Method: get member's profile (login cookies protected)
     CROW_ROUTE(app, "/member/profile")
     .methods(crow::HTTPMethod::GET)
     .CROW_MIDDLEWARES(app, JwtMiddleware)
@@ -173,6 +176,15 @@ int main() {
         }       
     });
     
+    // Get Method: get member's profile (unprotected)
+    CROW_ROUTE(app, "/admin/member/profile/<string>")
+    .methods(crow::HTTPMethod::GET)
+    .CROW_MIDDLEWARES(app, JwtMiddleware)
+    ([&](const crow::request& req, crow::response &res, std::string email){
+        auto& ctx = app.get_context<JwtMiddleware>(req);
+        int companyId = ctx.companyId;
+        dataservice.getMemberInfo(req, res, companyId, email);    
+    });
 
     // Delete Method: delete member
     CROW_ROUTE(app, "/admin/member/removeMember/<string>")
