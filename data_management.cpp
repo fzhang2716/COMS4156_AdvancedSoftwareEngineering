@@ -550,6 +550,7 @@ void DataManagementService::getMemberInfo(const crow::request& req, crow::respon
 void DataManagementService::addSubscription(const crow::request &req,
     crow::response &res, int companyId) {
     sql::Connection *conn = DBConnect();
+    Json::Value jsonResponse;
 
     if (companyId != -1) {
         try {
@@ -572,32 +573,36 @@ void DataManagementService::addSubscription(const crow::request &req,
                     sql::Statement *stmt = conn->createStatement();
                     stmt->execute(queryString);
                     res.code = 200;  // OK
-                    res.write("Add Subscription Success \n");
+                    jsonResponse["msg"] = "Add Subscription Success";
+                    res.write(jsonResponse.toStyledString());
                     res.end();
                 }
                 catch (sql::SQLException &e) {
                     // Catch any SQL errors
                     res.code = 500;  // Internal Server Error
-                    res.write("Add Subscription Error: " +
-                        std::string(e.what()) + "\n");
+                    jsonResponse["error"] = "Add Subscription Error: " +
+                        std::string(e.what());
                     res.end();
                 }
             }
             else{
                 res.code = 400;  // Bad Request
-                res.write("Member Not Exists");
+                jsonResponse["error"] = "Member Not Exists";
+                res.write(jsonResponse.toStyledString());
                 res.end();
             }
         }
         catch(const sql::SQLException &e) {
             res.code = 500;
-            res.write("Add Subscription Error: " + std::string(e.what()) + "\n");
+            jsonResponse["error"] = "Add Subscription Error: " + std::string(e.what());
+            res.write(jsonResponse.toStyledString());
             res.end();
         }
         catch (std::exception &e) {
             // Catch invalid request errors
             res.code = 400;  // Bad Request
-            res.write("Invalid request \n");
+            jsonResponse["error"] = "Invalid request";
+            res.write(jsonResponse.toStyledString());
             res.end();
         }
     }

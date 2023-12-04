@@ -96,7 +96,7 @@ TEST_CASE_METHOD(ServerFixture, "/company/addCompany test", "[routes][addCompany
     Json::parseFromStream(reader, responseBody, &responseJson, nullptr);
     REQUIRE(targetJson["msg"] == responseJson["msg"]);
     if ((response->status == 200) and (targetJson["msg"] == responseJson["msg"])){
-        std::string sqlCommend = "DELETE FROM service.company_table WHERE (email = 'fzhang0821@gmai' and company_name = 'testCompany')";
+        std::string sqlCommend = "DELETE FROM service.company_table WHERE (email = 'fzhang0821@gmail' and company_name = 'testCompany')";
         std::string deleteData = R"({"sqlCommed": ")" + sqlCommend + R"("})";
         client.Delete("/admin/deleteRecord", headers, deleteData, "application/json");
     }
@@ -121,8 +121,39 @@ TEST_CASE_METHOD(ServerFixture, "/member/addMember test", "[routes][addMember]")
     Json::parseFromStream(reader, responseBody, &responseJson, nullptr);
     REQUIRE(responseJson == targetJson);
     if ((response->status == 200) and (responseJson == targetJson)){
-        std::string sqlCommend = "DELETE FROM service.member_table WHERE (email = 'tyson@gmail.com') and (first_name = 'mike') and (last_name = 'tyson') and (hash_pwd = '123') and (phone_number = '1234')";
-        std::string deleteData = R"({"sqlCommed": ")" + sqlCommend + R"("})";
+        std::string sqlCommand = "DELETE FROM service.member_table WHERE (email = 'tyson@gmail.com') and (first_name = 'mike') and (last_name = 'tyson') and (hash_pwd = '123') and (phone_number = '1234')";
+        std::string deleteData = R"({"sqlCommed": ")" + sqlCommand + R"("})";
+        client.Delete("/admin/deleteRecord", headers, deleteData, "application/json");
+    }
+}
+
+TEST_CASE_METHOD(ServerFixture, "/subscription/addSubscription test", "[routes][addSubscription]") {
+    httplib::Client client("localhost", 3000);
+    std::string jsonData = R"({
+        "member_email": "m2@gmail.com",
+        "subscription_name": "espn",
+        "subscription_type": "Free",
+        "subscription_status": "active",
+        "next_due_date": "2023-12-31",
+        "start_date": "2023-01-01",
+        "billing_info": "info"
+    })";
+    
+    auto response = client.Post("/subscription/addSubscription", headers, jsonData, "application/json");
+
+    REQUIRE(response->status == 200);
+
+    Json::Value targetJson;
+    targetJson["msg"] = "Add Subscription Success";
+
+    Json::CharReaderBuilder reader;
+    Json::Value responseJson;
+    std::istringstream responseBody(response->body);
+    Json::parseFromStream(reader, responseBody, &responseJson, nullptr);
+    REQUIRE(responseJson == targetJson);
+    if ((response->status == 200)&& (responseJson == targetJson)) {
+        std::string sqlCommand = "SET SQL_SAFE_UPDATES = 0; DELETE FROM service.subscription_table WHERE(member_email = 'm2@gmail.com') AND(subscription_name = 'espn'); SET SQL_SAFE_UPDATES = 1;";
+        std::string deleteData = R"({"sqlCommed": ")" + sqlCommand + R"("})";
         client.Delete("/admin/deleteRecord", headers, deleteData, "application/json");
     }
 }
