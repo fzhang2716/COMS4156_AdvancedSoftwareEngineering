@@ -124,463 +124,149 @@ cpplint [filename]
 
 Refer to this [Postman Workspace](https://app.getpostman.com/join-team?invite_code=e99d0f0ace00953a60793b4fba6269fb&target_code=ba804970dfad862285f0124ba74c65c2) to see example API requests.
 
-For the following request, if the client did not provide correct request syntax, for example, missing parameters, then the server responses "400 Bad Request" like this:
-
-```
-HTTP/1.1 400 Bad Request
-Content-Length: 17
-Server: Crow/master
-Date: Thu, 19 Oct 2023 21:39:58 GMT
-Connection: Keep-Alive
-
-Invalid request 
-```
-
-If the client did not provide JWT token for certain requests, the server responses "401 Unauthorized" like this:
-```
-HTTP/1.1 401 Unauthorized
-Content-Length: 21
-Server: Crow/master
-Date: Fri, 01 Dec 2023 03:41:01 GMT
-Connection: Keep-Alive
-
-JWT token not found 
-``` 
-
-If the client provided invalid JWT token for certain requests, the server responses "401 Unauthorized" like this:
-```
-HTTP/1.1 401 Unauthorized
-Content-Length: 15
-Server: Crow/master
-Date: Fri, 01 Dec 2023 03:40:03 GMT
-Connection: Keep-Alive
-
-Invalid token 
-```
-
-
-### Register as a new client (company):
-
-#### Request
-`POST /addCompany`
-
-```
-curl -i --location 'http://localhost:3000/addCompany' \
---header 'Content-Type: text/plain' \
---data-raw '{
-    "email" : "eg@gmail.com",
-    "company_name" : "EG"
-}'
-```
-
-#### Response
-
-Success:
-```
-HTTP/1.1 200 OK
-Content-Length: 195
-Server: Crow/master
-Date: Fri, 03 Nov 2023 04:10:27 GMT
-Connection: Keep-Alive
-
-Add Company Success 
-Please save your JWT token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzA1MjA2MjgsImlzcyI6IlN1Yk1hbmFnZXIiLCJzdWIiOiIxNiJ9.kfC9TVEi8AgCLSrXF8obpQLi76gjXhdvtP5M6_kJaXU
-```
-
-Failed (company email has been registered):
-
-e.g. duplicate id
-```
-HTTP/1.1 500 Internal Server Error
-Content-Length: 119
-Server: Crow/master
-Date: Fri, 03 Nov 2023 04:10:45 GMT
-Connection: Keep-Alive
-
-Add Company Error: You have already registered with this email, if you lost your JWT token, please apply for a new one.
-```
-
-### Get client's company info:
-
-#### Request
-`GET /company` 
-
-```
-curl -i --location 'http://localhost:3000/company' \
---header 'Authorization: Bearer {JWT token}'
-```
-
-#### Response
-
-Success:
-```
-HTTP/1.1 200 OK
-Content-Length: 81
-Server: Crow/master
-Date: Fri, 03 Nov 2023 04:07:06 GMT
-Connection: Keep-Alive
-
-Result: Company ID: 1; Company Name: CompanyA; Company email:1@gmail.com 
-```
-
-If authentication failed, response "invalid token".
-
-### Re-apply for the access token:
-
-#### Request
-`POST /recoverCompany` 
-
-```
-curl -i --location 'http://localhost:3000/recoverCompany' \
---header 'Content-Type: text/plain' \
---data-raw '{
-    "email" : "eg@gmail.com"
-}'
-```
-
-#### Response
-
-Success:
-```
-HTTP/1.1 200 OK
-Content-Length: 40
-Server: Crow/master
-Date: Fri, 03 Nov 2023 04:12:38 GMT
-Connection: Keep-Alive
-
-An email has been send to your address 
-```
-
-Then, client needs to find his new API key in his email.
-
-Failed (email has not been registered):
-```
-HTTP/1.1 400 Bad Request
-Content-Length: 28
-Server: Crow/master
-Date: Fri, 03 Nov 2023 04:14:22 GMT
-Connection: Keep-Alive
-
-Your email has not been registered
-```
-
-### Update client's company info:
-`PATCH /company/changeCompany` 
-#### Request
-```
-curl -i --location --request PATCH 'http://localhost:3000/company/changeCompany' \
---header 'Content-Type: application/json' \
---header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzI1NzM1NjEsImlzcyI6IlN1Yk1hbmFnZXIiLCJzdWIiOiIyMSJ9.gPSQ91ze5GL4CkCE_sRWyPoQRRcEuQsogoQEJ9cxeQs' \
---data '{
-    "company_name": "newName"
-}'
-```
-#### Response
-```
-HTTP/1.1 200 OK
-Content-Length: 24
-Server: Crow/master
-Date: Fri, 01 Dec 2023 03:39:19 GMT
-Connection: Keep-Alive
-
-Update Company Success 
-```
-
-### Add a new member:
-`POST /member/addMember`
-#### Request
-
-```
-curl -i --location 'http://localhost:3000/member/addMember' \
---header 'Content-Type: application/json' \
---header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzI1NzM1NjEsImlzcyI6IlN1Yk1hbmFnZXIiLCJzdWIiOiIyMSJ9.gPSQ91ze5GL4CkCE_sRWyPoQRRcEuQsogoQEJ9cxeQs' \
---data-raw '{
-    "first_name" : "Jane",
-    "last_name" : "Doe",
-    "email": "jd@test.com",
-    "password": "abc123",
-    "phone_number": "111"
-}'
-```
-
-#### Response
-
-Success:
-```
-HTTP/1.1 200 OK
-Content-Length: 20
-Server: Crow/master
-Date: Fri, 01 Dec 2023 03:47:38 GMT
-Connection: Keep-Alive
-
-Add Member Success 
-```
-Failed (duplicate member email):
-```
-HTTP/1.1 500 Internal Server Error
-Content-Length: 82
-Server: Crow/master
-Date: Fri, 01 Dec 2023 03:48:10 GMT
-Connection: Keep-Alive
-
-Add Member Error: Duplicate entry 'jd@test.com-21' for key 'member_table.PRIMARY'
-```
-
-### Delete a member as admin:
-`DELETE /admin/member/removeMember/<string:memberEmail>`
-#### Request
-```
-curl -i --location --request DELETE 'http://localhost:3000/admin/member/removeMember/jd@test.com' \
---header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzI1NzM1NjEsImlzcyI6IlN1Yk1hbmFnZXIiLCJzdWIiOiIyMSJ9.gPSQ91ze5GL4CkCE_sRWyPoQRRcEuQsogoQEJ9cxeQs'
-```
-
-#### Response
-
-Success:
-```
-HTTP/1.1 204 No Content
-Content-Length: 21
-Server: Crow/master
-Date: Fri, 01 Dec 2023 03:53:09 GMT
-Connection: Keep-Alive
-```
-
-Failed (member not exist)：
-```
-HTTP/1.1 400 Bad Request
-Content-Length: 25
-Server: Crow/master
-Date: Fri, 01 Dec 2023 03:53:51 GMT
-Connection: Keep-Alive
-
-No Matching Memeber Found
-```
-
-### Change member's info as admin:
-`PATCH /admin/member/changeMemberInfo`
-#### Request
-```
-curl -i --location --request PATCH 'http://localhost:3000/admin/member/changeMemberInfo' \
---header 'Content-Type: application/json' \
---header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzI1NzM1NjEsImlzcyI6IlN1Yk1hbmFnZXIiLCJzdWIiOiIyMSJ9.gPSQ91ze5GL4CkCE_sRWyPoQRRcEuQsogoQEJ9cxeQs' \
---data-raw '{
-    "first_name" : "newFN",
-    "last_name" : "newLN",
-    "email": "jd@test.com",
-    "phone_number": "12345"
-}'
-```
-#### Response
-Success:
-```
-HTTP/1.1 200 OK
-Content-Length: 14
-Server: Crow/master
-Date: Fri, 01 Dec 2023 04:03:02 GMT
-Connection: Keep-Alive
-
-Update success
-```
-Failed (Member email not exist):
-```
-HTTP/1.1 400 Bad Request
-Content-Length: 24
-Server: Crow/master
-Date: Fri, 01 Dec 2023 04:02:26 GMT
-Connection: Keep-Alive
-
-No Query Found To Update
-```
-
-### Member login:
-`POST /member/login`
-#### Request
-```
-curl -i --location 'http://localhost:3000/member/login' \
---header 'Content-Type: application/json' \
---header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzI1NzM1NjEsImlzcyI6IlN1Yk1hbmFnZXIiLCJzdWIiOiIyMSJ9.gPSQ91ze5GL4CkCE_sRWyPoQRRcEuQsogoQEJ9cxeQs' \
---data-raw '{
-    "email": "jd@test.com",
-    "password": "abc123"
-}'
-```
-
-#### Response
-Success:
-```
-HTTP/1.1 200 OK
-Set-Cookie: PKdhtXMmr18n2L9K88eMlGn7CcctT9Rw=LJ8g; Path=/; Max-Age=86400
-Content-Length: 18
-Server: Crow/master
-Date: Fri, 01 Dec 2023 04:06:47 GMT
-Connection: Keep-Alive
-
-Login Successfully
-```
-
-Failed (email and password not matching):
-```
-HTTP/1.1 401 Unauthorized
-Content-Length: 18
-Server: Crow/master
-Date: Fri, 01 Dec 2023 04:11:05 GMT
-Connection: Keep-Alive
-
-401 Unauthorized
-```
-
-### Change member's info by self:
-`PATCH /member/changeMemberInfo`
-#### Request
-```
-curl -i --location --request PATCH 'http://localhost:3000/member/changeMemberInfo' \
---header 'Content-Type: application/json' \
---header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzI1NzM1NjEsImlzcyI6IlN1Yk1hbmFnZXIiLCJzdWIiOiIyMSJ9.gPSQ91ze5GL4CkCE_sRWyPoQRRcEuQsogoQEJ9cxeQs' \
---header 'Cookie: PKdhtXMmr18n2L9K88eMlGn7CcctT9Rw=LJ8g' \
---data '{
-    "first_name" : "FN",
-    "last_name" : "LN",
-    "phone_number": "12310"
-}'
-```
-#### Response
-Success (member needs to login and has correct cookies in header):
-```
-HTTP/1.1 200 OK
-Content-Length: 14
-Server: Crow/master
-Date: Fri, 01 Dec 2023 04:09:20 GMT
-Connection: Keep-Alive
-
-Update success
-```
-Failed (member not logged in):
-```
-HTTP/1.1 400 Bad Request
-Content-Length: 40
-Server: Crow/master
-Date: Fri, 01 Dec 2023 04:09:57 GMT
-Connection: Keep-Alive
-
-Auhorization Failed. Have not logged in.
-```
-### Member logout:
-`POST /member/logout`
-
-#### Request
-```
-curl -i --location --request POST 'http://localhost:3000/member/logout' \
---header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzI1NzM1NjEsImlzcyI6IlN1Yk1hbmFnZXIiLCJzdWIiOiIyMSJ9.gPSQ91ze5GL4CkCE_sRWyPoQRRcEuQsogoQEJ9cxeQs' \
---header 'Cookie: PKdhtXMmr18n2L9K88eMlGn7CcctT9Rw=LJ8g'
-```
-#### Response
-```
-HTTP/1.1 200 OK
-Content-Length: 19
-Server: Crow/master
-Date: Fri, 01 Dec 2023 04:12:39 GMT
-Connection: Keep-Alive
-
-Logout Successfully
-```
-
-### Get member's info by self:
-`GET /member/profile`
-#### Request
-```
-curl -i --location 'http://localhost:3000/member/profile' \
---header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzI1NzM1NjEsImlzcyI6IlN1Yk1hbmFnZXIiLCJzdWIiOiIyMSJ9.gPSQ91ze5GL4CkCE_sRWyPoQRRcEuQsogoQEJ9cxeQs' \
---header 'Cookie: PKdhtXMmr18n2L9K88eMlGn7CcctT9Rw=LJ8g'
-```
-#### Response
-Succcess：
-```
-HTTP/1.1 200 OK
-Content-Type: application/json
-Content-Length: 78
-Server: Crow/master
-Date: Fri, 01 Dec 2023 04:15:02 GMT
-Connection: Keep-Alive
-
-{
-   "email" : "jd@test.com",
-   "first_name" : "FN",
-   "last_name" : "LN"
-}
-```
-Failed (member not logged in):
-```
-HTTP/1.1 400 Bad Request
-Content-Length: 40
-Server: Crow/master
-Date: Fri, 01 Dec 2023 04:14:15 GMT
-Connection: Keep-Alive
-
-Auhorization Failed. Have not logged in.
-```
-
-### Add a new subscription:
-`POST /subscription/addSubscription`
-#### Request
-```
-curl -i --location 'http://localhost:3000/subscription/addSubscription' \
---header 'Content-Type: application/json' \
---header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzI1NzM1NjEsImlzcyI6IlN1Yk1hbmFnZXIiLCJzdWIiOiIyMSJ9.gPSQ91ze5GL4CkCE_sRWyPoQRRcEuQsogoQEJ9cxeQs' \
---data-raw '{
-    "member_email": "jd@test.com",
-    "subscription_name": "general",
-    "subscription_type": "yearly",
-    "subscription_status": "activate",
-    "next_due_date": "2023-12-30 00:00:00",
-    "start_date": "2022-11-30 00:00:00",
-    "billing_info": "info"
-}'
-```
-
-#### Response
-
-Success:
-```
-HTTP/1.1 200 OK
-Content-Length: 26
-Server: Crow/master
-Date: Fri, 01 Dec 2023 04:18:41 GMT
-Connection: Keep-Alive
-
-Add Subscription Success
-```
-### Update subscription:
-`PATCH /subscription/updateSubscription`
-
-#### Request
-```
-curl -i --location --request PATCH 'http://localhost:3000/subscription/updateSubscription' \
---header 'Content-Type: application/json' \
---header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzI1NzM1NjEsImlzcyI6IlN1Yk1hbmFnZXIiLCJzdWIiOiIyMSJ9.gPSQ91ze5GL4CkCE_sRWyPoQRRcEuQsogoQEJ9cxeQs' \
---data-raw '{
-    "email" : "jd@test.com",
-    "subscription_name": "general",
-    "new_action": "change subType"
-}'
-```
-#### Response
-Success:
-```
-HTTP/1.1 200 OK
-Content-Length: 14
-Server: Crow/master
-Date: Fri, 01 Dec 2023 04:20:51 GMT
-Connection: Keep-Alive
-
-Update Success
-```
-Failed (no matching email and sbuscription name):
-```
-HTTP/1.1 400 Bad Request
-Content-Length: 24
-Server: Crow/master
-Date: Fri, 01 Dec 2023 04:21:43 GMT
-Connection: Keep-Alive
-
-No Query Found To Update
-```
+Refer to this [API Curl Example](API.md) to see example API requests with curl.
+
+### - Register as a new client (company):
+- **Endpoint:** `/addCompany`
+- **Method:** POST
+- **Request Body:** JSON {"email", "company_name"}
+- **Success Response:** HTTP 200 OK, with a message displaying JWT token
+- **Error Response:** 
+    - HTTP 500 Internal Server Error, with an error message [e.g. registered email]
+    - HTTP 400 Bad Request, with an error message [e.g. invalid request body]
+
+### - Get client's company info:
+- **Endpoint:** `/company`
+- **Method:** GET
+- **Request Header:** 'Authorization: Bearer {JWT token}'
+- **Success Response:** HTTP 200 OK, with a JSON {"company_id", "company_name", "email"}
+- **Error Response:**
+    - HTTP 400 Bad Request, with an error message
+    - HTTP 401 Unauthorized, with an error message "JWT token not found" or "Invalid Token"
+    - HTTP 500 Internal Server Error, with an error message
+
+### - Client re-apply for the access token:
+- **Endpoint:** `/recoverCompany`
+- **Method:** POST
+- **Request Body:** JSON {"email"}
+- **Success Response:** HTTP 200 OK, with a message "An email has been send to your address "
+- **Error Response:**
+    - HTTP 400 Bad Request, with an error message [e.g. Email has not been registered]
+    - HTTP 500 Internal Server Error, with an error message
+
+### - Update client's company info:
+- **Endpoint:** `/company/changeCompany`
+- **Method:** PATCH
+- **Request Header:** 'Authorization: Bearer {JWT token}'
+- **Request Body:** JSON {"company_name"}
+- **Success Response:** HTTP 200 OK, with a message "Update Company Success"
+- **Error Response:**
+    - HTTP 400 Bad Request, with an error message
+    - HTTP 401 Unauthorized, with an error message "JWT token not found" or "Invalid Token"
+    - HTTP 500 Internal Server Error, with an error message
+
+### - Add a new member:
+- **Endpoint:** `/member/addMember`
+- **Method:** POST
+- **Request Header:** 'Authorization: Bearer {JWT token}'
+- **Request Body:** JSON {"first_name", "last_name", "email", "password", "phone_number"}
+- **Success Response:** HTTP 200 OK, with a message "Add Member Success"
+- **Error Response:**
+    - HTTP 400 Bad Request, with an error message
+    - HTTP 401 Unauthorized, with an error message "JWT token not found" or "Invalid Token"
+    - HTTP 500 Internal Server Error, with an error message [e.g. duplicate email]
+
+### - Get company's all members (pagination support):
+- **Endpoint:** `/company/getMembers?page=<int>&pageSize=<int>` (parameters are optional, defualt page=1, pageSize=10)
+- **Method:** GET
+- **Request Header:** 'Authorization: Bearer {JWT token}'
+- **Success Response:** HTTP 200 OK, JSON {"total_members", "total_pages", "members": [a JSON array of {"email", "first_name", "last_name", "phone_number"}]}
+- **Error Response:**
+    - HTTP 400 Bad Request, with an error message
+    - HTTP 401 Unauthorized, with an error message "JWT token not found" or "Invalid Token"
+    - HTTP 500 Internal Server Error, with an error message [e.g. duplicate email]
+
+### - Delete a member as admin:
+- **Endpoint:** `/admin/member/removeMember/<string:memberEmail>`
+- **Method:** DELETE
+- **Request Header:** 'Authorization: Bearer {JWT token}'
+- **Success Response:** HTTP 204 No Content
+- **Error Response:**
+    - HTTP 400 Bad Request, with an error message [e.g. no matching member found]
+    - HTTP 401 Unauthorized, with an error message "JWT token not found" or "Invalid Token"
+    - HTTP 500 Internal Server Error, with an error message
+
+### - Change member's info as admin:
+- **Endpoint:** `/admin/member/changeMemberInfo`
+- **Method:** PATCH
+- **Request Header:** 'Authorization: Bearer {JWT token}'
+- **Request Body:** JSON {"first_name", "last_name", "email", "phone_number"} (fields are all optional)
+- **Success Response:** HTTP 200 OK, with a message "Update Success"
+- **Error Response:**
+    - HTTP 400 Bad Request, with an error message [e.g. member email not exists]
+    - HTTP 401 Unauthorized, with an error message "JWT token not found" or "Invalid Token"
+    - HTTP 500 Internal Server Error, with an error message
+
+### - Member login:
+- **Endpoint:** `/member/login`
+- **Method:** POST
+- **Request Header:** 'Authorization: Bearer {JWT token}'
+- **Request Body:** JSON {"email", "password"}
+- **Success Response:** HTTP 200 OK, with a message "Login Successfully"
+- **Error Response:**
+    - HTTP 400 Bad Request, with an error message
+    - HTTP 401 Unauthorized, with an error message "JWT token not found" or "Invalid Token" or member email and password not matching
+    - HTTP 500 Internal Server Error, with an error message
+
+### - Change member's info by self:
+- **Endpoint:** `/member/changeMemberInfo`
+- **Method:** PATCH
+- **Request Header:** 'Authorization: Bearer {JWT token}', 'Cookie: {cookie get after member loged in}'
+- **Request Body:** JSON {"first_name", "last_name", "phone_number"} (fields are all optional)
+- **Success Response:** HTTP 200 OK, with a message "Update Success"
+- **Error Response:**
+    - HTTP 400 Bad Request, with an error message [e.g. member not loged in]
+    - HTTP 401 Unauthorized, with an error message "JWT token not found" or "Invalid Token"
+    - HTTP 500 Internal Server Error, with an error message
+
+### - Member logout:
+- **Endpoint:** `/member/logout`
+- **Method:** POST
+- **Request Header:** 'Authorization: Bearer {JWT token}', 'Cookie: {cookie get after member loged in}'
+- **Success Response:** HTTP 200 OK, with a message "Logout Successfully"
+- **Error Response:**
+    - HTTP 400 Bad Request, with an error message [e.g. member not loged in]
+    - HTTP 401 Unauthorized, with an error message "JWT token not found" or "Invalid Token"
+    - HTTP 500 Internal Server Error, with an error message
+
+### - Get member's info by self:
+- **Endpoint:** `/member/profile`
+- **Method:** GET
+- **Request Header:** 'Authorization: Bearer {JWT token}', 'Cookie: {cookie get after member loged in}'
+- **Success Response:** HTTP 200 OK, with a JSON {"email", "first_name", "last_name"}
+- **Error Response:**
+    - HTTP 400 Bad Request, with an error message [e.g. member not loged in]
+    - HTTP 401 Unauthorized, with an error message "JWT token not found" or "Invalid Token"
+    - HTTP 500 Internal Server Error, with an error message
+
+### - Add a new subscription:
+- **Endpoint:** `/subscription/addSubscription`
+- **Method:** POST
+- **Request Header:** 'Authorization: Bearer {JWT token}'
+- **Request Body:** JSON {"member_email", "subscription_name", "subscription_type", "subscription_status", "next_due_date", "start_date", "billing_info"}
+- **Success Response:** HTTP 200 OK, with a message "Add Subscription Success"
+- **Error Response:**
+    - HTTP 400 Bad Request, with an error message
+    - HTTP 401 Unauthorized, with an error message "JWT token not found" or "Invalid Token"
+    - HTTP 500 Internal Server Error, with an error message
+
+### - Update subscription:
+- **Endpoint:** `/subscription/updateSubscription`
+- **Method:** PATCH
+- **Request Header:** 'Authorization: Bearer {JWT token}'
+- **Request Body:** JSON {"email", "subscription_name", "new_action"}
+- **Success Response:** HTTP 200 OK, with a message "Update Success"
+- **Error Response:**
+    - HTTP 400 Bad Request, with an error message [e.g. no matching member eamil and subscription name]
+    - HTTP 401 Unauthorized, with an error message "JWT token not found" or "Invalid Token"
+    - HTTP 500 Internal Server Error, with an error message
