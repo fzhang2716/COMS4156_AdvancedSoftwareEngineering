@@ -242,6 +242,16 @@ int main() {
         dataservice.sendReminder(req, res, companyId);
     });
 
+    // test Method for delete added record
+    CROW_ROUTE(app, "/admin/deleteRecord")
+    .CROW_MIDDLEWARES(app, JwtMiddleware)
+    .methods(crow::HTTPMethod::DELETE)
+    ([&](const crow::request &req, crow::response &res){
+        auto& ctx = app.get_context<JwtMiddleware>(req);
+        int companyId = ctx.companyId;
+        dataservice.deleteByString(req, res, companyId);
+    });
+
 
     app.port(3000).multithreaded().run();
 }

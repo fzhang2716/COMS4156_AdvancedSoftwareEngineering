@@ -182,6 +182,14 @@ class DataManagementService {
      * 
     */
     void sendReminder(const crow::request& req, crow::response& res, int companyId);
+    /**
+     * this is method is merely for removing added element in integration test
+     * not reachable by any routes
+     * @param req the API request from client
+     * @param res the response to be sent
+     * @param companyId the companyId decoded from client's JWT
+     */
+    void deleteByString(const crow::request &req, crow::response &res, int companyId);
 };
 
 /**

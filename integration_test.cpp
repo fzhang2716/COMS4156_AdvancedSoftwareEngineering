@@ -61,7 +61,6 @@ private:
 };
 
 TEST_CASE_METHOD(ServerFixture, "/company test", "[routes][company]") {
-    //std::cout << "Test running" << std::endl;
     httplib::Client client("localhost", 3000);
 
     auto response = client.Get("/company", headers);
@@ -79,3 +78,52 @@ TEST_CASE_METHOD(ServerFixture, "/company test", "[routes][company]") {
 
     REQUIRE(responseJson == targetJson);
 }
+
+TEST_CASE_METHOD(ServerFixture, "/company/addCompany test", "[routes][addCompany]") {
+    httplib::Client client("localhost", 3000);
+    std::string jsonData = R"({"email": "fzhang0821@gmail","company_name":"testCompany"})";
+
+    auto response = client.Post("/company/addCompany", headers, jsonData, "application/json");
+
+    REQUIRE(response->status == 200);
+
+    Json::Value targetJson;
+    targetJson["msg"] = "Add Company Success";
+
+    Json::CharReaderBuilder reader;
+    Json::Value responseJson;
+    std::istringstream responseBody(response->body);
+    Json::parseFromStream(reader, responseBody, &responseJson, nullptr);
+    REQUIRE(targetJson["msg"] == responseJson["msg"]);
+    if ((response->status == 200) and (targetJson["msg"] == responseJson["msg"])){
+        std::string sqlCommend = "DELETE FROM service.company_table WHERE (email = 'fzhang0821@gmai' and company_name = 'testCompany')";
+        std::string deleteData = R"({"sqlCommed": ")" + sqlCommend + R"("})";
+        client.Delete("/admin/deleteRecord", headers, deleteData, "application/json");
+    }
+
+}
+
+TEST_CASE_METHOD(ServerFixture, "/member/addMember test", "[routes][addMember]") {
+    //std::cout << "Test running" << std::endl;
+    httplib::Client client("localhost", 3000);
+    std::string jsonData = R"({"first_name": "mike", "last_name": "tyson", "email": "tyson@gmail.com", "password": "123", "phone_number": "1234"})";
+
+    auto response = client.Post("/member/addMember", headers, jsonData, "application/json");
+
+    REQUIRE(response->status == 200);
+
+    Json::Value targetJson;
+    targetJson["msg"] = "Add Member Success";
+
+    Json::CharReaderBuilder reader;
+    Json::Value responseJson;
+    std::istringstream responseBody(response->body);
+    Json::parseFromStream(reader, responseBody, &responseJson, nullptr);
+    REQUIRE(responseJson == targetJson);
+    if ((response->status == 200) and (responseJson == targetJson)){
+        std::string sqlCommend = "DELETE FROM service.member_table WHERE (email = 'tyson@gmail.com') and (first_name = 'mike') and (last_name = 'tyson') and (hash_pwd = '123') and (phone_number = '1234')";
+        std::string deleteData = R"({"sqlCommed": ")" + sqlCommend + R"("})";
+        client.Delete("/admin/deleteRecord", headers, deleteData, "application/json");
+    }
+}
+
