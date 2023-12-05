@@ -244,6 +244,16 @@ int main() {
         dataservice.updateSubscription(req, res, companyId);
     });
 
+    // Patch Method: update the status of a given subscription as admin
+    CROW_ROUTE(app, "/admin/subscription/updateSubscription")
+    .CROW_MIDDLEWARES(app, JwtMiddleware)
+    .methods(crow::HTTPMethod::PATCH)
+    ([&](const crow::request &req, crow::response &res){
+        auto& ctx = app.get_context<JwtMiddleware>(req);
+        int companyId = ctx.companyId;
+        dataservice.updateSubscriptionAdmin(req, res, companyId);
+    });
+
     // Get Method: view subscriptions of a member with a company as admin
     CROW_ROUTE(app, "/admin/subscription/viewSubscriptions")
     .CROW_MIDDLEWARES(app, JwtMiddleware)

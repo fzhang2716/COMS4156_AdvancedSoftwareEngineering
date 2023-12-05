@@ -203,7 +203,7 @@ Refer to this [API Curl Example](API.md) to see example API requests with curl.
 - **Endpoint:** `/admin/member/changeMemberInfo`
 - **Method:** PATCH
 - **Request Header:** 'Authorization: Bearer {JWT token}'
-- **Request Body:** JSON {"first_name", "last_name", "email", "phone_number"} (fields are all optional)
+- **Request Body:** JSON {"first_name", "last_name", "email", "phone_number"} 
 - **Success Response:** HTTP 200 OK, with a message "Update Success"
 - **Error Response:**
     - HTTP 400 Bad Request, with an error message [e.g. member email not exists]
@@ -225,7 +225,7 @@ Refer to this [API Curl Example](API.md) to see example API requests with curl.
 - **Endpoint:** `/member/changeMemberInfo`
 - **Method:** PATCH
 - **Request Header:** 'Authorization: Bearer {JWT token}', 'Cookie: {cookie get after member loged in}'
-- **Request Body:** JSON {"first_name", "last_name", "phone_number"} (fields are all optional)
+- **Request Body:** JSON {"first_name", "last_name", "phone_number"}
 - **Success Response:** HTTP 200 OK, with a message "Update Success"
 - **Error Response:**
     - HTTP 400 Bad Request, with an error message [e.g. member not loged in]

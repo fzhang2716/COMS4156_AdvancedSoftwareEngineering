@@ -46,16 +46,16 @@ std::string Query::updateCompanyInfoQuery(const std::string& companyName, int co
     return "UPDATE service.company_table SET company_name = '"+ companyName + "' WHERE company_id = " + std::to_string(companyId) + ";";
 }
 
-std::string Query::addMemberQuery(const std::string& companyId,
+std::string Query::addMemberQuery(int companyId,
 const std::string& firstName, const std::string& lastName,
 const std::string& email, const std::string& hash_password, const std::string& phoneNumber) {
     return "Insert into service.member_table (company_id, first_name, last_name, email, hash_pwd, phone_number) Values ("
-    + companyId  + ", '"
+    + std::to_string(companyId)  + ", '"
     + firstName + "', '" + lastName + "', '" + email + "', '" + hash_password + "', '" +
     phoneNumber + "');";
 }
 
-std::string Query::updateMemberInfoQuery(const std::string& companyId,
+std::string Query::updateMemberInfoQuery(int companyId,
 const std::string& firstName, const std::string& lastName,
 const std::string& email, const std::string& phoneNumber) {
     std::string query = "UPDATE service.member_table SET ";
@@ -72,7 +72,7 @@ const std::string& email, const std::string& phoneNumber) {
     query.pop_back();
     query.pop_back(); // remove trailing comma and space
     query += " WHERE company_id = "
-    + companyId + " AND email = '" + email + "';";
+    + std::to_string(companyId) + " AND email = '" + email + "';";
     return query;
 }
 
@@ -99,9 +99,17 @@ std::string Query::updateSubscriptionAction(int companyId, const std::string& em
     const std::string& subscriptionName, const std::string& subscriptionStatus,
     const std::string& currentTime, const std::string& newAction){
     return "UPDATE service.subscription_table SET last_action = '"
-    + subscriptionStatus + "', last_action_date = '" + currentTime + "', subscription_status = '" + newAction + "' WHERE company_id = " + std::to_string(companyId) + " AND member_email = '" + email + + "' AND subscription_name = '" + subscriptionName + "';";
+    + subscriptionStatus + "', last_action_date = '" + currentTime + "', subscription_status = '" + newAction + "' WHERE company_id = " + std::to_string(companyId) + " AND member_email = '" + email +  "' AND subscription_name = '" + subscriptionName + "';";
 }
 
+std::string Query::updateSubscriptionAdmin(const std::string& subscription_id,
+const std::string& subscription_name, const std::string& subscription_type,
+const std::string& subscription_status, const std::string& start_date, const std::string& next_due_date,  const std::string& billing_info) {
+    std::string query = "UPDATE service.subscription_table SET subscription_name ='" + subscription_name 
+    + "', subscription_type = '"+ subscription_type + "', subscription_status = '"+ subscription_status 
+    + "', start_date = '"+ start_date + "', next_due_date = '"+ next_due_date + "', billing_info = '"+ billing_info + "' WHERE subscription_id = '" + subscription_id + "';";
+    return query;
+}
 std::string Query::searchFutureExpireSubscriptioByCompanyIdAndEmailAndrangeDaysAndsubscriptionId
 (int companyId, const std::string&  targetTime, const std::string&  subscriptionName) {
     std::string queryStmt = "SELECT member_email FROM service.subscription_table WHERE company_id = "

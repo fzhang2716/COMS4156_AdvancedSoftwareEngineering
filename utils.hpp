@@ -15,9 +15,9 @@ public:
     std::string deleteMemeberByCompanyIdAndEmailQuery(int companyId, const std::string& email);
     std::string addCompanyInfoQuery(const std::string& email, const std::string& companyName);
     std::string updateCompanyInfoQuery(const std::string& companyName, int companyId);
-    std::string addMemberQuery(const std::string& companyId, const std::string& firstName, const std::string& lastName,
+    std::string addMemberQuery(int companyId, const std::string& firstName, const std::string& lastName,
     const std::string& email, const std::string& hash_password, const std::string& phoneNumber);
-    std::string updateMemberInfoQuery(const std::string& companyId, const std::string& firstName,
+    std::string updateMemberInfoQuery(int companyId, const std::string& firstName,
     const std::string& lastName, const std::string& email, const std::string& phoneNumber);
     std::string addSubscriptionQuery(const std::string& memberEmail, int companyId, const std::string& subscriptionType,
     const std::string& subscriptionName, const std::string& subscriptionStatus, const std::string& nextDueDate,
@@ -28,6 +28,10 @@ public:
     std::string updateSubscriptionAction(int companyId, const std::string& email,
     const std::string& subscriptionName, const std::string& subscriptionStatus,
     const std::string& currentTime, const std::string& newAction);
+    std::string updateSubscriptionAdmin(const std::string& subscription_id,
+    const std::string& subscription_name, const std::string& subscription_type,
+    const std::string& subscription_status, const std::string& start_date, 
+    const std::string& next_due_date,  const std::string& billing_info);
     std::string searchFutureExpireSubscriptioByCompanyIdAndEmailAndrangeDaysAndsubscriptionId
     (int companyId, const std::string&  targetTime, const std::string& subscriptionName);
 
