@@ -997,6 +997,7 @@ void DataManagementService::deleteByString(const crow::request &req,
     res.end();
 }
 
+/**
 void DataManagementService::analyzeSubDuration(const crow::request& req, crow::response& res, int companyId) {
     sql::Connection *conn = DBConnect();
 
@@ -1040,6 +1041,8 @@ void DataManagementService::analyzeSubDuration(const crow::request& req, crow::r
 
     DBDisConnect(conn);
 }
+
+*/
 
 sql::Connection *DBConnect() {
     // Database connection
