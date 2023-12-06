@@ -27,7 +27,7 @@ void plot_hist(const std::vector<float>& data, const std::string& field) {
     float binWidth = (max - min) / numBins;
 
     std::vector<int> bins(numBins, 0);
-    for (int i = 0; i < data.size(); ++i) {
+    for (unsigned int i = 0; i < data.size(); ++i) {
         int index = (data[i] - min) / binWidth;
         index = std::min(index, numBins-1);
         bins[index] = bins[index] + 1;
