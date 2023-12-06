@@ -235,7 +235,7 @@ int main() {
     // Get Method: send email to a list of about expiring subscription
     CROW_ROUTE(app, "/company/sendReminder")
     .CROW_MIDDLEWARES(app, JwtMiddleware)
-    .methods(crow::HTTPMethod::GET)
+    .methods(crow::HTTPMethod::POST)
     ([&](const crow::request &req, crow::response &res){
         auto& ctx = app.get_context<JwtMiddleware>(req);
         int companyId = ctx.companyId;

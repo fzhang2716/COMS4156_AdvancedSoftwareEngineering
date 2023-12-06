@@ -158,3 +158,119 @@ TEST_CASE_METHOD(ServerFixture, "/subscription/addSubscription test", "[routes][
     }
 }
 
+
+TEST_CASE_METHOD(ServerFixture, "/admin/member/changeMemberInfo test", "[routes][changeMemberInfo]") {
+    httplib::Client client("localhost", 3000);
+    std::string jsonData = R"({
+        "email": "m2@gmail.com",
+        "first_name": "new_name",
+        "last_name": "new_name",
+        "phone_number": "123213"
+    })";
+    
+    auto response = client.Patch("/admin/member/changeMemberInfo", headers, jsonData, "application/json");
+    REQUIRE(response->status == 200);
+
+    Json::Value targetJson;
+    targetJson["msg"] = "Update success";
+
+    Json::CharReaderBuilder reader;
+    Json::Value responseJson;
+    std::istringstream responseBody(response->body);
+    Json::parseFromStream(reader, responseBody, &responseJson, nullptr);
+    REQUIRE(responseJson == targetJson);
+}
+
+
+
+TEST_CASE_METHOD(ServerFixture, "/admin/member/removeMember/<string> and addmemeber test", "[routes][addSubscription]") {
+    httplib::Client client("localhost", 3000);
+
+
+    std::string jsonData = R"({"first_name": "mike", "last_name": "tyson", "email": "tyson@gmail.com", "password": "123", "phone_number": "1234"})";
+
+    auto response = client.Post("/member/addMember", headers, jsonData, "application/json");
+
+    REQUIRE(response->status == 200);
+
+    std::string email = "tyson@gmail.com";
+    std::string requestUrl = "/admin/member/removeMember/" + email; 
+
+    auto deleteResponse = client.Delete(requestUrl.c_str(), headers, "", "application/json");
+    REQUIRE(deleteResponse->status == 204);
+
+    auto deleteAgainResponse = client.Delete(requestUrl.c_str(), headers, "", "application/json");
+    REQUIRE(deleteAgainResponse->status == 400);
+}
+
+//need login, do it later
+// TEST_CASE_METHOD(ServerFixture, "/member/changeMemberInfo test", "[routes][changeMemberInfo]") {
+//     httplib::Client client("localhost", 3000);
+//     std::string jsonData = R"({
+//         "email": "m2@gmail.com",
+//         "first_name": "new_name",
+//         "last_name": "new_name",
+//         "phone_number": "123213"
+//     })";
+    
+//     auto response = client.Patch("/member/changeMemberInfo", headers, jsonData, "application/json");
+//     REQUIRE(response->status == 200);
+
+//     Json::Value targetJson;
+//     targetJson["msg"] = "Update success";
+
+//     Json::CharReaderBuilder reader;
+//     Json::Value responseJson;
+//     std::istringstream responseBody(response->body);
+//     Json::parseFromStream(reader, responseBody, &responseJson, nullptr);
+//     REQUIRE(responseJson == targetJson);
+// }
+
+
+TEST_CASE_METHOD(ServerFixture, "/subscription/updateSubscription test", "[routes][updateSubscription]") {
+    httplib::Client client("localhost", 3000);
+    std::string jsonData = R"({
+        "email": "m2@gmail.com",
+        "subscription_name": "hulu",
+        "new_action": "deactivate"})";
+    
+    auto response = client.Patch("/subscription/updateSubscription", headers, jsonData, "application/json");
+    REQUIRE(response->status == 200);
+
+    Json::Value targetJson;
+    targetJson["msg"] = "Update Success";
+
+    Json::CharReaderBuilder reader;
+    Json::Value responseJson;
+    std::istringstream responseBody(response->body);
+    Json::parseFromStream(reader, responseBody, &responseJson, nullptr);
+    REQUIRE(responseJson == targetJson);
+}
+
+TEST_CASE_METHOD(ServerFixture, "/company/getExpiringSubscriptionByTime test", "[routes][updateSubscription]") {
+    httplib::Client client("localhost", 3000);
+    std::string url = "/company/getExpiringSubscriptionByTime?subscription_name=hulu&days=100"; 
+    auto response = client.Get(url, headers);
+    REQUIRE(response->status == 200);
+}
+
+
+TEST_CASE_METHOD(ServerFixture, "/company/sendReminder test", "[routes][sendReminder]") {
+    httplib::Client client("localhost", 3000);
+    std::string jsonData = R"({
+        "number": "1",
+        "target_time": "2023-11-28 20:07:46",
+        "0": "hz2716@columbia.edu"})";
+    
+    auto response = client.Post("/company/sendReminder", headers, jsonData, "application/json");
+    REQUIRE(response->status == 200);
+
+    Json::Value targetJson;
+    targetJson["msg"] = "Send successfully";
+
+    Json::CharReaderBuilder reader;
+    Json::Value responseJson;
+    std::istringstream responseBody(response->body);
+    Json::parseFromStream(reader, responseBody, &responseJson, nullptr);
+    REQUIRE(responseJson == targetJson);
+}
