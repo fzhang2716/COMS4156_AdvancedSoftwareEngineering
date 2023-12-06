@@ -96,6 +96,16 @@ int main() {
         dataservice.changeCompany(req, res, companyId);
     });
 
+    // Get Method: get all members of a company
+    CROW_ROUTE(app, "/company/getMembers")
+     .CROW_MIDDLEWARES(app, JwtMiddleware)
+    .methods(crow::HTTPMethod::GET)
+    ([&](const crow::request &req, crow::response &res){
+        auto& ctx = app.get_context<JwtMiddleware>(req);
+        int companyId = ctx.companyId;
+        dataservice.getCompanyMembers(req, res, companyId);
+    });
+
     //Post Method: request a new access token
     CROW_ROUTE(app, "/recoverCompany")
     .methods(crow::HTTPMethod::POST)
@@ -113,6 +123,7 @@ int main() {
         dataservice.addMember(req, res, companyId);
     });
 
+    // Post Method: member login
     CROW_ROUTE(app, "/member/login")
     .methods(crow::HTTPMethod::POST)
     .CROW_MIDDLEWARES(app, JwtMiddleware)
@@ -132,6 +143,7 @@ int main() {
         res.end();
     });
 
+    // Post Method: member logout
     CROW_ROUTE(app, "/member/logout")
     .methods(crow::HTTPMethod::POST)
     .CROW_MIDDLEWARES(app, JwtMiddleware)
@@ -145,6 +157,7 @@ int main() {
         res.end();
     });
 
+    // Get Method: get member's profile (login cookies protected)
     CROW_ROUTE(app, "/member/profile")
     .methods(crow::HTTPMethod::GET)
     .CROW_MIDDLEWARES(app, JwtMiddleware)
@@ -163,6 +176,15 @@ int main() {
         }       
     });
     
+    // Get Method: get member's profile (unprotected)
+    CROW_ROUTE(app, "/admin/member/profile/<string>")
+    .methods(crow::HTTPMethod::GET)
+    .CROW_MIDDLEWARES(app, JwtMiddleware)
+    ([&](const crow::request& req, crow::response &res, std::string email){
+        auto& ctx = app.get_context<JwtMiddleware>(req);
+        int companyId = ctx.companyId;
+        dataservice.getMemberInfo(req, res, companyId, email);    
+    });
 
     // Delete Method: delete member
     CROW_ROUTE(app, "/admin/member/removeMember/<string>")
@@ -220,6 +242,26 @@ int main() {
         auto& ctx = app.get_context<JwtMiddleware>(req);
         int companyId = ctx.companyId;
         dataservice.updateSubscription(req, res, companyId);
+    });
+
+    // Patch Method: update the status of a given subscription as admin
+    CROW_ROUTE(app, "/admin/subscription/updateSubscription")
+    .CROW_MIDDLEWARES(app, JwtMiddleware)
+    .methods(crow::HTTPMethod::PATCH)
+    ([&](const crow::request &req, crow::response &res){
+        auto& ctx = app.get_context<JwtMiddleware>(req);
+        int companyId = ctx.companyId;
+        dataservice.updateSubscriptionAdmin(req, res, companyId);
+    });
+
+    // Get Method: view subscriptions of a member with a company as admin
+    CROW_ROUTE(app, "/admin/subscription/viewSubscriptions")
+    .CROW_MIDDLEWARES(app, JwtMiddleware)
+    .methods(crow::HTTPMethod::GET)
+    ([&](const crow::request &req, crow::response &res){
+        auto& ctx = app.get_context<JwtMiddleware>(req);
+        int companyId = ctx.companyId;
+        dataservice.viewSubscriptions(req, res, companyId, true);
     });
 
     // Get Method: get a list of email about expiring subscription
