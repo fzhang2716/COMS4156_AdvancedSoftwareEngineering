@@ -10,8 +10,9 @@
 #include <curl/curl.h>
 #include <json/json.h>
 #include <vector>
-#include "analyze_data.hpp"
+#include "analyze_data.cpp"
 #include "send_attachment.cpp"
+#include "make_attachment.cpp"
 
 using namespace std;
 Query queryGenerator;
@@ -997,7 +998,6 @@ void DataManagementService::deleteByString(const crow::request &req,
     res.end();
 }
 
-/**
 void DataManagementService::analyzeSubDuration(const crow::request& req, crow::response& res, int companyId) {
     sql::Connection *conn = DBConnect();
 
@@ -1016,9 +1016,9 @@ void DataManagementService::analyzeSubDuration(const crow::request& req, crow::r
                 durations.push_back(duration);
             }
 
-            Analyze Analysis;
-            std::string analysis = Analysis.analyze(durations, "Durations (day)");
-            send(email, "", analysis);
+            std::string analysis = analyze(durations, "Durations (day)");
+            plot_hist(durations, "Durations (day)");
+            send(email, "figure.pdf", analysis);
 
             res.code = 200;
             res.add_header("Content-Type", "application/json");
@@ -1041,8 +1041,6 @@ void DataManagementService::analyzeSubDuration(const crow::request& req, crow::r
 
     DBDisConnect(conn);
 }
-
-*/
 
 sql::Connection *DBConnect() {
     // Database connection
