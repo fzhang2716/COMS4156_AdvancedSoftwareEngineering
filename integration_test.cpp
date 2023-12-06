@@ -252,6 +252,14 @@ TEST_CASE_METHOD(ServerFixture, "/company/getExpiringSubscriptionByTime test", "
     std::string url = "/company/getExpiringSubscriptionByTime?subscription_name=hulu&days=100"; 
     auto response = client.Get(url, headers);
     REQUIRE(response->status == 200);
+
+    Json::Value targetJson;
+    Json::CharReaderBuilder reader;
+    Json::Value responseJson;
+    std::istringstream responseBody(response->body);
+    Json::parseFromStream(reader, responseBody, &responseJson, nullptr);
+    REQUIRE(responseJson["0"] == "m2@gmail.com");
+    REQUIRE(responseJson["number"] == "1");
 }
 
 
