@@ -99,6 +99,7 @@ void DataManagementService::getCompanyInfo(const crow::request &req,
 void DataManagementService::addCompany(const crow::request &req,
     crow::response &res) {
     sql::Connection *conn = DBConnect();
+    Json::Value jsonResponse;
     // Try extract companyId, email, hashPwd, and companyName from the request.
     try {
         auto bodyInfo = crow::json::load(req.body);
@@ -118,13 +119,15 @@ void DataManagementService::addCompany(const crow::request &req,
                 std::string jwtToken = generateJwtToken(company_id);
                 
                 res.code = 200;  // OK
-                res.write("Add Company Success \n");
-                res.write("Please save your JWT token: " + jwtToken + "\n");
+                jsonResponse["msg"] = "Add Company Success";
+                jsonResponse["tokenMsg"] = jwtToken;
+                res.write(jsonResponse.toStyledString());
                 res.end();
 
             }else{
                 res.code = 500;  // Internal Server Error
-                res.write("Add Company Failed due to database issue.\n");
+                jsonResponse["error"] = "Add Company Failed due to database issue.";
+                res.write(jsonResponse.toStyledString());
                 res.end();
             }
 
@@ -137,11 +140,14 @@ void DataManagementService::addCompany(const crow::request &req,
             res.code = 500;  // Internal Server Error
             int errorCode = e.getErrorCode();
             if(errorCode == 1062){ // duplicate company email
-                res.write("Add Company Error: You have already registered with this email,"
-                " if you lost your JWT token, please apply for a new one.");
+                jsonResponse["error"] = "Add Company Error: You have already registered with this email,"
+                " if you lost your JWT token, please apply for a new one.";
+                res.write(jsonResponse.toStyledString());
             }
             else{
-                 res.write("Add Company Error: " + std::string(e.what()) + "\n");
+                jsonResponse["error"] = "Add Company Error: " + std::string(e.what());
+                res.write(jsonResponse.toStyledString());
+
             }
            
             res.end();
@@ -151,7 +157,8 @@ void DataManagementService::addCompany(const crow::request &req,
     catch (const std::exception &e) {
         // Catch invalid request errors
         res.code = 400;  // Bad Request
-        res.write("Invalid request \n");
+        jsonResponse["error"] = "Invalid request";
+        res.write(jsonResponse.toStyledString());
         res.end();
     }
     DBDisConnect(conn);
@@ -358,7 +365,7 @@ void DataManagementService::recoverCompany(const crow::request& req, crow::respo
 void DataManagementService::addMember(const crow::request &req,
     crow::response &res, int companyId) {
     sql::Connection *conn = DBConnect();
-    
+    Json::Value jsonResponse;
     if(companyId != -1) {
         try {
             auto bodyInfo = crow::json::load(req.body);
@@ -368,19 +375,22 @@ void DataManagementService::addMember(const crow::request &req,
             std::string password = bodyInfo["password"].s();
             std::string phoneNumber = bodyInfo["phone_number"].s();
 
-            try {
+            try {   
                 std::string query = queryGenerator.addMemberQuery(companyId,
                     firstName, lastName, email, password, phoneNumber);
                 sql::Statement *stmt = conn->createStatement();
                 stmt->execute(query);
                 res.code = 200;  // OK
-                res.write("Add Member Success \n");
+                res.add_header("Content-Type", "application/json");
+                jsonResponse["msg"] = "Add Member Success";
+                res.write(jsonResponse.toStyledString());
                 res.end();
             }
             catch (sql::SQLException &e) {
                 // Catch any SQL errors
                 res.code = 500;  // Internal Server Error
-                res.write("Add Member Error: " + std::string(e.what()) + "\n");
+                jsonResponse["msg"] = "Add Member Error: " + std::string(e.what());
+                res.write(jsonResponse.toStyledString());
                 res.end();
             }
             res.end();
@@ -388,7 +398,8 @@ void DataManagementService::addMember(const crow::request &req,
         catch (std::exception &e) {
             // Catch invalid request errors
             res.code = 400;  // Bad Request
-            res.write("Invalid request \n");
+            jsonResponse["msg"] = "Invalid request";
+            res.write(jsonResponse.toStyledString());
             res.end();
         }
     }
@@ -443,6 +454,7 @@ std::string DataManagementService::memberLogin(const crow::request& req, crow::r
 void DataManagementService::removeMember(const crow::request &req,
     crow::response &res, int companyId, std::string removeEmail) {
     sql::Connection *conn = DBConnect();
+    Json::Value jsonResponse;
 
     if (companyId != -1) {
         sql::Statement *searchStmt = conn->createStatement();
@@ -454,26 +466,28 @@ void DataManagementService::removeMember(const crow::request &req,
                 std::string query = queryGenerator.deleteMemeberByCompanyIdAndEmailQuery(companyId, removeEmail);
                 DeleteStmt->executeUpdate(query);
                 res.code = 204;
-                res.write("Delete Member Success");
+                jsonResponse["msg"] = "Delete Member Success";
+                res.write(jsonResponse.toStyledString());
                 res.end();
             } else {
                 res.code = 400;
-                res.write("No Matching Memeber Found");
+                jsonResponse["error"] = "No Matching Memeber Found";
+                res.write(jsonResponse.toStyledString());
                 res.end();
             }
         }
         catch (sql::SQLException &e) {
             // Catch any SQL errors
             res.code = 500;  // Internal Server Error
-            res.write("SQL Exception - Error code: " + std::to_string(e.getErrorCode()) + "\n");
-            res.write("SQL State: " + e.getSQLState() + "\n");
-            res.write("What: " + std::string(e.what()) + "\n");
+            jsonResponse["error"] = "SQL Exception - Error code: " + std::to_string(e.getErrorCode()) + "\n" + "SQL State: " + e.getSQLState() + "\n" +"What: " + std::string(e.what()) + "\n";
+            res.write(jsonResponse.toStyledString());
             res.end();
         }
         catch (std::exception &e) {
             // Catch invalid request errors
             res.code = 400;  // Bad Request
-            res.write("Invalid request \n");
+            jsonResponse["error"] = "Invalid request \n";
+            res.write(jsonResponse.toStyledString());
             res.end();
         }
     }
@@ -483,6 +497,8 @@ void DataManagementService::removeMember(const crow::request &req,
 void DataManagementService::changeMemberInfoAdmin(const crow::request &req,
     crow::response &res, int companyId) {
     sql::Connection *conn = DBConnect();
+    Json::Value jsonResponse;
+
     if (companyId != -1){
         try {
             auto bodyInfo = crow::json::load(req.body);
@@ -500,7 +516,8 @@ void DataManagementService::changeMemberInfoAdmin(const crow::request &req,
                 firstName, lastName, email, phoneNumber);
                 stmt->execute(query);
                 res.code = 200;  // OK
-                res.write("Update success");
+                jsonResponse["msg"] = "Update success";
+                res.write(jsonResponse.toStyledString());
                 res.end();
             } else {
                 res.code = 400;   // Bad Request
@@ -510,13 +527,15 @@ void DataManagementService::changeMemberInfoAdmin(const crow::request &req,
         }
         catch(const sql::SQLException &e) {
             res.code = 500;
-            res.write("Change Member Info Error: " + std::string(e.what()) + "\n");
+            jsonResponse["err"] = "Change Member Info Error: " + std::string(e.what());
+            res.write(jsonResponse.toStyledString());
             res.end();
         }
         catch (const std::exception &e) {
             // Catch invalid request errors
             res.code = 400;  // Bad Request
-            res.write("Invalid request \n");
+            jsonResponse["err"] = "Invalid request";
+            res.write(jsonResponse.toStyledString());
             res.end();
         }
     }
@@ -608,6 +627,7 @@ void DataManagementService::getMemberInfo(const crow::request& req, crow::respon
 void DataManagementService::addSubscription(const crow::request &req,
     crow::response &res, int companyId) {
     sql::Connection *conn = DBConnect();
+    Json::Value jsonResponse;
 
     if (companyId != -1) {
         try {
@@ -630,32 +650,36 @@ void DataManagementService::addSubscription(const crow::request &req,
                     sql::Statement *stmt = conn->createStatement();
                     stmt->execute(queryString);
                     res.code = 200;  // OK
-                    res.write("Add Subscription Success \n");
+                    jsonResponse["msg"] = "Add Subscription Success";
+                    res.write(jsonResponse.toStyledString());
                     res.end();
                 }
                 catch (sql::SQLException &e) {
                     // Catch any SQL errors
                     res.code = 500;  // Internal Server Error
-                    res.write("Add Subscription Error: " +
-                        std::string(e.what()) + "\n");
+                    jsonResponse["error"] = "Add Subscription Error: " +
+                        std::string(e.what());
                     res.end();
                 }
             }
             else{
                 res.code = 400;  // Bad Request
-                res.write("Member Not Exists");
+                jsonResponse["error"] = "Member Not Exists";
+                res.write(jsonResponse.toStyledString());
                 res.end();
             }
         }
         catch(const sql::SQLException &e) {
             res.code = 500;
-            res.write("Add Subscription Error: " + std::string(e.what()) + "\n");
+            jsonResponse["error"] = "Add Subscription Error: " + std::string(e.what());
+            res.write(jsonResponse.toStyledString());
             res.end();
         }
         catch (std::exception &e) {
             // Catch invalid request errors
             res.code = 400;  // Bad Request
-            res.write("Invalid request \n");
+            jsonResponse["error"] = "Invalid request";
+            res.write(jsonResponse.toStyledString());
             res.end();
         }
     }
@@ -667,6 +691,7 @@ void DataManagementService::addSubscription(const crow::request &req,
 void DataManagementService::updateSubscription(const crow::request &req,
     crow::response &res, int companyId) {
     sql::Connection *conn = DBConnect();
+    Json::Value jsonResponse;
 
     if(companyId != -1) {
         try {
@@ -690,23 +715,27 @@ void DataManagementService::updateSubscription(const crow::request &req,
                 updateSubscriptionAction(companyId, email, subscriptionName, subscriptionStatus, currentTime, newAction);
                 stmt->execute(query);
                 res.code = 200;
-                res.write("Update Success");
+                jsonResponse["msg"] = "Update Success";
+                res.write(jsonResponse.toStyledString());
 
             } else {
                 res.code = 400;
-                res.write("No Query Found To Update");
+                jsonResponse["err"] = "No Query Found To Update";
+                res.write(jsonResponse.toStyledString());
+
             }
             res.end();
         }
         catch(const sql::SQLException &e) {
             res.code = 500;
-            res.write("Change Member Info Error: " + std::string(e.what()) + "\n");
+            jsonResponse["err"] = "Change Member Info Error: " + std::string(e.what());
+            res.write(jsonResponse.toStyledString());
             res.end();
         }
         catch (const std::exception &e) {
             // Catch invalid request errors
             res.code = 400;  // Bad Request
-            res.write("Invalid request \n");
+
             res.end();
         }
     }
@@ -880,15 +909,17 @@ void DataManagementService::getExpiringSubscriptionByTime(const crow::request &r
 
 void DataManagementService::sendReminder(const crow::request &req,
                                          crow::response &res, int companyId) {
+    Json::Value jsonResponse;
+
     if (companyId != -1) {
         try {
             auto bodyInfo = crow::json::load(req.body);
             int num = bodyInfo["number"].i();
             int count = 0;
-            std::cout << num;
             if (num == 0) {
                 res.code = 400;
-                res.write("No email to send");
+                jsonResponse["error"] = "No email to send";
+                res.write(jsonResponse.toStyledString());
             } else {
                 std::string targetTime = bodyInfo["target_time"].s();
                 std::cout << targetTime;
@@ -906,7 +937,7 @@ void DataManagementService::sendReminder(const crow::request &req,
 
                         // Set the JSON payload with email details
                         std::string jsonPayload = "{\"personalizations\":[{\"to\": [{\"email\":\"" + email +
-                        "\"}]}],\"from\": {\"email\":\"hl3608@columbia.edu\"},\"subject\": \"SubManager New Token\",\"content\": [{\"type\": \"text/plain\", \"value\": \"Your subscription is about to expire before"
+                        "\"}]}],\"from\": {\"email\":\"hl3608@columbia.edu\"},\"subject\": \"SubManager New Token\",\"content\": [{\"type\": \"text/plain\", \"value\": \"Your subscription is about to expire before "
                         + targetTime + " \"}]}";
 
                         curl_easy_setopt(curl, CURLOPT_URL, url);
@@ -929,27 +960,41 @@ void DataManagementService::sendReminder(const crow::request &req,
                             curl_easy_cleanup(curl);
                         } catch (const std::exception &e) {
                             res.code = 500;  // Internal Server Error
-                            res.write("Failed to send email" + std::string(e.what()) + "\n");
+                            jsonResponse["error"] = "Failed to send email" + std::string(e.what());
+                            res.write(jsonResponse.toStyledString());
                             res.end();
                         }
                     } else {
                         res.code = 500;  // Internal Server Error
-                        res.write("Failed to send email with curl error\n");
+                        jsonResponse["error"] = "Failed to send email with curl error";
+                        res.write(jsonResponse.toStyledString());
                         res.end();
                     }
                     count += 1;
                 }
                 res.code = 200;
-                res.write("Send successfully");
+                jsonResponse["msg"] = "Send successfully";
+                res.write(jsonResponse.toStyledString());
                 res.end();
             }
         } catch (const std::exception &e) {
             // Catch invalid request errors
             res.code = 400;  // Bad Request
-            res.write("Invalid request \n");
+            jsonResponse["error"] = "Invalid request";
+            res.write(jsonResponse.toStyledString());
             res.end();
         }
     }
+}
+void DataManagementService::deleteByString(const crow::request &req,
+                                         crow::response &res, int companyId) {
+    auto bodyInfo = crow::json::load(req.body);
+    std::string sqlCommed = bodyInfo["sqlCommed"].s();
+    sql::Connection *conn = DBConnect();
+    sql::Statement *stmt = conn->createStatement();
+    stmt->executeQuery(sqlCommed);
+    DBDisConnect(conn);
+    res.end();
 }
 
 void DataManagementService::analyzeSubDuration(const crow::request& req, crow::response& res, int companyId) {
