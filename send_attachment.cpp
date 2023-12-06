@@ -88,7 +88,6 @@ void send(const std::string &email, const std::string &attachment, const std::st
 
     if (curl) {
         const char *url = "https://api.sendgrid.com/v3/mail/send";
-        struct curl_slist *recipients = NULL;
         struct curl_slist *headers = NULL;
 
         curl_easy_setopt(curl, CURLOPT_URL, url);

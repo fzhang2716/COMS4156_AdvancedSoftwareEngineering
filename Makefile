@@ -50,7 +50,7 @@ analyze_data_test.o:
 	$(CC) $(ANALYZETESTFLAGS) -c analyze_data_test.cpp
 
 clean:
-	$(RM) main test integration_test utils_test main.o data_management.o utils.o utils_test.o integration_test.o analyze_data.o analyze_data_test.o
+	$(RM) main test integration_test utils_test analyze_data_test main.o data_management.o utils.o utils_test.o integration_test.o analyze_data.o analyze_data_test.o
 # main: main.cpp data_management.cpp
 # 	$(CC) $(CFLAGS) -pthread -o main main.cpp $(LDLIBS)
 

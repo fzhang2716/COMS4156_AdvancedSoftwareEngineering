@@ -9,6 +9,9 @@
 #include <cstdlib>
 #include <curl/curl.h>
 #include <json/json.h>
+#include <vector>
+#include "analyze_data.hpp"
+#include "send_attachment.cpp"
 
 using namespace std;
 Query queryGenerator;
@@ -993,6 +996,53 @@ void DataManagementService::deleteByString(const crow::request &req,
     DBDisConnect(conn);
     res.end();
 }
+
+/**
+void DataManagementService::analyzeSubDuration(const crow::request& req, crow::response& res, int companyId) {
+    sql::Connection *conn = DBConnect();
+
+    if (companyId != -1) {
+        try {
+            auto bodyInfo = crow::json::load(req.body);
+            std::string email = bodyInfo["email"].s();
+            sql::Statement *stmt = conn->createStatement();
+            std::string query = queryGenerator.searchSubscriptionDurationByCompanyId(companyId);
+            sql::ResultSet *queryResult = stmt->executeQuery(query);
+
+            std::vector<float> durations;
+
+            while (queryResult->next()) {
+                float duration = static_cast<float>(queryResult->getInt("duration"));
+                durations.push_back(duration);
+            }
+
+            Analyze Analysis;
+            std::string analysis = Analysis.analyze(durations, "Durations (day)");
+            send(email, "", analysis);
+
+            res.code = 200;
+            res.add_header("Content-Type", "application/json");
+            res.write("Analyze successfully");
+            res.end();
+            delete queryResult;
+            delete stmt;
+        }
+        catch (const sql::SQLException &e) {
+            res.code = 500;
+            res.write("Analyze Subscription Duration Error: " + std::string(e.what()) + "\n");
+            res.end();
+        }
+        catch (const std::exception &e) {
+            res.code = 400;
+            res.write("Invalid Request \n");
+            res.end();
+        }
+    }
+
+    DBDisConnect(conn);
+}
+
+*/
 
 sql::Connection *DBConnect() {
     // Database connection

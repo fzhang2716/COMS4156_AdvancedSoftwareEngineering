@@ -234,7 +234,7 @@ TEST_CASE_METHOD(ServerFixture, "/admin/member/removeMember/<string> and addmeme
 //     REQUIRE(responseJson == targetJson);
 // }
 
-
+//hi
 TEST_CASE_METHOD(ServerFixture, "/subscription/updateSubscription test", "[routes][updateSubscription]") {
     httplib::Client client("localhost", 3000);
     std::string jsonData = R"({
