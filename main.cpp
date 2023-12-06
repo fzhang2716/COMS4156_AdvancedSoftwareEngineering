@@ -294,6 +294,15 @@ int main() {
         dataservice.deleteByString(req, res, companyId);
     });
 
+    // POST Method: send email to company about the analysis of their member subscription durations
+    CROW_ROUTE(app, "/company/analyzeSubDuration")
+    .CROW_MIDDLEWARES(app, JwtMiddleware)
+    .methods(crow::HTTPMethod::POST)
+    ([&](const crow::request &req, crow::response &res){
+        auto& ctx = app.get_context<JwtMiddleware>(req);
+        int companyId = ctx.companyId;
+        dataservice.analyzeSubDuration(req, res, companyId);
+    });
 
     app.port(3000).multithreaded().run();
 }

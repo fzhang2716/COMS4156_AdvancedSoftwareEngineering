@@ -121,7 +121,7 @@ std::string Query::searchFutureExpireSubscriptioByCompanyIdAndEmailAndrangeDaysA
 }
 
 std::string Query::searchSubscriptionDurationByCompanyId(int companyId) {
-    return "SELECT UNIX_TIMESTAMP(next_due_date-start_date) DIV 86400 AS duration FROM subscription_table WHERE company_id = companyId";
+    return "SELECT DATEDIFF(next_due_date, start_date) AS duration FROM service.subscription_table WHERE company_id = " + std::to_string(companyId) + ";";
 }
 
 std::string getCurrentDateTime() {

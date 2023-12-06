@@ -4,13 +4,13 @@
 # Variables to control Makefile operation
  
 CC = g++
-CFLAGS = -Wall -I /usr/include/cppconn -I jwt-cpp/include -I /usr/include/jsoncpp
+CFLAGS = -Wall -I /usr/include/cppconn -I jwt-cpp/include -I /usr/include/jsoncpp -I/usr/include/python3.8
 TESTCFLAGS = -std=c++14 -Wall -I"Catch2/single_include" -I /usr/include/jsoncpp -I jwt-cpp/include
-ANALYZETESTFLAGS = -std=c++14 -Wall -I"Catch2/single_include" -I/usr/include/python3.9
+ANALYZETESTFLAGS = -std=c++14 -Wall -I"Catch2/single_include" -I/usr/include/python3.8
 LDFLAGS = -L /usr/lib -L jwt-cpp/build -L /usr/include/jsoncpp
 CXXFLAGS = std=c++17
-LDLIBS = -lmysqlcppconn -lssl -lcrypto -lcurl -ljsoncpp -lpthread
-ANALYZELDLIBS = -lpython3.9 -lcurl -lssl -lcrypto
+LDLIBS = -lmysqlcppconn -lssl -lcrypto -lcurl -ljsoncpp -lpthread -lpython3.8
+ANALYZELDLIBS = -lpython3.8 -lcurl -lssl -lcrypto
  
 # ****************************************************
 # Targets needed to bring the executable up to date
@@ -19,14 +19,15 @@ all: main utils_test integration_test analyze_data_test
 main: main.o data_management.o utils.o
 	$(CC) $(CFLAGS) -pthread -o main main.o data_management.o utils.o $(LDFLAGS) $(LDLIBS)
 
+
 utils_test: utils_test.o utils.o
 	$(CC) $(TESTCFLAGS) -o utils_test utils_test.o utils.o
 
 integration_test: utils.o integration_test.o data_management.o
 	$(CC) $(TESTCFLAGS) -o integration_test utils.o integration_test.o data_management.o $(LDFLAGS) $(LDLIBS)
 
-analyze_data_test: analyze_data.o analyze_data_test.o
-	$(CC) $(ANALYZETESTFLAGS) -o analyze_data_test analyze_data.o analyze_data_test.o $(ANALYZELDLIBS)
+analyze_data_test: analyze_data_test.o
+	$(CC) $(ANALYZETESTFLAGS) -o analyze_data_test analyze_data_test.o $(ANALYZELDLIBS)
 
 utils_test.o:
 	$(CC) $(TESTCFLAGS) -c utils_test.cpp
