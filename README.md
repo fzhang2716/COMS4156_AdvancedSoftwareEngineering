@@ -60,9 +60,9 @@ sudo apt-get install libjsoncpp-dev
 git clone https://github.com/yhirose/cpp-httplib.git
 ```
 ### [matplotlib-cpp](https://github.com/lava/matplotlib-cpp)
-Need to install Python3.9 first
+Need to install Python3.8 first
 ```
-sudo apt-get install python3-matplotlib python3-numpy python3.9-dev
+sudo apt-get install python3-matplotlib python3-numpy python3.8-dev
 ```
 
 ## Compile and Run
