@@ -1004,7 +1004,7 @@ void DataManagementService::analyzeSubDuration(const crow::request& req, crow::r
         try {
             auto bodyInfo = crow::json::load(req.body);
             std::string email = bodyInfo["email"].s();
-            Sql::Statement *stmt = conn->createStatement();
+            sql::Statement *stmt = conn->createStatement();
             std::string query = queryGenerator.searchSubscriptionDurationByCompanyId(companyId);
             sql::ResultSet *queryResult = stmt->executeQuery(query);
 
@@ -1015,7 +1015,8 @@ void DataManagementService::analyzeSubDuration(const crow::request& req, crow::r
                 durations.push_back(duration);
             }
 
-            std::string analysis = Analyze::analyze(durations, "Durations (day)");
+            Analyze Analysis;
+            std::string analysis = Analysis.analyze(durations, "Durations (day)");
             send(email, "", analysis);
 
             res.code = 200;
