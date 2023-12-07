@@ -181,7 +181,17 @@ class DataManagementService {
      * 
     */
     void updateSubscriptionAdmin(const crow::request& req, crow::response& res, int companyId);
-
+    
+    /**
+     * Get all subscriptions of a company
+     * 
+     * @param req the API request from client
+     * @param res the response to be sent
+     * @param companyId the companyId decoded from client's JWT
+     * 
+    */
+    void getCompanySubscriptions(const crow::request& req, crow::response& res, int companyId);
+    
     /**
      * view all subscriptions of a member with a company
      * 
