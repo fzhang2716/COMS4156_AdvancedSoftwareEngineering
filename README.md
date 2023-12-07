@@ -112,7 +112,14 @@ Result:
 ===============================================================================
 All tests passed (2 assertions in 1 test case)
 ```
-
+## Static Analysis Tool
+We use Cppcheck, which is a static analysis tool for C/C++ code. It provides unique code analysis to detect bugs and focuses on detecting undefined behaviour and dangerous coding constructs. 
+```
+sudo apt-get install cppcheck
+cppcheck *.cpp --force --output-file=cppcheck-report.txt
+```
+We include such static analysis in our CI.
+##
 ## Style Check
 We use Cpplint, which is a command-line tool to check C/C++ files for style issues following Google's C++ style guide.
 ```

@@ -1,0 +1,6 @@
+Crow/include/crow/utility.h:44:29: error: Syntax Error: AST broken, ternary operator lacks ':'. [internalAstError]
+            return i >= len ? throw OutOfRange(i, len) : i;
+                            ^
+Crow/include/crow/utility.h:197:32: error: Syntax Error: AST broken, ternary operator lacks ':'. [internalAstError]
+            return s[p] == 0   ? throw std::runtime_error("unmatched tag <") :
+                               ^

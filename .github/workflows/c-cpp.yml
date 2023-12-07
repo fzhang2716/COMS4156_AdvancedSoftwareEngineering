@@ -51,6 +51,17 @@ jobs:
         sudo cmake --build build/ --target install
         cd ..
     
+    - name: Cppcheck for Static Bug Analysis
+      run: |
+        sudo apt-get install cppcheck
+        cppcheck *.cpp --force --output-file=cppcheck-report.txt
+
+    - name: Upload Cppcheck Report
+      uses: actions/upload-artifact@v2
+      with:
+        name: cppcheck-report
+        path: cppcheck-report.txt
+    
     - name: Build Project
       run: |
           make clean
