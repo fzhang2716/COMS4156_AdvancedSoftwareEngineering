@@ -124,7 +124,7 @@ We include such static analysis in our CI.
 We use Cpplint, which is a command-line tool to check C/C++ files for style issues following Google's C++ style guide.
 ```
 pip install cpplint
-cpplint [filename]
+cpplint --linelength=200 --filter=-runtime/references [filename]
 ```
 
 ## REST API

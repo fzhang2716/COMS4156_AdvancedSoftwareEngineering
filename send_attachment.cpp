@@ -1,11 +1,15 @@
-#include <curl/curl.h>
-#include "data_management.hpp"
-#include <iostream>
-#include <fstream>
-#include <sstream>
+/*
+ *   Copyright (c) 2023 Debugteam
+ *   All rights reserved.
+ */
 #include <openssl/bio.h>
 #include <openssl/buffer.h>
 #include <openssl/evp.h>
+#include <curl/curl.h>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include "./data_management.hpp"
 
 std::string base64_encode(const std::string &input) {
     BIO *bio, *b64;
@@ -92,7 +96,7 @@ void send(const std::string &email, const std::string &attachment, const std::st
 
         curl_easy_setopt(curl, CURLOPT_URL, url);
 
-        //Put a private key here
+        // Put a private key here
         std::string auth = "";
         headers = curl_slist_append(headers, auth.c_str());
         headers = curl_slist_append(headers, "Content-Type: application/json");
@@ -105,8 +109,7 @@ void send(const std::string &email, const std::string &attachment, const std::st
             pdfStream << pdfFile.rdbuf();
             std::string pdfContent = pdfStream.str();
             encoded = base64_encode(pdfContent);
-        }
-        else {
+        } else {
             encoded = "";
         }
         std::string jsonPayload = make_payload(email, encoded, message);

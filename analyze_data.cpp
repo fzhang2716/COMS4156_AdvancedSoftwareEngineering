@@ -1,3 +1,7 @@
+/*
+ *   Copyright (c) 2023 Debugteam
+ *   All rights reserved.
+ */
 #include <string>
 #include <vector>
 #include <algorithm>

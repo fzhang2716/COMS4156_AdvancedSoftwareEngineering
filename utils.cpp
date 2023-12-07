@@ -2,13 +2,13 @@
  *   Copyright (c) 2023 Debugteam
  *   All rights reserved.
  */
+#include <jwt-cpp/jwt.h>
 #include <string>
-#include <chrono>
+#include <chrono>  //NOLINT
 #include <ctime>
 #include <iomanip>
 #include <iostream>
 #include "./utils.hpp"
-#include <jwt-cpp/jwt.h>
 
 std::string Query::authenticationQuery(const std::string& username,
 const std::string& password) {
@@ -59,28 +59,27 @@ std::string Query::updateMemberInfoQuery(int companyId,
 const std::string& firstName, const std::string& lastName,
 const std::string& email, const std::string& phoneNumber) {
     std::string query = "UPDATE service.member_table SET ";
-    if(!firstName.empty()){
+    if (!firstName.empty()) {
         query += "first_name ='" + firstName + "', ";
     }
-    if(!lastName.empty()){
+    if (!lastName.empty()) {
         query += "last_name = '"+ lastName + "', ";
     }
-    if(!phoneNumber.empty()){
+    if (!phoneNumber.empty()) {
         query += "phone_number = '"+ phoneNumber+ "', ";
     }
 
     query.pop_back();
-    query.pop_back(); // remove trailing comma and space
+    query.pop_back();  // remove trailing comma and space
     query += " WHERE company_id = "
     + std::to_string(companyId) + " AND email = '" + email + "';";
     return query;
 }
 
-std::string Query::addSubscriptionQuery(const std::string& memberEmail, int companyId, const std::string& subscriptionName, 
-    const std::string& subscriptionType, const std::string& subscriptionStatus, const std::string& nextDueDate, 
-    const std::string& startDate, const std::string& billingInfo){
-       
-    return "Insert into service.subscription_table (member_email, company_id, subscription_name, subscription_type, subscription_status, next_due_date, start_date, billing_info) Values ('" + memberEmail + "', '" + std::to_string(companyId) + "', '" +
+std::string Query::addSubscriptionQuery(const std::string& memberEmail, int companyId, const std::string& subscriptionName,
+    const std::string& subscriptionType, const std::string& subscriptionStatus, const std::string& nextDueDate,
+    const std::string& startDate, const std::string& billingInfo) {
+    return "Insert into service.subscription_table (member_email, company_id, subscription_name, subscription_type, subscription_status, next_due_date, start_date, billing_info) Values ('" + memberEmail + "', '" + std::to_string(companyId) + "', '" +  //NOLINT
     subscriptionName + "', '" + subscriptionType + "', '" + subscriptionStatus + "', '" +
     nextDueDate + "', '" + startDate + "', '" + billingInfo + "');";
     }
@@ -96,7 +95,7 @@ std::string Query::searchSubscriptioByCompanyIdAndEmailAndSubscriptionNameQuery(
 }
 
 std::string Query::updateSubscriptionAction(const std::string& subscription_id,
-    const std::string& lastAction, const std::string& currentTime){
+    const std::string& lastAction, const std::string& currentTime) {
     return "UPDATE service.subscription_table SET last_action = '"
     + lastAction + "', last_action_date = '" + currentTime + "' WHERE subscription_id = '" + subscription_id + "';";
 }
@@ -104,14 +103,14 @@ std::string Query::updateSubscriptionAction(const std::string& subscription_id,
 std::string Query::updateSubscriptionAdmin(const std::string& subscription_id,
 const std::string& subscription_name, const std::string& subscription_type,
 const std::string& subscription_status, const std::string& start_date, const std::string& next_due_date,  const std::string& billing_info) {
-    std::string query = "UPDATE service.subscription_table SET subscription_name ='" + subscription_name 
-    + "', subscription_type = '"+ subscription_type + "', subscription_status = '"+ subscription_status 
+    std::string query = "UPDATE service.subscription_table SET subscription_name ='" + subscription_name
+    + "', subscription_type = '"+ subscription_type + "', subscription_status = '"+ subscription_status
     + "', start_date = '"+ start_date + "', next_due_date = '"+ next_due_date + "', billing_info = '"+ billing_info + "' WHERE subscription_id = '" + subscription_id + "';";
     return query;
 }
 
 std::string Query::updateSubscriptionMember(const std::string& subscription_id, const std::string& subscription_status, const std::string& billing_info) {
-    std::string query = "UPDATE service.subscription_table SET subscription_status = '"+ subscription_status 
+    std::string query = "UPDATE service.subscription_table SET subscription_status = '"+ subscription_status
     + "', billing_info = '"+ billing_info + "' WHERE subscription_id = '" + subscription_id + "';";
     return query;
 }

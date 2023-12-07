@@ -1,12 +1,15 @@
+/*
+ *   Copyright (c) 2023 Debugteam
+ *   All rights reserved.
+ */
 #define WITHOUT_NUMPY
-
-#include "matplotlibcpp.h"
 #include <iostream>
 #include <vector>
 #include <string>
 #include <algorithm>
 #include <sstream>
 #include <iomanip>
+#include "./matplotlibcpp.h"
 
 namespace plt = matplotlibcpp;
 
@@ -17,8 +20,7 @@ void plot_hist(const std::vector<float>& data, const std::string& field) {
     if (data.size() == 0) {
         max = 0;
         min = 0;
-    }
-    else {
+    } else {
         max = *std::max_element(data.begin(), data.end());
         min = *std::min_element(data.begin(), data.end());
     }
@@ -49,8 +51,7 @@ void plot_hist(const std::vector<float>& data, const std::string& field) {
         std::string label = "[" + roundedLeft + "," + roundedRight;
         if (i == numBins-1) {
             label = label + "]";
-        }
-        else {
+        } else {
             label = label + ")";
         }
         binLabels.push_back(label);
