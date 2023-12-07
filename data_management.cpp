@@ -2,22 +2,22 @@
  *   Copyright (c) 2023 Debugteam
  *   All rights reserved.
  */
-#include "data_management.hpp"
-#include "utils.hpp"
+#include "./data_management.hpp"
 #include <jwt-cpp/jwt.h>
-#include <exception>
-#include <cstdlib>
 #include <curl/curl.h>
 #include <json/json.h>
+#include <exception>
+#include <cstdlib>
 #include <vector>
+#include "./utils.hpp"
 #include "analyze_data.cpp"
 #include "send_attachment.cpp"
 #include "make_attachment.cpp"
 
-using namespace std;
+using namespace std;  // NOLINT
 Query queryGenerator;
 
-std::string DataManagementService::generateSessionSecret(){
+std::string DataManagementService::generateSessionSecret() {
     const std::string characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     const int length = 32;
     std::string sessionSecret;
@@ -27,7 +27,7 @@ std::string DataManagementService::generateSessionSecret(){
     return sessionSecret;
 }
 
-std::string DataManagementService::generateJwtToken(int client_id){
+std::string DataManagementService::generateJwtToken(int client_id) {
     // create a token valid for 1 year
     auto token = jwt::create()
         .set_issuer("SubManager")
@@ -35,12 +35,12 @@ std::string DataManagementService::generateJwtToken(int client_id){
         .set_subject(std::to_string(client_id))
         .set_expires_at(std::chrono::system_clock::now() + std::chrono::hours(24 * 365))
         .sign(jwt::algorithm::hs256{DataManagementService::secret_key});
-    
+
     return token;
 }
 
-int DataManagementService::verifyJwtToken(const std::string& token){
-    try{
+int DataManagementService::verifyJwtToken(const std::string& token) {
+    try {
         auto decoded = jwt::decode(token);
         jwt::verify()
         .allow_algorithm(jwt::algorithm::hs256{DataManagementService::secret_key})
@@ -49,7 +49,7 @@ int DataManagementService::verifyJwtToken(const std::string& token){
 
         cout << "subject id:" << decoded.get_subject() << "\n";
         return std::stoi(decoded.get_subject());
-    } catch (const std::exception &e){
+    } catch (const std::exception &e) {
         return -1;
     }
 }
@@ -73,12 +73,11 @@ void DataManagementService::getCompanyInfo(const crow::request &req,
                 res.code = 200;  // OK
             } else {
                 jsonResponse["error"] = "Error getting your company's information";
-                res.code = 204; // No Content
+                res.code = 204;  // No Content
             }
             res.add_header("Content-Type", "application/json");
             res.write(jsonResponse.toStyledString());
             res.end();
-            
             delete queryResult;
             delete stmt;
         }
@@ -115,17 +114,15 @@ void DataManagementService::addCompany(const crow::request &req,
             sql::Statement *stmt2 = conn->createStatement();
             sql::ResultSet *queryResult = stmt2->executeQuery("SELECT LAST_INSERT_ID() as last_id");
 
-            if(queryResult->next()){
+            if (queryResult->next()) {
                 int company_id = queryResult->getInt("last_id");
                 std::string jwtToken = generateJwtToken(company_id);
-                
                 res.code = 200;  // OK
                 jsonResponse["msg"] = "Add Company Success";
                 jsonResponse["tokenMsg"] = jwtToken;
                 res.write(jsonResponse.toStyledString());
                 res.end();
-
-            }else{
+            } else {
                 res.code = 500;  // Internal Server Error
                 jsonResponse["error"] = "Add Company Failed due to database issue.";
                 res.write(jsonResponse.toStyledString());
@@ -140,17 +137,14 @@ void DataManagementService::addCompany(const crow::request &req,
             // Catch any SQL errors
             res.code = 500;  // Internal Server Error
             int errorCode = e.getErrorCode();
-            if(errorCode == 1062){ // duplicate company email
+            if (errorCode == 1062) {  // duplicate company email
                 jsonResponse["error"] = "Add Company Error: You have already registered with this email,"
                 " if you lost your JWT token, please apply for a new one.";
                 res.write(jsonResponse.toStyledString());
-            }
-            else{
+            } else {
                 jsonResponse["error"] = "Add Company Error: " + std::string(e.what());
                 res.write(jsonResponse.toStyledString());
-
             }
-           
             res.end();
         }
         res.end();
@@ -169,11 +163,10 @@ void DataManagementService::addCompany(const crow::request &req,
 void DataManagementService::changeCompany(const crow::request &req,
     crow::response &res, int companyId) {
     sql::Connection *conn = DBConnect();
-    
-    if (companyId != -1){
+    if (companyId != -1) {
         try {
             auto bodyInfo = crow::json::load(req.body);
-            std::string companyName = bodyInfo["company_name"].s(); 
+            std::string companyName = bodyInfo["company_name"].s();
             std::string query = queryGenerator.updateCompanyInfoQuery(companyName, companyId);
             sql::Statement *stmt = conn->createStatement();
 
@@ -197,36 +190,32 @@ void DataManagementService::changeCompany(const crow::request &req,
     DBDisConnect(conn);
 }
 
-void DataManagementService::getCompanyMembers(const crow::request& req, crow::response& res, int companyId){
+void DataManagementService::getCompanyMembers(const crow::request& req, crow::response& res, int companyId) {
     sql::Connection *conn = DBConnect();
     auto page_param = req.url_params.get("page");
-    auto pageSize_param = req.url_params.get("pagesize");
-    
+    auto pageSize_param = req.url_params.get("pageSize");
     // Pagination dafualt setting
     int page = 1;
     int pageSize = 10;
 
-    if(page_param != nullptr){
+    if (page_param != nullptr) {
         page = std::stoi(page_param);
     }
-    if(pageSize_param != nullptr){
+    if (pageSize_param != nullptr) {
         pageSize = std::stoi(pageSize_param);
     }
-        
-    try{
+    try {
         // Get total number of members
         sql::Statement *countStmt = conn->createStatement();
         sql::ResultSet *countResult = countStmt->executeQuery("SELECT COUNT(*) as count FROM service.member_table WHERE company_id = '"
             + std::to_string(companyId) + "'");
-        
         countResult->next();
         int totalMembers = countResult->getInt("count");
-        int totalPages = (totalMembers + pageSize - 1)/pageSize; //cround up to integer
+        int totalPages = (totalMembers + pageSize - 1)/pageSize;  // cround up to integer
 
         sql::Statement *stmt = conn->createStatement();
         sql::ResultSet *queryResult = stmt->executeQuery("SELECT * FROM service.member_table WHERE company_id = '"
             + std::to_string(companyId) + "'" + " LIMIT " + std::to_string(pageSize) + " OFFSET " + std::to_string((page-1)*pageSize));
-        
         Json::Value jsonResponse;
         jsonResponse["total_members"] = std::to_string(totalMembers);
         jsonResponse["total_pages"] = std::to_string(totalPages);
@@ -237,18 +226,15 @@ void DataManagementService::getCompanyMembers(const crow::request& req, crow::re
             memberJson["first_name"] = static_cast<std::string>(queryResult->getString("first_name"));
             memberJson["last_name"] = static_cast<std::string>(queryResult->getString("last_name"));
             memberJson["phone_number"] = static_cast<std::string>(queryResult->getString("phone_number"));
-            
             membersArray.append(memberJson);
         }
         jsonResponse["members"] = membersArray;
-        
         res.code = 200;
-        res.add_header("Content-Type", "application/json");    
+        res.add_header("Content-Type", "application/json");
         res.write(jsonResponse.toStyledString());
         res.end();
         delete queryResult;
         delete stmt;
-
     } catch(const sql::SQLException &e) {
             res.code = 500;
             res.write("Get Company Members Error: " + std::string(e.what()) + "\n");
@@ -259,31 +245,27 @@ void DataManagementService::getCompanyMembers(const crow::request& req, crow::re
         res.write("Invalid request \n");
         res.end();
     }
-    
     DBDisConnect(conn);
 }
 
-void DataManagementService::recoverCompany(const crow::request& req, crow::response& res){
+void DataManagementService::recoverCompany(const crow::request& req, crow::response& res) {
     sql::Connection *conn = DBConnect();
 
-    try{
+    try {
         auto bodyInfo = crow::json::load(req.body);
         std::string email = bodyInfo["email"].s();
 
         try {
-           
             sql::Statement *stmt = conn->createStatement();
             sql::ResultSet *queryResult = stmt->executeQuery("SELECT * FROM service.company_table WHERE email = '"
             + email + "'");
 
-            if(queryResult->next()){
+            if (queryResult->next()) {
                 int company_id = queryResult->getInt("company_id");
                 std::string company_name =  queryResult->getString("company_name");
                 std::string jwtToken = generateJwtToken(company_id);
-                
                 CURL *curl = curl_easy_init();
-                
-                if(curl){
+                if (curl) {
                     const char *url = "https://api.sendgrid.com/v3/mail/send";
                     struct curl_slist* headers = NULL;
                     std::string auth = "Authorization: Bearer "+ DataManagementService::sendGrid_key;
@@ -291,33 +273,29 @@ void DataManagementService::recoverCompany(const crow::request& req, crow::respo
                     headers = curl_slist_append(headers, "Content-Type: application/json");
 
                     // Set the JSON payload with email details
-                    std::string jsonPayload = "{\"personalizations\":[{\"to\": [{\"email\":\"" + email + "\"}]}],\"from\": {\"email\":\"hl3608@columbia.edu\"},\"subject\": \"SubManager New Token\",\"content\": [{\"type\": \"text/plain\", \"value\": \"Your new token is: " + jwtToken + " \"}]}";
+                    std::string jsonPayload = "{\"personalizations\":[{\"to\": [{\"email\":\"" + email + "\"}]}],\"from\": {\"email\":\"hl3608@columbia.edu\"},\"subject\": \"SubManager New Token\",\"content\": [{\"type\": \"text/plain\", \"value\": \"Your new token is: " + jwtToken + " \"}]}";  //NOLINT
 
 
-                    //curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L); //verbose for debug
+                    // curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+                    // verbose for debug
                     curl_easy_setopt(curl, CURLOPT_URL, url);
                     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
                     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, jsonPayload.c_str());
 
-                    try{
-
+                    try {
                         CURLcode curl_res = curl_easy_perform(curl);
-                        
-
                         // Check the response
                         if (curl_res != CURLE_OK) {
                             res.code = 500;  // Internal Server Error
                             std::string errMsg(curl_easy_strerror(curl_res));
                             res.write("Failed to send email" +  errMsg + "\n");
                             res.end();
-                            
                             fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(curl_res));
-                        } else{
+                        } else {
                             res.code = 200;  // OK
                             res.write("An email has been send to your address \n");
                             res.end();
                         }
-                        
                         // Clean up
                         curl_slist_free_all(headers);
                         curl_easy_cleanup(curl);
@@ -326,12 +304,12 @@ void DataManagementService::recoverCompany(const crow::request& req, crow::respo
                         res.write("Failed to send email" + std::string(e.what()) + "\n");
                         res.end();
                     }
-                } else{
+                } else {
                     res.code = 500;  // Internal Server Error
                     res.write("Failed to send email with curl error\n");
                     res.end();
                 }
-            } else{
+            } else {
                 res.code = 400;  // Bad Request
                 res.write("Your email has not been registered\n");
                 res.end();
@@ -343,17 +321,16 @@ void DataManagementService::recoverCompany(const crow::request& req, crow::respo
             // Catch any SQL errors
             res.code = 500;  // Internal Server Error
             int errorCode = e.getErrorCode();
-            if(errorCode == 1062){ // duplicate company email
+            if (errorCode == 1062) {
+                // duplicate company email
                 res.write("Add Company Error: You have already registered with this email,"
                 " if you lost your JWT token, please apply for a new one.");
-            }
-            else{
+            } else {
                  res.write("Add Company Error: " + std::string(e.what()) + "\n");
             }
-           
             res.end();
         }
-    } catch (const std::exception &e){
+    } catch (const std::exception &e) {
         // Catch invalid request errors
         res.code = 400;  // Bad Request
         res.write("Invalid request \n");
@@ -363,11 +340,12 @@ void DataManagementService::recoverCompany(const crow::request& req, crow::respo
     DBDisConnect(conn);
 }
 
+
 void DataManagementService::addMember(const crow::request &req,
     crow::response &res, int companyId) {
     sql::Connection *conn = DBConnect();
     Json::Value jsonResponse;
-    if(companyId != -1) {
+    if (companyId != -1) {
         try {
             auto bodyInfo = crow::json::load(req.body);
             std::string firstName = bodyInfo["first_name"].s();
@@ -376,7 +354,7 @@ void DataManagementService::addMember(const crow::request &req,
             std::string password = bodyInfo["password"].s();
             std::string phoneNumber = bodyInfo["phone_number"].s();
 
-            try {   
+            try {
                 std::string query = queryGenerator.addMemberQuery(companyId,
                     firstName, lastName, email, password, phoneNumber);
                 sql::Statement *stmt = conn->createStatement();
@@ -408,26 +386,24 @@ void DataManagementService::addMember(const crow::request &req,
 }
 
 
-std::string DataManagementService::memberLogin(const crow::request& req, crow::response& res, int companyId){
+std::string DataManagementService::memberLogin(const crow::request& req, crow::response& res, int companyId) {
     sql::Connection *conn = DBConnect();
     std::string sessionEmail = "";
 
-    if(companyId != -1){
-        try{
+    if (companyId != -1) {
+        try {
             auto bodyInfo = crow::json::load(req.body);
             std::string email = bodyInfo["email"].s();
             std::string password = bodyInfo["password"].s();
-            
             try {
-                
                 sql::Statement *stmt = conn->createStatement();
                 std::string query = queryGenerator.searchMemeberForLogin(companyId, email, password);
                 sql::ResultSet *queryResult = stmt->executeQuery(query);
-                if(queryResult->next()){
+                if (queryResult->next()) {
                     sessionEmail = email;
                     res.code = 200;
-                }else{
-                    res.code = 401; // Unauthorized
+                } else {
+                    res.code = 401;  // Unauthorized
                 }
                 delete queryResult;
                 delete stmt;
@@ -500,7 +476,7 @@ void DataManagementService::changeMemberInfoAdmin(const crow::request &req,
     sql::Connection *conn = DBConnect();
     Json::Value jsonResponse;
 
-    if (companyId != -1){
+    if (companyId != -1) {
         try {
             auto bodyInfo = crow::json::load(req.body);
             std::string email = bodyInfo["email"].s();
@@ -543,9 +519,9 @@ void DataManagementService::changeMemberInfoAdmin(const crow::request &req,
     DBDisConnect(conn);
 }
 
-void DataManagementService::changeMemberInfo(const crow::request& req, crow::response& res, int companyId, std::string email){
+void DataManagementService::changeMemberInfo(const crow::request& req, crow::response& res, int companyId, std::string email) {
     sql::Connection *conn = DBConnect();
-    if (companyId != -1){
+    if (companyId != -1) {
         try {
             auto bodyInfo = crow::json::load(req.body);
             std::string firstName = bodyInfo["first_name"].s();
@@ -583,14 +559,13 @@ void DataManagementService::changeMemberInfo(const crow::request& req, crow::res
     DBDisConnect(conn);
 }
 
-void DataManagementService::getMemberInfo(const crow::request& req, crow::response& res, int companyId, std::string email){
+void DataManagementService::getMemberInfo(const crow::request& req, crow::response& res, int companyId, std::string email) {
     sql::Connection *conn = DBConnect();
-    if (companyId != -1){
+    if (companyId != -1) {
         try {
             sql::Statement *stmt = conn->createStatement();
             std::string query = queryGenerator.searchMemeberByCompanyIdAndEmailQuery(companyId, email);
             sql::ResultSet *queryResult = stmt->executeQuery(query);
-            
             Json::Value jsonResponse;
             // Tthere is at least one row in the result set
             if (queryResult->next()) {
@@ -601,9 +576,8 @@ void DataManagementService::getMemberInfo(const crow::request& req, crow::respon
                 res.code = 200;
             } else {
                 jsonResponse["error"] = "No member found for the specified company and email";
-                res.code = 400; 
-            }   
-
+                res.code = 400;
+            }
             res.add_header("Content-Type", "application/json");
             res.write(jsonResponse.toStyledString());
             res.end();
@@ -662,8 +636,7 @@ void DataManagementService::addSubscription(const crow::request &req,
                         std::string(e.what());
                     res.end();
                 }
-            }
-            else{
+            } else {
                 res.code = 400;  // Bad Request
                 jsonResponse["error"] = "Member Not Exists";
                 res.write(jsonResponse.toStyledString());
@@ -688,21 +661,21 @@ void DataManagementService::addSubscription(const crow::request &req,
     DBDisConnect(conn);
 }
 
-
 void DataManagementService::updateSubscription(const crow::request &req,
     crow::response &res, int companyId, std::string email) {
     sql::Connection *conn = DBConnect();
     Json::Value jsonResponse;
 
-    if(companyId != -1) {
+    if (companyId != -1) {
         try {
             auto bodyInfo = crow::json::load(req.body);
-            std::string subscriptionId = bodyInfo["subscription_id"].s(); //Required
+            std::string subscriptionId = bodyInfo["subscription_id"].s();  // Required
             std::string subscriptionStatus = bodyInfo["subscription_status"].s();
             std::string billingInfo = bodyInfo["billing_info"].s();
 
             sql::Statement *searchStmt = conn->createStatement();
-            std::string searchQuery = "SELECT * from service.subscription_table WHERE company_id = " + std::to_string(companyId) + " AND subscription_id = '" + subscriptionId + "' AND member_email = '" + email + "';";
+            std::string searchQuery = "SELECT * from service.subscription_table WHERE company_id = " + std::to_string(companyId) + " AND subscription_id = '"
+            + subscriptionId + "' AND member_email = '" + email + "';";
             sql::ResultSet *queryResult = searchStmt->executeQuery(searchQuery);
 
             if (queryResult->rowsCount() > 0) {
@@ -744,10 +717,10 @@ void DataManagementService::updateSubscriptionAction(const crow::request &req,
     sql::Connection *conn = DBConnect();
     Json::Value jsonResponse;
 
-    if(companyId != -1) {
+    if (companyId != -1) {
         try {
             auto bodyInfo = crow::json::load(req.body);
-            std::string subscriptionId = bodyInfo["subscription_id"].s(); //Required
+            std::string subscriptionId = bodyInfo["subscription_id"].s();  // Required
             std::string subscriptionAction = bodyInfo["last_action"].s();
 
             sql::Statement *searchStmt = conn->createStatement();
@@ -792,24 +765,23 @@ void DataManagementService::updateSubscriptionAdmin(const crow::request &req,
     crow::response &res, int companyId) {
     sql::Connection *conn = DBConnect();
 
-    if(companyId != -1) {
+    if (companyId != -1) {
         try {
             std::cout << "function called";
             auto bodyInfo = crow::json::load(req.body);
-            std::string subscriptionId = bodyInfo["subscription_id"].s(); //Required
-            
+            std::string subscriptionId = bodyInfo["subscription_id"].s();  // Required
+
             std::string subscriptionName = bodyInfo["subscription_name"].s();
             std::string subscriptionType = bodyInfo["subscription_type"].s();
             std::string subscriptionStatus = bodyInfo["subscription_status"].s();
             std::string startDate = bodyInfo["start_date"].s();
             std::string nextDueDate = bodyInfo["next_due_date"].s();
             std::string billingInfo = bodyInfo["billing_info"].s();
-            
+
             sql::Statement *searchStmt = conn->createStatement();
             std::string searchQuery = "SELECT * from service.subscription_table WHERE company_id = " + std::to_string(companyId) + " AND subscription_id = '" + subscriptionId + "';";
             sql::ResultSet *queryResult = searchStmt->executeQuery(searchQuery);
             if (queryResult->rowsCount() > 0) {
-
                 std::string query = queryGenerator.
                 updateSubscriptionAdmin(subscriptionId, subscriptionName, subscriptionType, subscriptionStatus, startDate, nextDueDate, billingInfo);
                 sql::Statement *stmt = conn->createStatement();
@@ -817,8 +789,7 @@ void DataManagementService::updateSubscriptionAdmin(const crow::request &req,
                 res.code = 200;
                 res.write("Update Success");
                 res.end();
-            }
-            else {
+            } else {
                 res.code = 400;
                 res.write("No subscription found or you don't have permission to modify this subscription.");
                 res.end();
@@ -840,36 +811,36 @@ void DataManagementService::updateSubscriptionAdmin(const crow::request &req,
     DBDisConnect(conn);
 }
 
-void DataManagementService::getCompanySubscriptions(const crow::request& req, crow::response& res, int companyId){
+void DataManagementService::getCompanySubscriptions(const crow::request& req, crow::response& res, int companyId) {
     sql::Connection *conn = DBConnect();
     auto page_param = req.url_params.get("page");
     auto pageSize_param = req.url_params.get("pagesize");
-    
+
     // Pagination dafualt setting
     int page = 1;
     int pageSize = 10;
 
-    if(page_param != nullptr){
+    if (page_param != nullptr) {
         page = std::stoi(page_param);
     }
-    if(pageSize_param != nullptr){
+    if (pageSize_param != nullptr) {
         pageSize = std::stoi(pageSize_param);
     }
-        
-    try{
+
+    try {
         // Get total number of subscriptions
         sql::Statement *countStmt = conn->createStatement();
         sql::ResultSet *countResult = countStmt->executeQuery("SELECT COUNT(*) as count FROM service.subscription_table WHERE company_id = '"
             + std::to_string(companyId) + "'");
-        
+
         countResult->next();
         int totalSubscriptions = countResult->getInt("count");
-        int totalPages = (totalSubscriptions + pageSize - 1)/pageSize; //cround up to integer
+        int totalPages = (totalSubscriptions + pageSize - 1)/pageSize;  // cround up to integer
 
         sql::Statement *stmt = conn->createStatement();
         sql::ResultSet *queryResult = stmt->executeQuery("SELECT * FROM service.subscription_table WHERE company_id = '"
             + std::to_string(companyId) + "'" + " LIMIT " + std::to_string(pageSize) + " OFFSET " + std::to_string((page-1)*pageSize));
-        
+
         Json::Value jsonResponse;
         jsonResponse["total_subscriptions"] = std::to_string(totalSubscriptions);
         jsonResponse["total_pages"] = std::to_string(totalPages);
@@ -890,14 +861,13 @@ void DataManagementService::getCompanySubscriptions(const crow::request& req, cr
             subsArray.append(subsJson);
         }
         jsonResponse["subscriptions"] = subsArray;
-        
+
         res.code = 200;
-        res.add_header("Content-Type", "application/json");    
+        res.add_header("Content-Type", "application/json");
         res.write(jsonResponse.toStyledString());
         res.end();
         delete queryResult;
         delete stmt;
-
     } catch(const sql::SQLException &e) {
             res.code = 500;
             res.write("Get Company All Subscriptions Error: " + std::string(e.what()) + "\n");
@@ -908,26 +878,26 @@ void DataManagementService::getCompanySubscriptions(const crow::request& req, cr
         res.write("Invalid request \n");
         res.end();
     }
-    
+
     DBDisConnect(conn);
 }
 
-void DataManagementService::viewSubscriptions(const crow::request& req, 
-crow::response& res, int companyId, bool isAdmin, std::string email){
+void DataManagementService::viewSubscriptions(const crow::request& req,
+crow::response& res, int companyId, bool isAdmin, std::string email) {
     sql::Connection *conn = DBConnect();
 
-    if(companyId != -1) {
-        try{
-            if(isAdmin){ 
+    if (companyId != -1) {
+        try {
+            if (isAdmin) {
                 auto bodyInfo = crow::json::load(req.body);
                 email = bodyInfo["email"].s();
             }
-            
+
             sql::Statement *stmt = conn->createStatement();
             std::string query = queryGenerator.searchSubscriptioByCompanyIdAndEmailQuery(companyId, email);
             sql::ResultSet *queryResult = stmt->executeQuery(query);
             int total_subscriptions = static_cast<int>(queryResult->rowsCount());
-            
+
             Json::Value jsonResponse;
             Json::Value subscriptionsArray(Json::arrayValue);
             // Tthere is at least one row in the result set
@@ -940,19 +910,18 @@ crow::response& res, int companyId, bool isAdmin, std::string email){
                 subscriptionJson["start_date"] = static_cast<std::string>(queryResult->getString("start_date"));
                 subscriptionJson["next_due_date"] = static_cast<std::string>(queryResult->getString("next_due_date"));
                 subscriptionJson["billing_info"] = static_cast<std::string>(queryResult->getString("billing_info"));
-                
-                if(isAdmin){
+
+                if (isAdmin) {
                     subscriptionJson["last_action"] = static_cast<std::string>(queryResult->getString("last_action"));
                     subscriptionJson["last_action_date"] = static_cast<std::string>(queryResult->getString("last_action_date"));
                 }
                 subscriptionsArray.append(subscriptionJson);
-                
             }
             jsonResponse["total_subscriptions"] = std::to_string(total_subscriptions);
             jsonResponse["subscriptions"] = subscriptionsArray;
 
             res.code = 200;
-            res.add_header("Content-Type", "application/json");    
+            res.add_header("Content-Type", "application/json");
             res.write(jsonResponse.toStyledString());
             res.end();
             delete queryResult;
@@ -978,12 +947,11 @@ void DataManagementService::getExpiringSubscriptionByTime(const crow::request &r
     Json::Value jsonObject;
     sql::Connection *conn = DBConnect();
 
-    if(companyId != -1) {
+    if (companyId != -1) {
         try {
             int rangeDays;
             std::string subscriptionName;
             int counter = 0;
-            
             rangeDays = crow::utility::lexical_cast<int>(req.url_params.get("days"));
             std::string targetTime = "" + timeAddition(rangeDays);
 
@@ -1003,7 +971,7 @@ void DataManagementService::getExpiringSubscriptionByTime(const crow::request &r
                     std::string currEmail = queryResult->getString("member_email");
                     jsonObject[std::to_string(counter)] = currEmail;
                     counter += 1;
-                }                
+                }
             }
             jsonObject["number"] = std::to_string(counter);
             jsonObject["target_time"] = targetTime;
@@ -1049,7 +1017,7 @@ void DataManagementService::sendReminder(const crow::request &req,
 
                     std::cout << email;
                     CURL *curl = curl_easy_init();
-                    if(curl) {
+                    if (curl) {
                         const char *url = "https://api.sendgrid.com/v3/mail/send";
                         struct curl_slist* headers = NULL;
                         std::string auth = "Authorization: Bearer "+ DataManagementService::sendGrid_key;
@@ -1058,7 +1026,7 @@ void DataManagementService::sendReminder(const crow::request &req,
 
                         // Set the JSON payload with email details
                         std::string jsonPayload = "{\"personalizations\":[{\"to\": [{\"email\":\"" + email +
-                        "\"}]}],\"from\": {\"email\":\"hl3608@columbia.edu\"},\"subject\": \"Friendly Reminder About Your Subscription Due Date\",\"content\": [{\"type\": \"text/plain\", \"value\": \"Your subscription is about to expire before "
+                        "\"}]}],\"from\": {\"email\":\"hl3608@columbia.edu\"},\"subject\": \"SubManager New Token\",\"content\": [{\"type\": \"text/plain\", \"value\": \"Your subscription is about to expire before " //NOLINT
                         + targetTime + " \"}]}";
 
                         curl_easy_setopt(curl, CURLOPT_URL, url);
