@@ -64,6 +64,15 @@ Need to install Python3.8 first
 ```
 sudo apt-get install python3-matplotlib python3-numpy python3.8-dev
 ```
+## Third-party APIs
+### [SendGrid](https://sendgrid.com/en-us/solutions/email-api)
+(email services)
+
+Need to add the api keys:
+
+*data_management.hpp* [#Line27](https://github.com/fzhang2716/COMS4156_AdvancedSoftwareEngineering/blob/44aaddd8637b95ae7e7029714efbf2b567c06fd6/data_management.hpp#L27) <{API_KEY}>
+
+*send_attachment.cpp* [#Line100](https://github.com/fzhang2716/COMS4156_AdvancedSoftwareEngineering/blob/44aaddd8637b95ae7e7029714efbf2b567c06fd6/send_attachment.cpp#L100) <"Bearer "+ {API_KEY}>
 
 ## Compile and Run
 In root directory, run Makefile:
@@ -129,7 +138,7 @@ cpplint --linelength=200 --filter=-runtime/references [filename]
 
 ## REST API
 
-Refer to this [Postman Workspace](https://app.getpostman.com/join-team?invite_code=e99d0f0ace00953a60793b4fba6269fb&target_code=ba804970dfad862285f0124ba74c65c2) to see example API requests.
+Refer to this [Postman Workspace](https://app.getpostman.com/join-team?invite_code=e99d0f0ace00953a60793b4fba6269fb&target_code=ba804970dfad862285f0124ba74c65c2) or [Google Doc Screenshots](https://docs.google.com/document/d/1liqiSBghhSN7_ZPRPIBlw0qJ3BbGde0nJYx_kBdFqIo/edit?usp=sharing) to see example API requests.
 
 Refer to this [API Curl Example](API.md) to see example API requests with curl.
 
