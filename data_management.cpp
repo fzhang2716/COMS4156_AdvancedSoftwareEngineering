@@ -1010,7 +1010,7 @@ void DataManagementService::sendReminder(const crow::request &req,
 
                         // Set the JSON payload with email details
                         std::string jsonPayload = "{\"personalizations\":[{\"to\": [{\"email\":\"" + email +
-                        "\"}]}],\"from\": {\"email\":\"hl3608@columbia.edu\"},\"subject\": \"SubManager New Token\",\"content\": [{\"type\": \"text/plain\", \"value\": \"Your subscription is about to expire before "
+                        "\"}]}],\"from\": {\"email\":\"hl3608@columbia.edu\"},\"subject\": \"Friendly Reminder About Your Subscription Due Date\",\"content\": [{\"type\": \"text/plain\", \"value\": \"Your subscription is about to expire before "
                         + targetTime + " \"}]}";
 
                         curl_easy_setopt(curl, CURLOPT_URL, url);
