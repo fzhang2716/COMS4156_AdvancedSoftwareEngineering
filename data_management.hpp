@@ -30,7 +30,6 @@ class DataManagementService {
      * Generate a random session secret for member login
     */
     std::string generateSessionSecret();
-    
     /**
      * Generate a JWT token for the client
      * 
@@ -38,7 +37,6 @@ class DataManagementService {
      * @return a string JWT token
     */
     std::string generateJwtToken(int client_id);
-
     /**
      * Verify the client's token
      * 
@@ -46,7 +44,6 @@ class DataManagementService {
      * @return the company_id of the client if authorized; otherwise, -1
     */
     int verifyJwtToken(const std::string& token);
-    
     /**
      * Add a new client as company
      * 
@@ -55,7 +52,6 @@ class DataManagementService {
      * 
     */
     void addCompany(const crow::request& req, crow::response& res);
-    
      /**
      * Recover the client's JWT token by sending him an email
      * 
@@ -64,7 +60,6 @@ class DataManagementService {
      * 
     */
     void recoverCompany(const crow::request& req, crow::response& res);
-    
      /**
      * Get the client's company information
      * 
@@ -74,7 +69,6 @@ class DataManagementService {
      * 
     */
     void getCompanyInfo(const crow::request& req, crow::response& res, int companyId);
-    
     /**
      * Change a company's information
      * 
@@ -84,7 +78,6 @@ class DataManagementService {
      * 
     */
     void changeCompany(const crow::request& req, crow::response& res, int companyId);
-    
     /**
      * Get all members of a company
      *
@@ -93,7 +86,6 @@ class DataManagementService {
      * @param companyId the companyId decoded from client's JWT 
     */
     void getCompanyMembers(const crow::request& req, crow::response& res, int companyId);
-    
     /**
      * Add a new member
      * 
@@ -103,13 +95,10 @@ class DataManagementService {
      * 
     */
     void addMember(const crow::request& req, crow::response& res, int companyId);
-    
     /**
      * Member Login
     */
     std::string memberLogin(const crow::request& req, crow::response& res, int companyId);
-
-
     /**
      * delete a existed memeber
      * 
@@ -119,7 +108,6 @@ class DataManagementService {
      * 
     */
     void removeMember(const crow::request& req, crow::response& res, int companyId, std::string deleteEmail);
-    
     /**
      * change infomation of an existing memeber as admin
      * 
@@ -129,7 +117,6 @@ class DataManagementService {
      * 
     */
     void changeMemberInfoAdmin(const crow::request& req, crow::response& res, int companyId);
-
     /**
      * change infomation of a member by himself
      * 
@@ -140,7 +127,6 @@ class DataManagementService {
      * 
     */
     void changeMemberInfo(const crow::request& req, crow::response& res, int companyId, std::string email);
-
      /**
      * get infomation of a member
      * 
@@ -151,7 +137,6 @@ class DataManagementService {
      * 
     */
     void getMemberInfo(const crow::request& req, crow::response& res, int companyId, std::string email);
-    
      /**
      * Add a new subscription for its member
      * 
@@ -161,7 +146,6 @@ class DataManagementService {
      * 
     */
     void addSubscription(const crow::request& req, crow::response& res, int companyId);
-    
     /**
      * change infomation of an existing subscription
      * 
@@ -171,7 +155,6 @@ class DataManagementService {
      * 
     */
     void updateSubscription(const crow::request& req, crow::response& res, int companyId, std::string email);
-
     /**
      * update subscription action
      * 
@@ -181,8 +164,6 @@ class DataManagementService {
      * 
     */
     void updateSubscriptionAction(const crow::request &req, crow::response &res, int companyId);
-    
-    
     /**
      * change infomation of an existing subscription as admin
      * 
@@ -192,7 +173,6 @@ class DataManagementService {
      * 
     */
     void updateSubscriptionAdmin(const crow::request& req, crow::response& res, int companyId);
-    
     /**
      * Get all subscriptions of a company
      * 
@@ -202,7 +182,6 @@ class DataManagementService {
      * 
     */
     void getCompanySubscriptions(const crow::request& req, crow::response& res, int companyId);
-    
     /**
      * view all subscriptions of a member with a company
      * 
@@ -253,7 +232,6 @@ class DataManagementService {
      * @param companyId the companyId decoded from client's JWT
      */
     void deleteByString(const crow::request &req, crow::response &res, int companyId);
-
 };
 
 /**

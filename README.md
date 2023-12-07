@@ -117,7 +117,7 @@ All tests passed (2 assertions in 1 test case)
 We use Cpplint, which is a command-line tool to check C/C++ files for style issues following Google's C++ style guide.
 ```
 pip install cpplint
-cpplint --linelength=200 [filename]
+cpplint --linelength=200 --filter=-runtime/references [filename]
 ```
 
 ## REST API
