@@ -1,8 +1,12 @@
+/*
+ *   Copyright (c) 2023 Debugteam
+ *   All rights reserved.
+ */
 #define CATCH_CONFIG_MAIN
 
 #include <string>
-#include <./catch2/catch.hpp>
 #include "./analyze_data.cpp"
+#include <./catch2/catch.hpp>
 #include <cmath>
 
 bool areEqual(float a, float b, double tolerance = 1e-9) {
