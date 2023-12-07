@@ -173,6 +173,17 @@ class DataManagementService {
     void updateSubscription(const crow::request& req, crow::response& res, int companyId, std::string email);
 
     /**
+     * update subscription action
+     * 
+     * @param req the API request from client
+     * @param res the response to be sent
+     * @param companyId the companyId decoded from client's JWT
+     * 
+    */
+    void updateSubscriptionAction(const crow::request &req, crow::response &res, int companyId);
+    
+    
+    /**
      * change infomation of an existing subscription as admin
      * 
      * @param req the API request from client

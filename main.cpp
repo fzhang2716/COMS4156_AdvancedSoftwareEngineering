@@ -262,6 +262,16 @@ int main() {
         dataservice.updateSubscriptionAdmin(req, res, companyId);
     });
 
+    // Patch Method: update the last_action and last_action_date fields of a given subscription 
+    CROW_ROUTE(app, "/subscription/updateSubscriptionAction")
+    .CROW_MIDDLEWARES(app, JwtMiddleware)
+    .methods(crow::HTTPMethod::PATCH)
+    ([&](const crow::request &req, crow::response &res){
+        auto& ctx = app.get_context<JwtMiddleware>(req);
+        int companyId = ctx.companyId;
+        dataservice.updateSubscriptionAction(req, res, companyId);
+    });
+
     // Get Method: view subscriptions of a company 
     CROW_ROUTE(app, "/subscription/allSubscriptions")
     .CROW_MIDDLEWARES(app, JwtMiddleware)

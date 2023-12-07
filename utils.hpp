@@ -25,9 +25,8 @@ public:
     std::string searchSubscriptioByCompanyIdAndEmailQuery(int companyId, const std::string& email);
     std::string searchSubscriptioByCompanyIdAndEmailAndSubscriptionNameQuery(int companyId,
     const std::string& email, const std::string& subscriptionName);
-    std::string updateSubscriptionAction(int companyId, const std::string& email,
-    const std::string& subscriptionName, const std::string& subscriptionStatus,
-    const std::string& currentTime, const std::string& newAction);
+    std::string updateSubscriptionAction(const std::string& subscription_id,
+    const std::string& lastAction, const std::string& currentTime);
     std::string updateSubscriptionAdmin(const std::string& subscription_id,
     const std::string& subscription_name, const std::string& subscription_type,
     const std::string& subscription_status, const std::string& start_date, 

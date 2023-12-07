@@ -711,11 +711,13 @@ void DataManagementService::updateSubscription(const crow::request &req,
                 sql::Statement *stmt = conn->createStatement();
                 stmt->execute(query);
                 res.code = 200;
-                res.write("Update Success");
+                jsonResponse["msg"] = "Update Subscription Success";
+                res.write(jsonResponse.toStyledString());
                 res.end();
             } else {
                 res.code = 400;
-                res.write("No subscription found or you don't have permission to modify this subscription.");
+                jsonResponse["err"] = "No subscription found or you don't have permission to modify this subscription.";
+                res.write(jsonResponse.toStyledString());
                 res.end();
             }
         }
@@ -728,8 +730,58 @@ void DataManagementService::updateSubscription(const crow::request &req,
         catch (const std::exception &e) {
             // Catch invalid request errors
             res.code = 400;  // Bad Request
-            res.write("Invalid request \n");
-            res.write("What: " + std::string(e.what()) + "\n");
+            jsonResponse["err"] = "Invalid request: " + std::string(e.what()) + "\n";
+            res.write(jsonResponse.toStyledString());
+            res.end();
+        }
+    }
+    DBDisConnect(conn);
+}
+
+
+void DataManagementService::updateSubscriptionAction(const crow::request &req,
+    crow::response &res, int companyId) {
+    sql::Connection *conn = DBConnect();
+    Json::Value jsonResponse;
+
+    if(companyId != -1) {
+        try {
+            auto bodyInfo = crow::json::load(req.body);
+            std::string subscriptionId = bodyInfo["subscription_id"].s(); //Required
+            std::string subscriptionAction = bodyInfo["last_action"].s();
+
+            sql::Statement *searchStmt = conn->createStatement();
+            std::string searchQuery = "SELECT * from service.subscription_table WHERE company_id = " + std::to_string(companyId) + " AND subscription_id = '" + subscriptionId + "';";
+            sql::ResultSet *queryResult = searchStmt->executeQuery(searchQuery);
+
+            if (queryResult->rowsCount() > 0) {
+                std::string currentTime = "" + getCurrentDateTime();
+                std::string query = queryGenerator.
+                updateSubscriptionAction(subscriptionId, subscriptionAction, currentTime);
+                sql::Statement *stmt = conn->createStatement();
+                stmt->execute(query);
+                res.code = 200;
+                jsonResponse["msg"] = "Update Subscription Action Success";
+                res.write(jsonResponse.toStyledString());
+                res.end();
+            } else {
+                res.code = 400;
+                jsonResponse["err"] = "No subscription found or you don't have permission to modify this subscription.";
+                res.write(jsonResponse.toStyledString());
+                res.end();
+            }
+        }
+        catch(const sql::SQLException &e) {
+            res.code = 500;
+            jsonResponse["err"] = "Update Subscription Action Error: " + std::string(e.what());
+            res.write(jsonResponse.toStyledString());
+            res.end();
+        }
+        catch (const std::exception &e) {
+            // Catch invalid request errors
+            res.code = 400;  // Bad Request
+            jsonResponse["err"] = "Invalid Request" + std::string(e.what()) + "\n";
+            res.write(jsonResponse.toStyledString());
             res.end();
         }
     }
