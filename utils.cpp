@@ -110,6 +110,13 @@ const std::string& subscription_status, const std::string& start_date, const std
     + "', start_date = '"+ start_date + "', next_due_date = '"+ next_due_date + "', billing_info = '"+ billing_info + "' WHERE subscription_id = '" + subscription_id + "';";
     return query;
 }
+
+std::string Query::updateSubscriptionMember(const std::string& subscription_id, const std::string& subscription_status, const std::string& billing_info) {
+    std::string query = "UPDATE service.subscription_table SET subscription_status = '"+ subscription_status 
+    + "', billing_info = '"+ billing_info + "' WHERE subscription_id = '" + subscription_id + "';";
+    return query;
+}
+
 std::string Query::searchFutureExpireSubscriptioByCompanyIdAndEmailAndrangeDaysAndsubscriptionId
 (int companyId, const std::string&  targetTime, const std::string&  subscriptionName) {
     std::string queryStmt = "SELECT member_email FROM service.subscription_table WHERE company_id = "

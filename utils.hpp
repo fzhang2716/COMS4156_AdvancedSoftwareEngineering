@@ -32,6 +32,8 @@ public:
     const std::string& subscription_name, const std::string& subscription_type,
     const std::string& subscription_status, const std::string& start_date, 
     const std::string& next_due_date,  const std::string& billing_info);
+    std::string updateSubscriptionMember(const std::string& subscription_id, 
+    const std::string& subscription_status, const std::string& billing_info);
     std::string searchFutureExpireSubscriptioByCompanyIdAndEmailAndrangeDaysAndsubscriptionId
     (int companyId, const std::string&  targetTime, const std::string& subscriptionName);
     std::string searchSubscriptionDurationByCompanyId(int companyId);

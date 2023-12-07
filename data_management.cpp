@@ -690,42 +690,34 @@ void DataManagementService::addSubscription(const crow::request &req,
 
 
 void DataManagementService::updateSubscription(const crow::request &req,
-    crow::response &res, int companyId) {
+    crow::response &res, int companyId, std::string email) {
     sql::Connection *conn = DBConnect();
     Json::Value jsonResponse;
 
     if(companyId != -1) {
         try {
             auto bodyInfo = crow::json::load(req.body);
-            std::string email = bodyInfo["email"].s();
-            std::string subscriptionName = bodyInfo["subscription_name"].s();
-            std::string newAction = bodyInfo["new_action"].s();
+            std::string subscriptionId = bodyInfo["subscription_id"].s(); //Required
+            std::string subscriptionStatus = bodyInfo["subscription_status"].s();
+            std::string billingInfo = bodyInfo["billing_info"].s();
 
-            sql::Statement *stmt = conn->createStatement();
-            std::string query = queryGenerator.searchSubscriptioByCompanyIdAndEmailAndSubscriptionNameQuery
-            (companyId, email, subscriptionName);
-            sql::ResultSet *queryResult = stmt->executeQuery(query);
+            sql::Statement *searchStmt = conn->createStatement();
+            std::string searchQuery = "SELECT * from service.subscription_table WHERE company_id = " + std::to_string(companyId) + " AND subscription_id = '" + subscriptionId + "' AND member_email = '" + email + "';";
+            sql::ResultSet *queryResult = searchStmt->executeQuery(searchQuery);
+
             if (queryResult->rowsCount() > 0) {
-                std::string subscriptionStatus = "";
-
-                while (queryResult->next()) {
-                    subscriptionStatus += queryResult->getString("subscription_status");
-                }
-                std::string currentTime = "" + getCurrentDateTime();
                 std::string query = queryGenerator.
-                updateSubscriptionAction(companyId, email, subscriptionName, subscriptionStatus, currentTime, newAction);
+                updateSubscriptionMember(subscriptionId, subscriptionStatus, billingInfo);
+                sql::Statement *stmt = conn->createStatement();
                 stmt->execute(query);
                 res.code = 200;
-                jsonResponse["msg"] = "Update Success";
-                res.write(jsonResponse.toStyledString());
-
+                res.write("Update Success");
+                res.end();
             } else {
                 res.code = 400;
-                jsonResponse["err"] = "No Query Found To Update";
-                res.write(jsonResponse.toStyledString());
-
+                res.write("No subscription found or you don't have permission to modify this subscription.");
+                res.end();
             }
-            res.end();
         }
         catch(const sql::SQLException &e) {
             res.code = 500;
@@ -736,7 +728,8 @@ void DataManagementService::updateSubscription(const crow::request &req,
         catch (const std::exception &e) {
             // Catch invalid request errors
             res.code = 400;  // Bad Request
-
+            res.write("Invalid request \n");
+            res.write("What: " + std::string(e.what()) + "\n");
             res.end();
         }
     }
@@ -868,13 +861,16 @@ void DataManagementService::getCompanySubscriptions(const crow::request& req, cr
 }
 
 void DataManagementService::viewSubscriptions(const crow::request& req, 
-crow::response& res, int companyId, bool isAdmin){
+crow::response& res, int companyId, bool isAdmin, std::string email){
     sql::Connection *conn = DBConnect();
 
     if(companyId != -1) {
         try{
-            auto bodyInfo = crow::json::load(req.body);
-            std::string email = bodyInfo["email"].s();
+            if(isAdmin){ 
+                auto bodyInfo = crow::json::load(req.body);
+                email = bodyInfo["email"].s();
+            }
+            
             sql::Statement *stmt = conn->createStatement();
             std::string query = queryGenerator.searchSubscriptioByCompanyIdAndEmailQuery(companyId, email);
             sql::ResultSet *queryResult = stmt->executeQuery(query);

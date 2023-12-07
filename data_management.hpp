@@ -170,7 +170,7 @@ class DataManagementService {
      * @param companyId the companyId decoded from client's JWT
      * 
     */
-    void updateSubscription(const crow::request& req, crow::response& res, int companyId);
+    void updateSubscription(const crow::request& req, crow::response& res, int companyId, std::string email);
 
     /**
      * change infomation of an existing subscription as admin
@@ -198,9 +198,10 @@ class DataManagementService {
      * @param req the API request from client
      * @param res the response to be sent
      * @param companyId the companyId decoded from client's JWT
+     * @param email the member's email (is is Admin is true, no need to provide)
      * 
     */
-    void viewSubscriptions(const crow::request& req, crow::response& res, int companyId, bool isAdmin);
+    void viewSubscriptions(const crow::request& req, crow::response& res, int companyId, bool isAdmin, std::string email);
 
 
     /**
