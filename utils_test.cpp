@@ -3,11 +3,11 @@
  *   All rights reserved.
  */
 #define CATCH_CONFIG_MAIN
-
+#include <jwt-cpp/jwt.h>
 #include <string>
 #include <./catch2/catch.hpp>
 #include "./utils.hpp"
-#include <jwt-cpp/jwt.h>
+
 
 
 Query queryGenerator;
@@ -33,6 +33,6 @@ TEST_CASE("Add Company Info Query", "[single-file]" ) {
 
 TEST_CASE("Add Member Query", "[single-file]" ) {
     std::string query = queryGenerator.addMemberQuery(1, "firstName", "lastName", "email", "abc12345", "1111111111");
-    std::string target_query = "Insert into service.member_table (company_id, first_name, last_name, email, hash_pwd, phone_number) Values (1, 'firstName', 'lastName', 'email', 'abc12345', '1111111111');";
+    std::string target_query = "Insert into service.member_table (company_id, first_name, last_name, email, hash_pwd, phone_number) Values (1, 'firstName', 'lastName', 'email', 'abc12345', '1111111111');";  // NOLINT
     REQUIRE(query == target_query);
 }

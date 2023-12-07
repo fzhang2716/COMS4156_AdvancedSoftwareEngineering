@@ -7,7 +7,7 @@
 #include <string>
 
 class Query {
-public:
+ public:
     std::string authenticationQuery(const std::string& username, const std::string& password);
     std::string companyInfoQuery(int companyId);
     std::string searchMemeberByCompanyIdAndEmailQuery(int companyId, const std::string& email);
@@ -29,17 +29,16 @@ public:
     const std::string& lastAction, const std::string& currentTime);
     std::string updateSubscriptionAdmin(const std::string& subscription_id,
     const std::string& subscription_name, const std::string& subscription_type,
-    const std::string& subscription_status, const std::string& start_date, 
+    const std::string& subscription_status, const std::string& start_date,
     const std::string& next_due_date,  const std::string& billing_info);
-    std::string updateSubscriptionMember(const std::string& subscription_id, 
+    std::string updateSubscriptionMember(const std::string& subscription_id,
     const std::string& subscription_status, const std::string& billing_info);
     std::string searchFutureExpireSubscriptioByCompanyIdAndEmailAndrangeDaysAndsubscriptionId
     (int companyId, const std::string&  targetTime, const std::string& subscriptionName);
     std::string searchSubscriptionDurationByCompanyId(int companyId);
-
 };
 
 std::string getCurrentDateTime();
 std::string timeAddition(int numDays);
 
-#endif  //  UTILS_HPP
+#endif  // UTILS_HPP_
