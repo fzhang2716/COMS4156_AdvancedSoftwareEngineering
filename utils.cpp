@@ -95,11 +95,10 @@ std::string Query::searchSubscriptioByCompanyIdAndEmailAndSubscriptionNameQuery(
     + std::to_string(companyId) + " AND member_email = '" + email + "' AND subscription_name = '" + subscriptionName + "';";
 }
 
-std::string Query::updateSubscriptionAction(int companyId, const std::string& email,
-    const std::string& subscriptionName, const std::string& subscriptionStatus,
-    const std::string& currentTime, const std::string& newAction){
+std::string Query::updateSubscriptionAction(const std::string& subscription_id,
+    const std::string& lastAction, const std::string& currentTime){
     return "UPDATE service.subscription_table SET last_action = '"
-    + subscriptionStatus + "', last_action_date = '" + currentTime + "', subscription_status = '" + newAction + "' WHERE company_id = " + std::to_string(companyId) + " AND member_email = '" + email +  "' AND subscription_name = '" + subscriptionName + "';";
+    + lastAction + "', last_action_date = '" + currentTime + "' WHERE subscription_id = '" + subscription_id + "';";
 }
 
 std::string Query::updateSubscriptionAdmin(const std::string& subscription_id,
@@ -110,6 +109,13 @@ const std::string& subscription_status, const std::string& start_date, const std
     + "', start_date = '"+ start_date + "', next_due_date = '"+ next_due_date + "', billing_info = '"+ billing_info + "' WHERE subscription_id = '" + subscription_id + "';";
     return query;
 }
+
+std::string Query::updateSubscriptionMember(const std::string& subscription_id, const std::string& subscription_status, const std::string& billing_info) {
+    std::string query = "UPDATE service.subscription_table SET subscription_status = '"+ subscription_status 
+    + "', billing_info = '"+ billing_info + "' WHERE subscription_id = '" + subscription_id + "';";
+    return query;
+}
+
 std::string Query::searchFutureExpireSubscriptioByCompanyIdAndEmailAndrangeDaysAndsubscriptionId
 (int companyId, const std::string&  targetTime, const std::string&  subscriptionName) {
     std::string queryStmt = "SELECT member_email FROM service.subscription_table WHERE company_id = "

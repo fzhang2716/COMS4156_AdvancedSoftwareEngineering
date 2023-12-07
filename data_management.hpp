@@ -170,8 +170,19 @@ class DataManagementService {
      * @param companyId the companyId decoded from client's JWT
      * 
     */
-    void updateSubscription(const crow::request& req, crow::response& res, int companyId);
+    void updateSubscription(const crow::request& req, crow::response& res, int companyId, std::string email);
 
+    /**
+     * update subscription action
+     * 
+     * @param req the API request from client
+     * @param res the response to be sent
+     * @param companyId the companyId decoded from client's JWT
+     * 
+    */
+    void updateSubscriptionAction(const crow::request &req, crow::response &res, int companyId);
+    
+    
     /**
      * change infomation of an existing subscription as admin
      * 
@@ -181,16 +192,27 @@ class DataManagementService {
      * 
     */
     void updateSubscriptionAdmin(const crow::request& req, crow::response& res, int companyId);
-
+    
     /**
-     * view all subscriptions of a member with a company
+     * Get all subscriptions of a company
      * 
      * @param req the API request from client
      * @param res the response to be sent
      * @param companyId the companyId decoded from client's JWT
      * 
     */
-    void viewSubscriptions(const crow::request& req, crow::response& res, int companyId, bool isAdmin);
+    void getCompanySubscriptions(const crow::request& req, crow::response& res, int companyId);
+    
+    /**
+     * view all subscriptions of a member with a company
+     * 
+     * @param req the API request from client
+     * @param res the response to be sent
+     * @param companyId the companyId decoded from client's JWT
+     * @param email the member's email (is is Admin is true, no need to provide)
+     * 
+    */
+    void viewSubscriptions(const crow::request& req, crow::response& res, int companyId, bool isAdmin, std::string email);
 
 
     /**

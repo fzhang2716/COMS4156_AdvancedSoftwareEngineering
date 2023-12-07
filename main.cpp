@@ -239,9 +239,17 @@ int main() {
     .CROW_MIDDLEWARES(app, JwtMiddleware)
     .methods(crow::HTTPMethod::PATCH)
     ([&](const crow::request &req, crow::response &res){
+       auto& session = app.get_context<Session>(req);
         auto& ctx = app.get_context<JwtMiddleware>(req);
         int companyId = ctx.companyId;
-        dataservice.updateSubscription(req, res, companyId);
+        std::string email = session.get("email", "NA");
+        if(email == "NA"){
+            res.write("Auhorization Failed. Have not logged in.");
+            res.code = 400;
+            res.end();
+        }else{
+            dataservice.updateSubscription(req, res, companyId, email);
+        }
     });
 
     // Patch Method: update the status of a given subscription as admin
@@ -254,6 +262,26 @@ int main() {
         dataservice.updateSubscriptionAdmin(req, res, companyId);
     });
 
+    // Patch Method: update the last_action and last_action_date fields of a given subscription 
+    CROW_ROUTE(app, "/subscription/updateSubscriptionAction")
+    .CROW_MIDDLEWARES(app, JwtMiddleware)
+    .methods(crow::HTTPMethod::PATCH)
+    ([&](const crow::request &req, crow::response &res){
+        auto& ctx = app.get_context<JwtMiddleware>(req);
+        int companyId = ctx.companyId;
+        dataservice.updateSubscriptionAction(req, res, companyId);
+    });
+
+    // Get Method: view subscriptions of a company 
+    CROW_ROUTE(app, "/subscription/allSubscriptions")
+    .CROW_MIDDLEWARES(app, JwtMiddleware)
+    .methods(crow::HTTPMethod::GET)
+    ([&](const crow::request &req, crow::response &res){
+        auto& ctx = app.get_context<JwtMiddleware>(req);
+        int companyId = ctx.companyId;
+        dataservice.getCompanySubscriptions(req, res, companyId);
+    });
+
     // Get Method: view subscriptions of a member with a company as admin
     CROW_ROUTE(app, "/admin/subscription/viewSubscriptions")
     .CROW_MIDDLEWARES(app, JwtMiddleware)
@@ -261,7 +289,25 @@ int main() {
     ([&](const crow::request &req, crow::response &res){
         auto& ctx = app.get_context<JwtMiddleware>(req);
         int companyId = ctx.companyId;
-        dataservice.viewSubscriptions(req, res, companyId, true);
+        dataservice.viewSubscriptions(req, res, companyId, true, "");
+    });
+
+    // Get Method: view subscriptions of a member with a company as admin
+    CROW_ROUTE(app, "/subscription/viewSubscriptions")
+    .CROW_MIDDLEWARES(app, JwtMiddleware)
+    .methods(crow::HTTPMethod::GET)
+    ([&](const crow::request &req, crow::response &res){
+        auto& session = app.get_context<Session>(req);
+        auto& ctx = app.get_context<JwtMiddleware>(req);
+        int companyId = ctx.companyId;
+        std::string email = session.get("email", "NA");
+        if(email == "NA"){
+            res.write("Auhorization Failed. Have not logged in.");
+            res.code = 400;
+            res.end();
+        }else{
+           dataservice.viewSubscriptions(req, res, companyId, false, email);
+        }
     });
 
     // Get Method: get a list of email about expiring subscription

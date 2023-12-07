@@ -237,16 +237,25 @@ TEST_CASE_METHOD(ServerFixture, "/admin/member/removeMember/<string> and addmeme
 //hi
 TEST_CASE_METHOD(ServerFixture, "/subscription/updateSubscription test", "[routes][updateSubscription]") {
     httplib::Client client("localhost", 3000);
-    std::string jsonData = R"({
+    std::string login_jsonData = R"({
         "email": "m2@gmail.com",
-        "subscription_name": "hulu",
-        "new_action": "deactivate"})";
+        "password": "123"})";
+    auto login_response = client.Post("/member/login", headers, login_jsonData, "application/json");
+    REQUIRE(login_response->status == 200);
+    std::string cookies = login_response->get_header_value("Set-Cookie");
     
+    
+    std::string jsonData = R"({
+        "subscription_id": "9",
+        "subscription_status": "canceled",
+        "billing_info": "0111 credit card"})";
+    
+    headers.insert(std::make_pair("Cookie", cookies));
     auto response = client.Patch("/subscription/updateSubscription", headers, jsonData, "application/json");
     REQUIRE(response->status == 200);
 
     Json::Value targetJson;
-    targetJson["msg"] = "Update Success";
+    targetJson["msg"] = "Update Subscription Success";
 
     Json::CharReaderBuilder reader;
     Json::Value responseJson;
