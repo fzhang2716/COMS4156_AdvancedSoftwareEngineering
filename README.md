@@ -128,7 +128,7 @@ sudo apt-get install cppcheck
 cppcheck *.cpp --force --output-file=cppcheck-report.txt
 ```
 We include such static analysis in our CI.
-##
+
 ## Style Check
 We use Cpplint, which is a command-line tool to check C/C++ files for style issues following Google's C++ style guide.
 ```
@@ -146,10 +146,10 @@ Refer to this [API Curl Example](API.md) to see example API requests with curl.
 > Our service's target clients are any SAAS providers or entities who provide subscriptions to their members. Our clients are referred to as "Company", and their members are referred to as "members". To use our service, clients (a.k.a companies) need to send a request to the "/addCompany" endpoint for a JWT token. JWT token authorization is used in most APIs. Note that our service provides some unprotected endpoints for the company's admin and some login cookie-protected endpoints for the company's members.
 
 ### - Register as a new company:
-- **Endpoint:** `/addCompany`
+- **Endpoint:** `/company/addCompany`
 - **Method:** POST
 - **Request Body:** JSON {"email", "company_name"}
-- **Success Response:** HTTP 200 OK, with a message displaying JWT token
+- **Success Response:** HTTP 200 OK, with a JSON {"msg" : "Add Company Success", "tokenMsg": "<JWT_token>"}
 - **Error Response:** 
     - HTTP 500 Internal Server Error, with an error message [e.g. registered email]
     - HTTP 400 Bad Request, with an error message [e.g. invalid request body]
@@ -189,14 +189,14 @@ Refer to this [API Curl Example](API.md) to see example API requests with curl.
 - **Method:** POST
 - **Request Header:** 'Authorization: Bearer {JWT token}'
 - **Request Body:** JSON {"first_name", "last_name", "email", "password", "phone_number"}
-- **Success Response:** HTTP 200 OK, with a message "Add Member Success"
+- **Success Response:** HTTP 200 OK, with a JSON {"msg": "Add Member Success"}
 - **Error Response:**
     - HTTP 400 Bad Request, with an error message
     - HTTP 401 Unauthorized, with an error message "JWT token not found" or "Invalid Token"
     - HTTP 500 Internal Server Error, with an error message [e.g. duplicate email]
 
 ### - Get company's all members (pagination support):
-- **Endpoint:** `/company/getMembers?page=<int>&pageSize=<int>` (parameters are optional, defualt page=1, pageSize=10)
+- **Endpoint:** `/company/getMembers?page=<int>&pagesize=<int>` (parameters are optional, defualt page=1, pageSize=10)
 - **Method:** GET
 - **Request Header:** 'Authorization: Bearer {JWT token}'
 - **Success Response:** HTTP 200 OK, with a JSON {"total_members", "total_pages", "members": [a JSON array of {"email", "first_name", "last_name", "phone_number"}]}
@@ -209,7 +209,7 @@ Refer to this [API Curl Example](API.md) to see example API requests with curl.
 - **Endpoint:** `/admin/member/removeMember/<string:memberEmail>`
 - **Method:** DELETE
 - **Request Header:** 'Authorization: Bearer {JWT token}'
-- **Success Response:** HTTP 204 No Content
+- **Success Response:** HTTP 204 No Content, with a JSON {"msg":"Delete Member Success"}
 - **Error Response:**
     - HTTP 400 Bad Request, with an error message [e.g. no matching member found]
     - HTTP 401 Unauthorized, with an error message "JWT token not found" or "Invalid Token"
@@ -220,7 +220,7 @@ Refer to this [API Curl Example](API.md) to see example API requests with curl.
 - **Method:** PATCH
 - **Request Header:** 'Authorization: Bearer {JWT token}'
 - **Request Body:** JSON {"first_name", "last_name", "email", "phone_number"} 
-- **Success Response:** HTTP 200 OK, with a message "Update Success"
+- **Success Response:** HTTP 200 OK, with a JSON {"msg":"Update Success"}
 - **Error Response:**
     - HTTP 400 Bad Request, with an error message [e.g. member email not exists]
     - HTTP 401 Unauthorized, with an error message "JWT token not found" or "Invalid Token"
@@ -262,7 +262,7 @@ Refer to this [API Curl Example](API.md) to see example API requests with curl.
 - **Endpoint:** `/member/profile`
 - **Method:** GET
 - **Request Header:** 'Authorization: Bearer {JWT token}', 'Cookie: {cookie get after member loged in}'
-- **Success Response:** HTTP 200 OK, with a JSON {"email", "first_name", "last_name"}
+- **Success Response:** HTTP 200 OK, with a JSON {"email", "first_name", "last_name", "phone_number"}
 - **Error Response:**
     - HTTP 400 Bad Request, with an error message [e.g. member not loged in]
     - HTTP 401 Unauthorized, with an error message "JWT token not found" or "Invalid Token"
@@ -272,7 +272,7 @@ Refer to this [API Curl Example](API.md) to see example API requests with curl.
 - **Endpoint:** `/admin/member/profile/<string:memberEmail>`
 - **Method:** GET
 - **Request Header:** 'Authorization: Bearer {JWT token}'
-- **Success Response:** HTTP 200 OK, with a JSON {"email", "first_name", "last_name"}
+- **Success Response:** HTTP 200 OK, with a JSON {"email", "first_name", "last_name", "phone_number"}
 - **Error Response:**
     - HTTP 400 Bad Request, with an error message [e.g. no matching member email]
     - HTTP 401 Unauthorized, with an error message "JWT token not found" or "Invalid Token"
@@ -283,20 +283,42 @@ Refer to this [API Curl Example](API.md) to see example API requests with curl.
 - **Method:** POST
 - **Request Header:** 'Authorization: Bearer {JWT token}'
 - **Request Body:** JSON {"member_email", "subscription_name", "subscription_type", "subscription_status", "next_due_date", "start_date", "billing_info"}
-- **Success Response:** HTTP 200 OK, with a message "Add Subscription Success"
+- **Success Response:** HTTP 200 OK, with a JSON  {"msg":"Add Subscription Success"}
 - **Error Response:**
     - HTTP 400 Bad Request, with an error message
     - HTTP 401 Unauthorized, with an error message "JWT token not found" or "Invalid Token"
     - HTTP 500 Internal Server Error, with an error message
 
-### - Update subscription:
+### - Update subscription by self:
 - **Endpoint:** `/subscription/updateSubscription`
 - **Method:** PATCH
+- **Request Header:** 'Authorization: Bearer {JWT token}','Cookie: {cookie get after member loged in}'
+- **Request Body:** JSON {"subscription_id", "subscription_status", "billing_info"}
+- **Success Response:** HTTP 200 OK, with a JSON {"msg": "Update Subscription Success"}
+- **Error Response:**
+    - HTTP 400 Bad Request, with an error message [e.g. member not loged in]
+    - HTTP 401 Unauthorized, with an error message "JWT token not found" or "Invalid Token"
+    - HTTP 500 Internal Server Error, with an error message
+
+### - Update subscription as admin:
+- **Endpoint:** `/admin/subscription/updateSubscription`
+- **Method:** PATCH
 - **Request Header:** 'Authorization: Bearer {JWT token}'
-- **Request Body:** JSON {"email", "subscription_name", "new_action"}
+- **Request Body:** JSON {"subscription_id", "subscription_name", "subscription_type", "subscription_status", "start_date", "next_due_date", "billing_info"}
 - **Success Response:** HTTP 200 OK, with a message "Update Success"
 - **Error Response:**
-    - HTTP 400 Bad Request, with an error message [e.g. no matching member eamil and subscription name]
+    - HTTP 400 Bad Request, with an error message
+    - HTTP 401 Unauthorized, with an error message "JWT token not found" or "Invalid Token"
+    - HTTP 500 Internal Server Error, with an error message
+
+### - Update subscription modify action:
+- **Endpoint:** `/subscription/updateSubscriptionAction`
+- **Method:** PATCH
+- **Request Header:** 'Authorization: Bearer {JWT token}'
+- **Request Body:** JSON {"subscription_id", "last_action"}
+- **Success Response:** HTTP 200 OK, with a JSON {"msg":"Update Subscription Action Success"}
+- **Error Response:**
+    - HTTP 400 Bad Request, with an error message
     - HTTP 401 Unauthorized, with an error message "JWT token not found" or "Invalid Token"
     - HTTP 500 Internal Server Error, with an error message
 
@@ -306,6 +328,59 @@ Refer to this [API Curl Example](API.md) to see example API requests with curl.
 - **Request Header:** 'Authorization: Bearer {JWT token}'
 - **Request Body:** JSON {"email"}
 - **Success Response:** HTTP 200 OK, with a JSON {"total_subscriptions", "subscriptions": [a JSON array of {"subscription_id", "subscription_name", "subscription_type", "subscription_status", "billing_info", "start_date", "next_due_date", "last_action", "last_action_date"}]}
+- **Error Response:**
+    - HTTP 400 Bad Request, with an error message
+    - HTTP 401 Unauthorized, with an error message "JWT token not found" or "Invalid Token"
+    - HTTP 500 Internal Server Error, with an error message
+
+### - View a member's subscriptions by self:
+- **Endpoint:** `/subscription/viewSubscriptions`
+- **Method:** GET
+- **Request Header:** 'Authorization: Bearer {JWT token}','Cookie: {cookie get after member loged in}'
+- **Success Response:** HTTP 200 OK, with a JSON {"total_subscriptions", "subscriptions": [a JSON array of {"subscription_id", "subscription_name", "subscription_type", "subscription_status", "billing_info", "start_date", "next_due_date"}]}
+- **Error Response:**
+    - HTTP 400 Bad Request, with an error message [e.g. member not loged in]
+    - HTTP 401 Unauthorized, with an error message "JWT token not found" or "Invalid Token"
+    - HTTP 500 Internal Server Error, with an error message
+
+### - Get all subscriptions of a company (pagination support):
+- **Endpoint:** `/subscription/allSubscriptions?page=<int>&pagesize=<int>`
+- **Method:** GET
+- **Request Header:** 'Authorization: Bearer {JWT token}'
+- **Success Response:** HTTP 200 OK, with a JSON {"total_subscriptions", "total_pages", "subscriptions": [a JSON array of {"subscription_id", "subscription_name", "subscription_type", "subscription_status", "billing_info", "start_date", "next_due_date", "last_action", "last_action_date"}]}
+- **Error Response:**
+    - HTTP 400 Bad Request, with an error message
+    - HTTP 401 Unauthorized, with an error message "JWT token not found" or "Invalid Token"
+    - HTTP 500 Internal Server Error, with an error message
+
+
+### - Get expiring subscriptions of a company:
+- **Endpoint:** `/company/getExpiringSubscriptionByTime??subscription_name=<string: subscription_name>&days=<int>`
+- **Method:** GET
+- **Request Header:** 'Authorization: Bearer {JWT token}'
+- **Success Response:** HTTP 200 OK, with a JSON {"target_time", "number", "0" : <first member's email>, "1": <second member's email>, ...}.
+- **Error Response:**
+    - HTTP 400 Bad Request, with an error message
+    - HTTP 401 Unauthorized, with an error message "JWT token not found" or "Invalid Token"
+    - HTTP 500 Internal Server Error, with an error message
+
+### - Send email reminders to members:
+- **Endpoint:** `/company/sendReminder`
+- **Method:** POST
+- **Request Header:** 'Authorization: Bearer {JWT token}'
+- **Request Body:** JSON {"number", "0", "1", "target_time"}, the same format as success response of *Get expiring subscriptions of a company*
+- **Success Response:** HTTP 200 OK, with a JSON {"msg": "Send successfully"}.
+- **Error Response:**
+    - HTTP 400 Bad Request, with an error message
+    - HTTP 401 Unauthorized, with an error message "JWT token not found" or "Invalid Token"
+    - HTTP 500 Internal Server Error, with an error message
+
+### - Send company analysis report of subscription duration:
+- **Endpoint:** `/company/analyzeSubDuration`
+- **Method:** POST
+- **Request Header:** 'Authorization: Bearer {JWT token}'
+- **Request Body:** JSON {"email"}
+- **Success Response:** HTTP 200 OK, with a message "Analyze succcessfully"
 - **Error Response:**
     - HTTP 400 Bad Request, with an error message
     - HTTP 401 Unauthorized, with an error message "JWT token not found" or "Invalid Token"
