@@ -119,7 +119,7 @@ make integration_test
 Result:
 ```
 ===============================================================================
-All tests passed (2 assertions in 1 test case)
+All tests passed (21 assertions in 9 test cases)
 ```
 ## Static Analysis Tool
 We use Cppcheck, which is a static analysis tool for C/C++ code. It provides unique code analysis to detect bugs and focuses on detecting undefined behaviour and dangerous coding constructs. 
