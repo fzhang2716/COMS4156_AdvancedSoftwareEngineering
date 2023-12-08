@@ -72,7 +72,7 @@ Need to add the api keys:
 
 *data_management.hpp* [#Line27](https://github.com/fzhang2716/COMS4156_AdvancedSoftwareEngineering/blob/44aaddd8637b95ae7e7029714efbf2b567c06fd6/data_management.hpp#L27) <{API_KEY}>
 
-*send_attachment.cpp* [#Line100](https://github.com/fzhang2716/COMS4156_AdvancedSoftwareEngineering/blob/44aaddd8637b95ae7e7029714efbf2b567c06fd6/send_attachment.cpp#L100) <"Bearer "+ {API_KEY}>
+*send_attachment.cpp* [#Line100](https://github.com/fzhang2716/COMS4156_AdvancedSoftwareEngineering/blob/44aaddd8637b95ae7e7029714efbf2b567c06fd6/send_attachment.cpp#L100) <"Authorization: Bearer "+ {API_KEY}>
 
 ## Compile and Run
 In root directory, run Makefile:
