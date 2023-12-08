@@ -63,12 +63,10 @@ jobs:
         path: cppcheck-report.txt
     
     - name: Upload coverage reports to Codecov
-      run: |
-        # Replace `linux` below with the appropriate OS
-        # Options are `alpine`, `linux`, `macos`, `windows`
-        curl -Os https://uploader.codecov.io/latest/linux/codecov
-        chmod +x codecov
-        ./codecov -t ${04e5bf86-1168-46c8-b362-a1f42b252612}
+      uses: codecov/codecov-action@v3
+      env:
+        CODECOV_TOKEN: '972dab48-4eef-4c6a-9728-547f508e55ae'
+
     
     - name: Build Project
       run: |
