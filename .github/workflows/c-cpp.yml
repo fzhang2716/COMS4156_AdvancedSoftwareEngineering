@@ -68,7 +68,7 @@ jobs:
         # Options are `alpine`, `linux`, `macos`, `windows`
         curl -Os https://uploader.codecov.io/latest/linux/codecov
         chmod +x codecov
-        ./codecov -t ${bb286a49-f3d6-494e-a294-dbbe9515be43}
+        ./codecov -t ${04e5bf86-1168-46c8-b362-a1f42b252612}
     
     - name: Build Project
       run: |
