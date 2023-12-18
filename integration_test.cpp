@@ -158,10 +158,7 @@ TEST_CASE_METHOD(ServerFixture, "/subscription/addSubscription test", "[routes][
     REQUIRE(responseJson == targetJson);
     if ((response->status == 200)&& (responseJson == targetJson)) {
         std::string sqlCommand = "DELETE FROM service.subscription_table WHERE(member_email = 'm2@gmail.com') AND (subscription_name = 'espn');";
-
-        // std::string sqlCommand = "SET SQL_SAFE_UPDATES = 0; DELETE FROM service.subscription_table WHERE(member_email = 'm2@gmail.com') AND (subscription_name = 'espn'); SET SQL_SAFE_UPDATES = 1;";
         std::string deleteData = R"({"sqlCommed": ")" + sqlCommand + R"("})";
-        std::cout << sqlCommand;
         client.Delete("/admin/deleteRecord", headers, deleteData, "application/json");
     }
 }
@@ -210,27 +207,34 @@ TEST_CASE_METHOD(ServerFixture, "/admin/member/removeMember/<string> and addmeme
     REQUIRE(deleteAgainResponse->status == 400);
 }
 
-// need login, do it later
-// TEST_CASE_METHOD(ServerFixture, "/member/changeMemberInfo test", "[routes][changeMemberInfo]") {
-//     httplib::Client client("localhost", 3000);
-//     std::string jsonData = R"({
-//         "email": "m2@gmail.com",
-//         "first_name": "new_name",
-//         "last_name": "new_name",
-//         "phone_number": "123213"
-//     })";
-//     auto response = client.Patch("/member/changeMemberInfo", headers, jsonData, "application/json");
-//     REQUIRE(response->status == 200);
 
-//     Json::Value targetJson;
-//     targetJson["msg"] = "Update success";
+TEST_CASE_METHOD(ServerFixture, "/member/changeMemberInfo test", "[routes][changeMemberInfo]") {
+    httplib::Client client("localhost", 3000);
+    std::string login_jsonData = R"({
+        "email": "m2@gmail.com",
+        "password": "123"})";
+    auto login_response = client.Post("/member/login", headers, login_jsonData, "application/json");
+    REQUIRE(login_response->status == 200);
+    std::string cookies = login_response->get_header_value("Set-Cookie");
 
-//     Json::CharReaderBuilder reader;
-//     Json::Value responseJson;
-//     std::istringstream responseBody(response->body);
-//     Json::parseFromStream(reader, responseBody, &responseJson, nullptr);
-//     REQUIRE(responseJson == targetJson);
-// }
+    std::string jsonData = R"({
+        "first_name": "integration test",
+        "last_name": "IT",
+        "phone_number": "123213"
+    })";
+    headers.insert(std::make_pair("Cookie", cookies));
+    auto response = client.Patch("/member/changeMemberInfo", headers, jsonData, "application/json");
+    REQUIRE(response->status == 200);
+
+    Json::Value targetJson;
+    targetJson["msg"] = "Update success";
+
+    Json::CharReaderBuilder reader;
+    Json::Value responseJson;
+    std::istringstream responseBody(response->body);
+    Json::parseFromStream(reader, responseBody, &responseJson, nullptr);
+    REQUIRE(responseJson == targetJson);
+}
 
 TEST_CASE_METHOD(ServerFixture, "/subscription/updateSubscription test", "[routes][updateSubscription]") {
     httplib::Client client("localhost", 3000);
