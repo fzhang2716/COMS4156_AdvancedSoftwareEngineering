@@ -157,8 +157,11 @@ TEST_CASE_METHOD(ServerFixture, "/subscription/addSubscription test", "[routes][
     Json::parseFromStream(reader, responseBody, &responseJson, nullptr);
     REQUIRE(responseJson == targetJson);
     if ((response->status == 200)&& (responseJson == targetJson)) {
-        std::string sqlCommand = "SET SQL_SAFE_UPDATES = 0; DELETE FROM service.subscription_table WHERE(member_email = 'm2@gmail.com') AND(subscription_name = 'espn'); SET SQL_SAFE_UPDATES = 1;";
+        std::string sqlCommand = "DELETE FROM service.subscription_table WHERE(member_email = 'm2@gmail.com') AND (subscription_name = 'espn');";
+
+        // std::string sqlCommand = "SET SQL_SAFE_UPDATES = 0; DELETE FROM service.subscription_table WHERE(member_email = 'm2@gmail.com') AND (subscription_name = 'espn'); SET SQL_SAFE_UPDATES = 1;";
         std::string deleteData = R"({"sqlCommed": ")" + sqlCommand + R"("})";
+        std::cout << sqlCommand;
         client.Delete("/admin/deleteRecord", headers, deleteData, "application/json");
     }
 }
