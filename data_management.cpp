@@ -429,7 +429,7 @@ std::string DataManagementService::memberLogin(const crow::request& req, crow::r
                 }
                 delete queryResult;
                 delete stmt;
-                res.end();
+                // res.end();
             }
             catch (sql::SQLException &e) {
                 // Catch any SQL errors
