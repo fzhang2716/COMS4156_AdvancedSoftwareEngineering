@@ -5,7 +5,9 @@
 **Members:** Frank Zhang (hz2716), Han Liu (hl3608), Xinghang Sun (xs2421), Yuxuan Chen (yc4144)
 
 ## Overview
-Our project is a subscription management service that provides sub-services like subscription data management, analytics, insights feedback, notification sending, alerting, and reports generation.
+Our project builds a subscription management service that provides sub-services like subscription data management, analytics, insights feedback, notification sending, alerting, and reports generation.
+
+Our service is a subscription management service that can help a company to manage their members and their member’s subscriptions to the company’s services. In addition, our service provides analysis and alerting features that can help a company get insights into their subscription statistics and notify their members whose subscriptions are about to be due.
 
 ## Client App Demo
 https://github.com/everssun/4156_final_project_client_app
