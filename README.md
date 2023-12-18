@@ -1,4 +1,8 @@
 # COMS4156_AdvancedSoftwareEngineering
+## Team
+**Name:** DebugTeam
+
+**Members:** Frank Zhang (hz2716), Han Liu (hl3608), Xinghang Sun (xs2421), Yuxuan Chen (yc4144)
 
 ## Overview
 Our project is a subscription management service that provides sub-services like subscription data management, analytics, insights feedback, notification sending, alerting, and reports generation.
@@ -119,7 +123,7 @@ make integration_test
 Result:
 ```
 ===============================================================================
-All tests passed (21 assertions in 9 test cases)
+All tests passed (24 assertions in 10 test cases)
 ```
 ## Static Analysis Tool
 We use Cppcheck, which is a static analysis tool for C/C++ code. It provides unique code analysis to detect bugs and focuses on detecting undefined behaviour and dangerous coding constructs. 
