@@ -168,7 +168,7 @@ Refer to this [API Curl Example](API.md) to see example API requests with curl.
 - **Endpoint:** `/recoverCompany`
 - **Method:** POST
 - **Request Body:** JSON {"email"}
-- **Success Response:** HTTP 200 OK, with a message "An email has been send to your address "
+- **Success Response:** HTTP 200 OK, with a JSON {"msg": "An email has been send to your address "}
 - **Error Response:**
     - HTTP 400 Bad Request, with an error message [e.g. Email has not been registered]
     - HTTP 500 Internal Server Error, with an error message
@@ -178,7 +178,7 @@ Refer to this [API Curl Example](API.md) to see example API requests with curl.
 - **Method:** PATCH
 - **Request Header:** 'Authorization: Bearer {JWT token}'
 - **Request Body:** JSON {"company_name"}
-- **Success Response:** HTTP 200 OK, with a message "Update Company Success"
+- **Success Response:** HTTP 200 OK, with a JSON {"msg": "Update Company Success"}
 - **Error Response:**
     - HTTP 400 Bad Request, with an error message
     - HTTP 401 Unauthorized, with an error message "JWT token not found" or "Invalid Token"
@@ -209,7 +209,7 @@ Refer to this [API Curl Example](API.md) to see example API requests with curl.
 - **Endpoint:** `/admin/member/removeMember/<string:memberEmail>`
 - **Method:** DELETE
 - **Request Header:** 'Authorization: Bearer {JWT token}'
-- **Success Response:** HTTP 204 No Content, with a JSON {"msg":"Delete Member Success"}
+- **Success Response:** HTTP 204 No Content, with a JSON {"msg": "Delete Member Success"}
 - **Error Response:**
     - HTTP 400 Bad Request, with an error message [e.g. no matching member found]
     - HTTP 401 Unauthorized, with an error message "JWT token not found" or "Invalid Token"
@@ -220,7 +220,7 @@ Refer to this [API Curl Example](API.md) to see example API requests with curl.
 - **Method:** PATCH
 - **Request Header:** 'Authorization: Bearer {JWT token}'
 - **Request Body:** JSON {"first_name", "last_name", "email", "phone_number"} 
-- **Success Response:** HTTP 200 OK, with a JSON {"msg":"Update Success"}
+- **Success Response:** HTTP 200 OK, with a JSON {"msg": "Update success"}
 - **Error Response:**
     - HTTP 400 Bad Request, with an error message [e.g. member email not exists]
     - HTTP 401 Unauthorized, with an error message "JWT token not found" or "Invalid Token"
@@ -231,7 +231,7 @@ Refer to this [API Curl Example](API.md) to see example API requests with curl.
 - **Method:** POST
 - **Request Header:** 'Authorization: Bearer {JWT token}'
 - **Request Body:** JSON {"email", "password"}
-- **Success Response:** HTTP 200 OK, with a message "Login Successfully"
+- **Success Response:** HTTP 200 OK, with a JSON {"msg": "success"} and a message "Login Successfully"
 - **Error Response:**
     - HTTP 400 Bad Request, with an error message
     - HTTP 401 Unauthorized, with an error message "JWT token not found" or "Invalid Token" or member email and password not matching
@@ -242,7 +242,7 @@ Refer to this [API Curl Example](API.md) to see example API requests with curl.
 - **Method:** PATCH
 - **Request Header:** 'Authorization: Bearer {JWT token}', 'Cookie: {cookie get after member loged in}'
 - **Request Body:** JSON {"first_name", "last_name", "phone_number"}
-- **Success Response:** HTTP 200 OK, with a message "Update Success"
+- **Success Response:** HTTP 200 OK, with a JSON {"msg": "Update success"}
 - **Error Response:**
     - HTTP 400 Bad Request, with an error message [e.g. member not loged in]
     - HTTP 401 Unauthorized, with an error message "JWT token not found" or "Invalid Token"
@@ -305,7 +305,7 @@ Refer to this [API Curl Example](API.md) to see example API requests with curl.
 - **Method:** PATCH
 - **Request Header:** 'Authorization: Bearer {JWT token}'
 - **Request Body:** JSON {"subscription_id", "subscription_name", "subscription_type", "subscription_status", "start_date", "next_due_date", "billing_info"}
-- **Success Response:** HTTP 200 OK, with a message "Update Success"
+- **Success Response:** HTTP 200 OK, with a JSON {"msg": "Update Success"}
 - **Error Response:**
     - HTTP 400 Bad Request, with an error message
     - HTTP 401 Unauthorized, with an error message "JWT token not found" or "Invalid Token"
@@ -380,7 +380,7 @@ Refer to this [API Curl Example](API.md) to see example API requests with curl.
 - **Method:** POST
 - **Request Header:** 'Authorization: Bearer {JWT token}'
 - **Request Body:** JSON {"email"}
-- **Success Response:** HTTP 200 OK, with a message "Analyze succcessfully"
+- **Success Response:** HTTP 200 OK, with a JSON {""msg": Analyze successfully"}
 - **Error Response:**
     - HTTP 400 Bad Request, with an error message
     - HTTP 401 Unauthorized, with an error message "JWT token not found" or "Invalid Token"
